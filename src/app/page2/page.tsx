@@ -1,6 +1,6 @@
 'use client';
 
-import TarjetaNotificacion from '../components/noti/compnot/TarjetaNotificacion';
+import TargetaNotificacion from '../components/noti/compnot/TarjetaNotificacion';
 
 export default function NotificacionesPage() {
   const notificaciones = [
@@ -40,7 +40,7 @@ export default function NotificacionesPage() {
       {/* Lista de notificaciones */}
       <div className="px-6 space-y-4">
         {notificaciones.map((n, i) => (
-          <TarjetaNotificacion key={i} {...n} />
+          <TargetaNotificacion key={i} {...n} />
         ))}
       </div>
     </div>
