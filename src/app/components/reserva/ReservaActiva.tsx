@@ -5,24 +5,21 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import "../../globals.css";
 
-export default function ReservaActiva() {
-  const router = useRouter();
+interface ReservaActivaProps {
+  id: number | null;
+}
 
+export default function ReservaActiva({ id }: ReservaActivaProps) {
+  const router = useRouter();
   const [vehiculo, setVehiculo] = useState<any>(null);
   const [estadoTiempo, setEstadoTiempo] = useState<number>(0);
   const [idReserva, setIdReserva] = useState<number | null>(null);
-  const [idVehiculo, setIdVehiculo] = useState<number | null>(null);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
-    if (id) setIdVehiculo(parseInt(id));
-  }, []);
+  const [idVehiculo, setIdVehiculo] = useState<number | null>(id);
 
   useEffect(() => {
     if (idVehiculo) {
       axios
-        .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
+        .get(http://localhost:3000/vehiculo/obtenerDetalleVehiculo/${idVehiculo})
         .then((response) => {
           if (response.data.success) {
             setVehiculo(response.data.data);
@@ -44,7 +41,7 @@ export default function ReservaActiva() {
     const intervalo = setInterval(() => {
       if (idReserva) {
         axios
-          .get(`https://vercel-back-speed-code.vercel.app/reservas/obtenerTiempoReserva/${idReserva}`)
+          .get(http://localhost:3000/reservas/obtenerTiempoReserva/${idReserva})
           .then((response) => {
             if (response.data.success) {
               setEstadoTiempo(response.data.tiempoRestante);
@@ -71,7 +68,7 @@ export default function ReservaActiva() {
   const cancelarReserva = async (porTiempo = false) => {
     if (idReserva) {
       try {
-        await axios.post(`https://vercel-back-speed-code.vercel.app/reservas/cancelar/${idReserva}`);
+        await axios.post(http://localhost:3000/reservas/cancelar/${idReserva});
         alert("Reserva cancelada correctamente");
         router.push("/reserva-expirada");
       } catch (error) {
@@ -81,10 +78,8 @@ export default function ReservaActiva() {
     }
   };
 
-  
-
   if (!vehiculo) {
-    return <p>Cargando información de la reserva...</p>;
+    return <p className="text-center mt-8">Cargando información de la reserva...</p>;
   }
 
   return (
@@ -103,7 +98,7 @@ export default function ReservaActiva() {
           <p className="mt-2 text-gray-600">Estado: {vehiculo.reserva.estado === 'confirmada' ? 'Confirmada' : 'Pendiente'}</p>
         </div>
         <img
-          src={`/${vehiculo.imagen}`}
+          src={/${vehiculo.imagen}}
           alt={vehiculo.marca}
           className="w-full md:w-48 h-auto rounded-lg shadow-md object-cover"
         />
@@ -116,7 +111,7 @@ export default function ReservaActiva() {
 
       <div className="flex justify-center gap-4 mt-8">
         <button
-          onClick={() => router.push(`/pago?id=${idVehiculo}&monto=${vehiculo.tarifa}`)}
+          onClick={() => router.push(/pago?id=${idVehiculo}&monto=${vehiculo.tarifa})}
           className="bg-[#FCA311] hover:bg-[#e2910f] text-white px-6 py-3 rounded-xl shadow-lg transition duration-200 transform hover:scale-105"
         >
           Confirmar Pago
