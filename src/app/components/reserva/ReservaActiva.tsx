@@ -19,7 +19,8 @@ export default function ReservaActiva({ id }: ReservaActivaProps) {
   useEffect(() => {
     if (idVehiculo) {
       axios
-        .get('https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}')
+      .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
+
         .then((response) => {
           if (response.data.success) {
             setVehiculo(response.data.data);

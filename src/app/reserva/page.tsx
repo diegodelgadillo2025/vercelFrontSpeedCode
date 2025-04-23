@@ -17,4 +17,5 @@ function ReservaContent() {
   const id = idParam ? parseInt(idParam) : null; // Convertir a número aquí
 
   return <ReservaActiva id={id} />;
+
 }
