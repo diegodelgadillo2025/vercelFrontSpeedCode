@@ -98,7 +98,7 @@ export default function ReservaActiva({ id }: ReservaActivaProps) {
           <p className="mt-2 text-gray-600">Estado: {vehiculo.reserva.estado === 'confirmada' ? 'Confirmada' : 'Pendiente'}</p>
         </div>
         <img
-          src={/${vehiculo.imagen}}
+          src={`/${vehiculo.imagen}`} 
           alt={vehiculo.marca}
           className="w-full md:w-48 h-auto rounded-lg shadow-md object-cover"
         />
@@ -111,7 +111,7 @@ export default function ReservaActiva({ id }: ReservaActivaProps) {
 
       <div className="flex justify-center gap-4 mt-8">
         <button
-          onClick={() => router.push(/pago?id=${idVehiculo}&monto=${vehiculo.tarifa})}
+          onClick={() => router.push(`/pago?id=${idVehiculo}&monto=${vehiculo.tarifa}`)}   
           className="bg-[#FCA311] hover:bg-[#e2910f] text-white px-6 py-3 rounded-xl shadow-lg transition duration-200 transform hover:scale-105"
         >
           Confirmar Pago
