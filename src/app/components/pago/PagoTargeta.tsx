@@ -101,7 +101,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
 
     try {
       const response = await axios.post(
-        `http://localhost:3000/pagos/pagarConTarjeta/${idReserva}`,
+        `https://vercel-back-speed-code.vercel.app/pagos/pagarConTarjeta/${idReserva}`,
         datosPago
       );
 
