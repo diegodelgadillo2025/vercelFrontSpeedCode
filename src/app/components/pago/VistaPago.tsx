@@ -39,7 +39,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   useEffect(() => {
     if (idVehiculo) {
       axios
-        .get(http://localhost:3000/vehiculo/obtenerDetalleVehiculo/${idVehiculo})
+        .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
         .then((response) => {
           if (response.data.success) {
             const data = response.data.data;
@@ -85,7 +85,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
                 const imageWindow = window.open("", "_blank");
                 if (imageWindow) {
                   imageWindow.document.write(
-                    <img src="http://localhost:3000/imagenes/${vehiculo.imagen}" style="width: 100%; height: auto;" />
+                    <img src="https://vercel-back-speed-code.vercel.app/imagenes/${vehiculo.imagen}" style="width: 100%; height: auto;" />
                   );
                 } else {
                   alert("Por favor permite ventanas emergentes para ver la imagen");
