@@ -127,7 +127,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       <div className="space-y-4">
         {/* Nombre del titular */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nombre del titular</label>
+          <label className="block text-sm font-medium text-gray-700">Nombre del titular(*)</label>
           <input
             type="text"
             value={nombreTitular}
@@ -162,7 +162,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
 
         {/* Número de tarjeta */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Número de tarjeta</label>
+          <label className="block text-sm font-medium text-gray-700">Número de tarjeta(*)</label>
           <input
             type="text"
             value={numeroTarjeta}
@@ -179,80 +179,129 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
 
         {/* Fecha de expiración y CVV */}
         <div className="flex flex-col md:flex-row gap-4">
+          {/* Mes */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Mes</label>
+            <label className="block text-sm font-medium text-gray-700">Mes(*)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="\d{2}"
+              maxLength={2}
               value={mes}
               onChange={(e) => {
-                let val = e.target.value.slice(0, 2);
-                if (parseInt(val) > 12) val = '12';
-                if (parseInt(val) < 1) val = '01';
-                setMes(val);
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length === 1 && parseInt(val) > 1) val = '0' + val;
+                if (val.length <= 2) setMes(val);
+              }}
+              onBlur={() => {
+                const num = parseInt(mes);
+                if (isNaN(num) || num < 1 || num > 12) setMes('');
+                else if (mes.length === 1) setMes('0' + mes);
               }}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-center"
               placeholder="MM"
-              min={1}
-              max={12}
             />
           </div>
 
+          {/* Año */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Año</label>
+            <label className="block text-sm font-medium text-gray-700">Año(*)</label>
             <input
               type="text"
+              inputMode="numeric"
+              pattern="\d{2}"
+              maxLength={2}
               value={anio}
               onChange={(e) => {
-                let val = e.target.value.replace(/\D/g, '').slice(0, 2);
-                if (val.length === 2) {
-                  const num = parseInt(val);
-                  if (num < 25) val = '25';
-                  else if (num > 35) val = '35';
-                }
-                setAnio(val);
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length <= 2) setAnio(val);
+              }}
+              onBlur={() => {
+                const currentYear = new Date().getFullYear() % 100; // dos últimos dígitos
+                const maxYear = currentYear + 10;
+                const num = parseInt(anio);
+                if (isNaN(num) || num < currentYear || num > maxYear) setAnio('');
               }}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-center"
               placeholder="AA"
             />
           </div>
 
+          {/* CVV */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">CVV</label>
+            <label className="block text-sm font-medium text-gray-700">CVV(*)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="\d{3}"
+              maxLength={3}
               value={cvv}
-              onChange={(e) => setCvv(e.target.value.slice(0, 3))}
+              onChange={(e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                setCvv(val.slice(0, 3));
+              }}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-center"
               placeholder="123"
             />
           </div>
         </div>
 
+
+
+        
         {/* Dirección */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Dirección</label>
           <input
             type="text"
             value={direccion}
-            onChange={(e) =>
-              setDireccion(e.target.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, ''))
-            }
+            maxLength={80}
+            onChange={(e) => {
+              const val = e.target.value
+                .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '') // solo letras, números y espacios
+                .replace(/\s{2,}/g, ' '); // elimina espacios dobles
+              setDireccion(val);
+            }}
+            onBlur={() => {
+              const val = direccion.trim();
+              if (val.length < 5) {
+                setDireccion(''); // o mostrar un error
+              } else {
+                setDireccion(val);
+              }
+            }}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            placeholder="Ej. Calle Oquendo"
+            placeholder="Ej. Calle Oquendo 123"
           />
         </div>
 
+
         {/* Correo electrónico */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Correo electrónico</label>
-          <input
-            type="email"
-            value={correoElectronico}
-            onChange={(e) => setCorreoElectronico(e.target.value)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            placeholder="Ej. juan.perez@gmail.com"
-          />
-        </div>
+        <label className="block text-sm font-medium text-gray-700">Correo electrónico(*)</label>
+        <input
+          type="email"
+          value={correoElectronico}
+          maxLength={100}
+          onChange={(e) => {
+            const val = e.target.value.trim().replace(/\s/g, ''); // limpia espacios
+            setCorreoElectronico(val);
+          }}
+          onBlur={() => {
+            const esValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoElectronico);
+            if (!esValido) {
+              // Puedes mostrar mensaje de error o limpiar
+              setCorreoElectronico('');
+            }
+          }}
+          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          placeholder="Ej. juan.perez@gmail.com"
+        />
+        {correoElectronico.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoElectronico) && (
+          <p className="text-red-500 text-xs mt-1">Ingrese un correo electrónico válido.</p>
+        )}
+      </div>
+
       </div>
 
       {/* Botones */}
