@@ -132,18 +132,33 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
             type="text"
             value={nombreTitular}
             onChange={(e) => {
-              let letrasSolo = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-              letrasSolo = letrasSolo
+              let input = e.target.value;
+
+              // 1. Eliminar caracteres que no sean letras ni espacios
+              input = input.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+
+              // 2. Reemplazar múltiples espacios por uno solo
+              input = input.replace(/\s+/g, ' ');
+
+              // 3. Limitar la longitud máxima (60 caracteres)
+              if (input.length > 60) return;
+
+              // 4. Capitalizar cada palabra
+              const formateado = input
                 .toLowerCase()
                 .split(' ')
-                .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+                .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
                 .join(' ');
-              setNombreTitular(letrasSolo);
+
+              // 5. Actualizar el estado
+              setNombreTitular(formateado);
             }}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
             placeholder="Ej. Juan Pérez"
           />
+          <p className="text-xs text-gray-500 mt-1">Máximo 60 caracteres. Solo letras y espacios.</p>
         </div>
+
 
         {/* Número de tarjeta */}
         <div>
