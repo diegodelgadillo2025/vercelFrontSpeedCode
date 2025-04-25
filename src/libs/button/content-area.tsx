@@ -22,7 +22,7 @@ const ContentArea: React.FC = () => {
 
   return (
     <div style={contentAreaStyles}>
-      <p style={placeholderTextStyles}>Content area for vehicle results</p>
+      <p style={placeholderTextStyles}>Aqui se mostraran los resultados de la busqueda</p>
     </div>
   )
 }

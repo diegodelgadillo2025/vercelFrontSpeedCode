@@ -173,7 +173,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   }
 
   const filterButtonStyles: React.CSSProperties = {
-    backgroundColor: "#FF6B00",
+    backgroundColor: "#A9A9A9",
     color: "white",
     border: "none",
     borderRadius: "4px",
@@ -256,25 +256,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           )}
         </div>
       </div>
-
-      <div style={filtersContainerStyles}>
-        <select style={selectStyles}>
-          <option>Filtro 1</option>
-        </select>
-        <select style={selectStyles}>
-          <option>Filtro 2</option>
-        </select>
-        <select style={selectStyles}>
-          <option>Filtro 3</option>
-        </select>
-        <select style={selectStyles}>
-          <option>Filtro 4</option>
-        </select>
-        <select style={selectStyles}>
-          <option>Filtro 5</option>
-        </select>
-      </div>
-
       <button style={filterButtonStyles}>Filtrar</button>
     </div>
   )

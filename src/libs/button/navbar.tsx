@@ -64,13 +64,8 @@ const Navbar: React.FC<NavbarProps> = ({ windowWidth }) => {
     <nav style={navbarStyles}>
       <h1 style={logoStyles}>REDIBO</h1>
       <div style={navButtonsContainerStyles}>
-        <button style={navButtonStyles}>Boton1</button>
-        <button style={navButtonStyles}>Boton2</button>
-        <button style={navButtonStyles}>Boton3</button>
-        <button style={navButtonStyles}>Boton4</button>
-      </div>
-      <button style={mobileMenuButtonStyles}>☰</button>
-    </nav>
+        </div>
+     </nav>
   )
 }
 
