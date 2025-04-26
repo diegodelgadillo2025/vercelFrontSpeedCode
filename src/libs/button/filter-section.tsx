@@ -324,3 +324,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
 }
 
 export default FilterSection
+// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos 
+
