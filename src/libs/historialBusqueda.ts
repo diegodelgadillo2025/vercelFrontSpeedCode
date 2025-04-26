@@ -8,8 +8,8 @@ export const obtenerHistorialBusqueda = async (usuarioId: number, limite: number
 export const guardarBusqueda = async (usuarioId: number, termino: string, filtros?: any) => {
   try {
     const response = await apiClient.post('/historial', {
-      usuarioId,
-      termino,
+      usuario_idusuario: usuarioId,
+      termino_busqueda: termino,
       filtros: filtros || null
     });
     return response.data;

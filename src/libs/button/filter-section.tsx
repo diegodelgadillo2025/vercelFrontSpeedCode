@@ -2,14 +2,12 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { obtenerHistorialBusqueda, guardarBusqueda, autocompletarBusqueda } from '@/libs/historialBusqueda';
 
 interface FilterSectionProps {
   windowWidth: number
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
-  // Estado para el historial de búsquedas
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [showHistory, setShowHistory] = useState<boolean>(false)
@@ -17,38 +15,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const historyRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const result = await obtenerHistorialBusqueda(5);
-        const terms = result.map((item: any) => item.termino_busqueda);
-        setSearchHistory(terms);
-      } catch (error) {
-        console.error("Failed to load search history:", error);
-      }
-    };
-
-    loadHistory();
-  }, []);
+    const storedHistory = localStorage.getItem("searchHistory")
+    if (storedHistory) {
+      setSearchHistory(JSON.parse(storedHistory))
+    }
+  }, [])
 
   useEffect(() => {
-    const fetchAutocomplete = async () => {
-      if (searchTerm.trim() === "") {
-        return;
-      }
+    localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
+  }, [searchHistory])
 
-      try {
-        const suggestions = await autocompletarBusqueda(5, searchTerm); // Replace 5 with the dynamic user ID later
-        const terms = suggestions.map((item: any) => item.termino_busqueda);
-        setSearchHistory(terms);
-      } catch (error) {
-        console.error("Failed to fetch autocomplete suggestions:", error);
-      }
-    };
-
-    fetchAutocomplete();
-  }, [searchTerm]);
-
-  // Cerrar el historial cuando se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -67,42 +43,26 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     }
   }, [])
 
-  // Función para añadir una búsqueda al historial
   const addToHistory = (term: string) => {
     if (!term.trim()) return
 
-    // Eliminar duplicados y añadir al principio
     const newHistory = [term, ...searchHistory.filter((item) => item !== term)]
-
-    // Mantener solo las últimas 5 búsquedas
     setSearchHistory(newHistory.slice(0, 5))
     setSearchTerm(term)
     setShowHistory(false)
   }
 
-  // Función para borrar el historial
   const clearHistory = () => {
     setSearchHistory([])
+    localStorage.removeItem("searchHistory")
   }
 
-  // Función para manejar la búsqueda
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-    
-    addToHistory(searchTerm);
-    
-    try {
-      await guardarBusqueda(5, searchTerm); // Replace 5 with the dynamic user ID later
-      console.log("Search saved:", searchTerm);
-    } catch (error) {
-      console.error("Failed to save search to backend:", error);
-    }
-    
-    // Aquí iría la lógica de búsqueda real
-    console.log("Buscando:", searchTerm);
+  const handleSearch = () => {
+    if (!searchTerm.trim()) return
+    addToHistory(searchTerm)
+    console.log("Searching:", searchTerm)
   }
 
-  // Estilos
   const containerStyles: React.CSSProperties = {
     backgroundColor: "#ffffff",
     padding: "20px",
@@ -123,7 +83,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     display: "flex",
     width: windowWidth < 1024 ? "100%" : "30%",
     minWidth: windowWidth < 1024 ? "auto" : "300px",
-    position: "relative", // Para posicionar el historial
+    position: "relative",
   }
 
   const searchInputStyles: React.CSSProperties = {
@@ -145,7 +105,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     cursor: "pointer",
   }
 
-  // Estilos para el historial de búsquedas
   const historyContainerStyles: React.CSSProperties = {
     position: "absolute",
     top: "100%",
@@ -168,10 +127,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     alignItems: "center",
   }
 
-  const historyItemHoverStyles: React.CSSProperties = {
-    backgroundColor: "#f5f5f5",
-  }
-
   const clearButtonStyles: React.CSSProperties = {
     padding: "10px 15px",
     backgroundColor: "#f8f8f8",
@@ -182,23 +137,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     textAlign: "center",
     cursor: "pointer",
     fontSize: "14px",
-  }
-
-  const filtersContainerStyles: React.CSSProperties = {
-    display: "flex",
-    flexWrap: windowWidth < 1024 ? "wrap" : "nowrap",
-    gap: "10px",
-    width: windowWidth < 1024 ? "100%" : "calc(60% - 100px)",
-    flexGrow: 1,
-  }
-
-  const selectStyles: React.CSSProperties = {
-    padding: "10px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    fontSize: "14px",
-    flex: "1",
-    minWidth: windowWidth < 1024 ? "45%" : "0",
   }
 
   const filterButtonStyles: React.CSSProperties = {
@@ -232,11 +170,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
             }
           }}
         />
-        <button style={searchButtonStyles} onClick={handleSearch}>
-          →
-        </button>
+        <button style={searchButtonStyles} onClick={handleSearch}>→</button>
 
-        {/* Historial de búsquedas */}
         <div ref={historyRef} style={historyContainerStyles}>
           {searchHistory.length > 0 ? (
             <>
@@ -281,7 +216,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
               </button>
             </>
           ) : (
-            <div style={{ ...historyItemStyles, color: "#999" }}>No hay búsquedas recientes</div>
+            <div style={{ ...historyItemStyles, color: "#999" }}>
+              No hay búsquedas recientes
+            </div>
           )}
         </div>
       </div>
