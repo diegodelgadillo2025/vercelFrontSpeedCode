@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import ModalSeleccionPago from "./ModalSeleccionPago";
-import PagoTargeta from "./PagoTargeta";
+import PagoTarjeta from "./PagoTargeta"; // ✅ corregido el nombre
 import PagoQR from "./PagoQR";
 import "../../globals.css";
 
@@ -76,8 +76,12 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
         <div className="space-y-4">
           <div className="relative flex justify-center">
             <img
+<<<<<<< Updated upstream
               src={vehiculo.imagen}   
 
+=======
+              src={`/${vehiculo.imagen}`}   
+>>>>>>> Stashed changes
               alt={`${vehiculo.marca} ${vehiculo.modelo}`} 
               className="w-[400px] h-[250px] object-cover rounded-lg shadow-lg"
             />
@@ -150,7 +154,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   const renderFormularioPago = () => (
     <div className="flex-1">
       {modoPago === "tarjeta" ? (
-        <PagoTargeta
+        <PagoTarjeta
           nombreTitular={nombreTitular}
           numeroTarjeta={numeroTarjeta}
           mes={mes}
@@ -166,7 +170,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
           setDireccion={setDireccion}
           setCorreoElectronico={setCorreoElectronico}
           handleConfirmacion={handleConfirmacion}
-          onCancel={() => setModoPago(null)}
+          onCancel={() => setModoPago(null)} // ✅ Vuelve al modal correctamente
         />
       ) : vehiculo ? (
         <PagoQR
@@ -192,7 +196,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
       {!modoPago ? (
         <ModalSeleccionPago
           setModoPago={setModoPago}
-          onCancel={() => router.push("/")}
+          onCancel={() => router.push("/")} // ✅ Ir al inicio
         />
       ) : (
         renderVistaPago()

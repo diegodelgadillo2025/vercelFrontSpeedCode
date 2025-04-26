@@ -38,6 +38,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
   setCvv,
   setDireccion,
   setCorreoElectronico,
+  onCancel, // 🛠️ Agregado para usarlo correctamente
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,12 +46,11 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
   const [idReserva, setIdReserva] = useState<number | null>(null);
 
   useEffect(() => {
-    // Obtén el idReserva y monto de los parámetros de la URL
     const idReserva = searchParams.get("id");
     if (idReserva) {
       const valor = parseInt(idReserva);
       if (!isNaN(valor)) {
-        setIdReserva(valor);  // Guarda el idReserva en el estado
+        setIdReserva(valor);
       }
     }
 
@@ -67,7 +67,6 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
     const fechaExpiracion = `${mes}/${anio}`;
     const concepto = "Pago de reserva con tarjeta";
 
-    // Validación de los campos
     if (
       !nombreTitular ||
       !numeroTarjeta ||
@@ -133,24 +132,14 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
             value={nombreTitular}
             onChange={(e) => {
               let input = e.target.value;
-
-              // 1. Eliminar caracteres que no sean letras ni espacios
               input = input.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-
-              // 2. Reemplazar múltiples espacios por uno solo
               input = input.replace(/\s+/g, ' ');
-
-              // 3. Limitar la longitud máxima (60 caracteres)
               if (input.length > 60) return;
-
-              // 4. Capitalizar cada palabra
               const formateado = input
                 .toLowerCase()
                 .split(' ')
                 .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
                 .join(' ');
-
-              // 5. Actualizar el estado
               setNombreTitular(formateado);
             }}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
@@ -158,7 +147,6 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
           />
           <p className="text-xs text-gray-500 mt-1">Máximo 60 caracteres. Solo letras y espacios.</p>
         </div>
-
 
         {/* Número de tarjeta */}
         <div>
@@ -217,7 +205,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
                 if (val.length <= 2) setAnio(val);
               }}
               onBlur={() => {
-                const currentYear = new Date().getFullYear() % 100; // dos últimos dígitos
+                const currentYear = new Date().getFullYear() % 100;
                 const maxYear = currentYear + 10;
                 const num = parseInt(anio);
                 if (isNaN(num) || num < currentYear || num > maxYear) setAnio('');
@@ -246,9 +234,6 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
           </div>
         </div>
 
-
-
-        
         {/* Dirección */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Dirección</label>
@@ -258,14 +243,14 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
             maxLength={80}
             onChange={(e) => {
               const val = e.target.value
-                .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '') // solo letras, números y espacios
-                .replace(/\s{2,}/g, ' '); // elimina espacios dobles
+                .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '')
+                .replace(/\s{2,}/g, ' ');
               setDireccion(val);
             }}
             onBlur={() => {
               const val = direccion.trim();
               if (val.length < 5) {
-                setDireccion(''); // o mostrar un error
+                setDireccion('');
               } else {
                 setDireccion(val);
               }
@@ -275,39 +260,36 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
           />
         </div>
 
-
         {/* Correo electrónico */}
         <div>
-        <label className="block text-sm font-medium text-gray-700">Correo electrónico(*)</label>
-        <input
-          type="email"
-          value={correoElectronico}
-          maxLength={100}
-          onChange={(e) => {
-            const val = e.target.value.trim().replace(/\s/g, ''); // limpia espacios
-            setCorreoElectronico(val);
-          }}
-          onBlur={() => {
-            const esValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoElectronico);
-            if (!esValido) {
-              // Puedes mostrar mensaje de error o limpiar
-              setCorreoElectronico('');
-            }
-          }}
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          placeholder="Ej. juan.perez@gmail.com"
-        />
-        {correoElectronico.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoElectronico) && (
-          <p className="text-red-500 text-xs mt-1">Ingrese un correo electrónico válido.</p>
-        )}
-      </div>
-
+          <label className="block text-sm font-medium text-gray-700">Correo electrónico(*)</label>
+          <input
+            type="email"
+            value={correoElectronico}
+            maxLength={100}
+            onChange={(e) => {
+              const val = e.target.value.trim().replace(/\s/g, '');
+              setCorreoElectronico(val);
+            }}
+            onBlur={() => {
+              const esValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoElectronico);
+              if (!esValido) {
+                setCorreoElectronico('');
+              }
+            }}
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            placeholder="Ej. juan.perez@gmail.com"
+          />
+          {correoElectronico.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoElectronico) && (
+            <p className="text-red-500 text-xs mt-1">Ingrese un correo electrónico válido.</p>
+          )}
+        </div>
       </div>
 
       {/* Botones */}
       <div className="mt-6 flex justify-between gap-4">
         <button
-          onClick={() => router.back()}
+          onClick={onCancel} // ✅ AQUI ESTA CORREGIDO
           className="w-1/2 py-2 px-4 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition text-sm"
         >
           Cancelar
