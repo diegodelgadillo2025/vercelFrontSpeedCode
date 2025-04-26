@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
+import { obtenerHistorialBusqueda, guardarBusqueda, autocompletarBusqueda } from '@/libs/historialBusqueda';
 
 interface FilterSectionProps {
   windowWidth: number
@@ -15,18 +16,37 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
 
-  // Cargar historial de búsquedas desde localStorage al iniciar
   useEffect(() => {
-    const savedHistory = localStorage.getItem("searchHistory")
-    if (savedHistory) {
-      setSearchHistory(JSON.parse(savedHistory))
-    }
-  }, [])
+    const loadHistory = async () => {
+      try {
+        const result = await obtenerHistorialBusqueda(5);
+        const terms = result.map((item: any) => item.termino_busqueda);
+        setSearchHistory(terms);
+      } catch (error) {
+        console.error("Failed to load search history:", error);
+      }
+    };
 
-  // Guardar historial en localStorage cuando cambie
+    loadHistory();
+  }, []);
+
   useEffect(() => {
-    localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
-  }, [searchHistory])
+    const fetchAutocomplete = async () => {
+      if (searchTerm.trim() === "") {
+        return;
+      }
+
+      try {
+        const suggestions = await autocompletarBusqueda(5, searchTerm); // Replace 5 with the dynamic user ID later
+        const terms = suggestions.map((item: any) => item.termino_busqueda);
+        setSearchHistory(terms);
+      } catch (error) {
+        console.error("Failed to fetch autocomplete suggestions:", error);
+      }
+    };
+
+    fetchAutocomplete();
+  }, [searchTerm]);
 
   // Cerrar el historial cuando se hace clic fuera
   useEffect(() => {
@@ -63,14 +83,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   // Función para borrar el historial
   const clearHistory = () => {
     setSearchHistory([])
-    localStorage.removeItem("searchHistory")
   }
 
   // Función para manejar la búsqueda
-  const handleSearch = () => {
-    addToHistory(searchTerm)
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+    
+    addToHistory(searchTerm);
+    
+    try {
+      await guardarBusqueda(5, searchTerm); // Replace 5 with the dynamic user ID later
+      console.log("Search saved:", searchTerm);
+    } catch (error) {
+      console.error("Failed to save search to backend:", error);
+    }
+    
     // Aquí iría la lógica de búsqueda real
-    console.log("Buscando:", searchTerm)
+    console.log("Buscando:", searchTerm);
   }
 
   // Estilos
