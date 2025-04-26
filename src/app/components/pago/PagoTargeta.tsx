@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
 import { FC, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import Modal from "./Modal";
 
 interface PagoTarjetaProps {
   nombreTitular: string;
@@ -38,11 +39,15 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
   setCvv,
   setDireccion,
   setCorreoElectronico,
-  onCancel, // 🛠️ Agregado para usarlo correctamente
+  onCancel,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [monto, setMonto] = useState<number | null>(null);
+  const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
+  const [mostrarModalCancelacion, setMostrarModalCancelacion] = useState(false);
+  const [mensajeErrorModal, setMensajeErrorModal] = useState<string | null>(null);
+
   const [idReserva, setIdReserva] = useState<number | null>(null);
 
   useEffect(() => {
@@ -63,8 +68,8 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
     }
   }, [searchParams]);
 
-  const handleConfirmacion = async () => {
-    const fechaExpiracion = `${mes}/${anio}`;
+  const handleConfirmacionReal = async () => {
+    const fechaExpiracion = "${mes}/${anio}";
     const concepto = "Pago de reserva con tarjeta";
 
     if (
@@ -76,12 +81,12 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       !mes ||
       !anio
     ) {
-      alert("Por favor completa todos los campos.");
+      setMensajeErrorModal("Por favor completa todos los campos.");
       return;
     }
 
     if (!monto || !idReserva) {
-      alert("Monto o idReserva no definido. Verifica la URL.");
+      setMensajeErrorModal("Monto o idReserva no definido. Verifica la URL.");
       return;
     }
 
@@ -96,8 +101,6 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       correoElectronico,
     };
 
-    console.log("Datos a enviar:", { idReserva, datosPago });
-
     try {
       const response = await axios.post(
         `https://vercelbackspeedcode.onrender.com/pagos/pagarConTarjeta/${idReserva}`,
@@ -108,12 +111,12 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
         alert("¡Pago confirmado con éxito!");
         router.push("/pago");
       } else {
-        alert("Error en el pago: " + (response.data?.mensaje || "Error desconocido"));
+        setMensajeErrorModal("Error en el pago: " + (response.data?.mensaje || "Error desconocido"));
       }
     } catch (error: any) {
       console.error("Error:", error);
       const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
-      alert("Error: " + msg);
+      setMensajeErrorModal("Error: " + msg);
     }
   };
 
@@ -145,7 +148,6 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
             placeholder="Ej. Juan Pérez"
           />
-          <p className="text-xs text-gray-500 mt-1">Máximo 60 caracteres. Solo letras y espacios.</p>
         </div>
 
         {/* Número de tarjeta */}
@@ -242,18 +244,13 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
             value={direccion}
             maxLength={80}
             onChange={(e) => {
-              const val = e.target.value
-                .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '')
-                .replace(/\s{2,}/g, ' ');
+              const val = e.target.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').replace(/\s{2,}/g, ' ');
               setDireccion(val);
             }}
             onBlur={() => {
               const val = direccion.trim();
-              if (val.length < 5) {
-                setDireccion('');
-              } else {
-                setDireccion(val);
-              }
+              if (val.length < 5) setDireccion('');
+              else setDireccion(val);
             }}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             placeholder="Ej. Calle Oquendo 123"
@@ -289,18 +286,49 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       {/* Botones */}
       <div className="mt-6 flex justify-between gap-4">
         <button
-          onClick={onCancel} // ✅ AQUI ESTA CORREGIDO
+          onClick={() => setMostrarModalCancelacion(true)}
           className="w-1/2 py-2 px-4 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition text-sm"
         >
           Cancelar
         </button>
         <button
-          onClick={handleConfirmacion}
+          onClick={() => setMostrarModalConfirmacion(true)}
           className="w-1/2 py-2 px-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md transition text-sm"
         >
           Confirmar
         </button>
       </div>
+
+      {/* Modales */}
+      {mostrarModalConfirmacion && (
+        <Modal
+          mensaje="¿Seguro que deseas realizar el pago con tarjeta?"
+          onConfirmar={async () => {
+            setMostrarModalConfirmacion(false);
+            await handleConfirmacionReal();
+          }}
+          onCancelar={() => setMostrarModalConfirmacion(false)}
+        />
+      )}
+
+      {mostrarModalCancelacion && (
+        <Modal
+          mensaje="¿Seguro que deseas cancelar el pago?"
+          onConfirmar={() => {
+            setMostrarModalCancelacion(false);
+            router.back();
+          }}
+          onCancelar={() => setMostrarModalCancelacion(false)}
+        />
+      )}
+
+      {mensajeErrorModal && (
+        <Modal
+          mensaje={mensajeErrorModal}
+          onConfirmar={() => setMensajeErrorModal(null)}
+          onCancelar={() => setMensajeErrorModal(null)}
+        />
+      )}
     </div>
   );
 };

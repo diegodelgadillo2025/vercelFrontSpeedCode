@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import ModalSeleccionPago from "./ModalSeleccionPago";
-import PagoTarjeta from "./PagoTargeta"; // ✅ corregido el nombre
+import PagoTargeta from "./PagoTargeta";
 import PagoQR from "./PagoQR";
 import "../../globals.css";
 
@@ -39,7 +39,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   useEffect(() => {
     if (idVehiculo) {
       axios
-        .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
+        .get(`https://vercelbackspeedcode.onrender.com/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
         .then((response) => {
           if (response.data.success) {
             const data = response.data.data;
@@ -76,13 +76,8 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
         <div className="space-y-4">
           <div className="relative flex justify-center">
             <img
-<<<<<<< Updated upstream
-              src={vehiculo.imagen}   
-
-=======
-              src={`/${vehiculo.imagen}`}   
->>>>>>> Stashed changes
-              alt={`${vehiculo.marca} ${vehiculo.modelo}`} 
+              src={vehiculo.imagen}
+              alt={"${vehiculo.marca} ${vehiculo.modelo}"}
               className="w-[400px] h-[250px] object-cover rounded-lg shadow-lg"
             />
             <button
@@ -154,7 +149,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   const renderFormularioPago = () => (
     <div className="flex-1">
       {modoPago === "tarjeta" ? (
-        <PagoTarjeta
+        <PagoTargeta
           nombreTitular={nombreTitular}
           numeroTarjeta={numeroTarjeta}
           mes={mes}
@@ -170,7 +165,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
           setDireccion={setDireccion}
           setCorreoElectronico={setCorreoElectronico}
           handleConfirmacion={handleConfirmacion}
-          onCancel={() => setModoPago(null)} // ✅ Vuelve al modal correctamente
+          onCancel={() => setModoPago(null)}
         />
       ) : vehiculo ? (
         <PagoQR
@@ -196,7 +191,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
       {!modoPago ? (
         <ModalSeleccionPago
           setModoPago={setModoPago}
-          onCancel={() => router.push("/")} // ✅ Ir al inicio
+          onCancel={() => router.push("/")}
         />
       ) : (
         renderVistaPago()
