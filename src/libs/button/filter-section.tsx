@@ -172,6 +172,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     alignItems: "center",
   }
 
+  const historyTextStyles: React.CSSProperties = {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    flex: "1",
+    marginRight: "10px",
+  }
+
+  const deleteButtonStyles: React.CSSProperties = {
+    color: "#999",
+    fontSize: "12px",
+    flexShrink: 0,
+  }
+
   const historyItemHoverStyles: React.CSSProperties = {
     backgroundColor: "#f5f5f5",
   }
@@ -266,7 +280,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                     e.currentTarget.style.backgroundColor = "";
                   }}
                 >
-                  <span>{item}</span>
+                  <span style={historyTextStyles}>{item}</span>
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
@@ -280,7 +294,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                         )
                       );
                     }}
-                    style={{ color: "#999", fontSize: "12px" }}
+                    style={deleteButtonStyles}
                   >
                     ✕
                   </span>
