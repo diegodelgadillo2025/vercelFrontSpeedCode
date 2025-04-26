@@ -1,10 +1,15 @@
-import type React from "react"
+"use client"
+
+import { useRouter } from 'next/navigation';
+import React from 'react';
 
 interface NavbarProps {
-  windowWidth: number
+  windowWidth: number;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ windowWidth }) => {
+  const router = useRouter();
+
   // Modificar el estilo de la barra de navegación para permitir un diseño de tres secciones
   const navbarStyles: React.CSSProperties = {
     position: "fixed",
@@ -62,7 +67,19 @@ const Navbar: React.FC<NavbarProps> = ({ windowWidth }) => {
   // Modificar el return para usar el nuevo diseño de grid
   return (
     <nav style={navbarStyles}>
-      <h1 style={logoStyles}>REDIBO</h1>
+      <span 
+        onClick={() => router.push('/carousel')}
+        style={{ 
+          cursor: 'pointer',
+          color: "#FF6B00",
+          fontWeight: "bold",
+          fontSize: "24px",
+          margin: 0,
+          gridColumn: "1",
+        }}
+      >
+        REDIBO
+      </span>
       <div style={navButtonsContainerStyles}>
         </div>
      </nav>

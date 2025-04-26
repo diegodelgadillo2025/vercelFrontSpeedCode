@@ -2,29 +2,46 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
+import { obtenerHistorialBusqueda, guardarBusqueda, autocompletarBusqueda } from '@/libs/historialBusqueda';
 
 interface FilterSectionProps {
   windowWidth: number
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
+  // Estado para el historial de búsquedas
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [showHistory, setShowHistory] = useState<boolean>(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
 
+  // Load initial visible history
   useEffect(() => {
-    const storedHistory = localStorage.getItem("searchHistory")
-    if (storedHistory) {
-      setSearchHistory(JSON.parse(storedHistory))
+    const stored = localStorage.getItem("searchHistory");
+    if (stored) {
+      setSearchHistory(JSON.parse(stored));
     }
-  }, [])
+  }, []);
 
+  // Updated autocomplete effect
   useEffect(() => {
-    localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
-  }, [searchHistory])
+    const storedMemory = JSON.parse(localStorage.getItem("searchMemory") || "[]");
+    const input = searchTerm.toLowerCase().trim();
 
+    if (!input) {
+      const recentTerms = storedMemory.slice(0, 5);
+      setSearchHistory(recentTerms);
+      return;
+    }
+
+    const filtered = storedMemory
+      .filter((term: string) => term.includes(input))
+      .slice(0, 5);
+    setSearchHistory(filtered);
+  }, [searchTerm]);
+
+  // Combined click outside and escape key handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -33,36 +50,69 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
         searchInputRef.current &&
         !searchInputRef.current.contains(event.target as Node)
       ) {
-        setShowHistory(false)
+        setShowHistory(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowHistory(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
 
+  // Función para añadir una búsqueda al historial
   const addToHistory = (term: string) => {
-    if (!term.trim()) return
+    const lowerTerm = term.toLowerCase().trim();
+    if (!lowerTerm) return;
 
-    const newHistory = [term, ...searchHistory.filter((item) => item !== term)]
-    setSearchHistory(newHistory.slice(0, 5))
-    setSearchTerm(term)
-    setShowHistory(false)
-  }
+    // Visual history
+    const existingHistory = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+    const newHistory = [lowerTerm, ...existingHistory.filter((item: string) => item !== lowerTerm)];
+    const limitedHistory = newHistory.slice(0, 5);
+    localStorage.setItem("searchHistory", JSON.stringify(limitedHistory));
+    setSearchHistory(limitedHistory);
 
+    // Persistent memory
+    const existingMemory = JSON.parse(localStorage.getItem("searchMemory") || "[]");
+    const updatedMemory = Array.from(new Set([lowerTerm, ...existingMemory]));
+    localStorage.setItem("searchMemory", JSON.stringify(updatedMemory));
+
+    setSearchTerm(lowerTerm);
+    setShowHistory(false);
+  };
+
+  // Función para borrar el historial
   const clearHistory = () => {
     setSearchHistory([])
-    localStorage.removeItem("searchHistory")
   }
 
-  const handleSearch = () => {
-    if (!searchTerm.trim()) return
-    addToHistory(searchTerm)
-    console.log("Searching:", searchTerm)
-  }
+  // Función para manejar la búsqueda
+  const handleSearch = async () => {
+    const lowerTerm = searchTerm.toLowerCase().trim();
+    if (!lowerTerm) return;
 
+    addToHistory(lowerTerm);
+
+    try {
+      await guardarBusqueda(5, lowerTerm);
+      console.log("Search saved to backend:", lowerTerm);
+    } catch (error) {
+      console.error("Failed to save search to backend:", error);
+    }
+
+    console.log("Searching for:", lowerTerm);
+  };
+
+  // Estilos
   const containerStyles: React.CSSProperties = {
     backgroundColor: "#ffffff",
     padding: "20px",
@@ -83,7 +133,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     display: "flex",
     width: windowWidth < 1024 ? "100%" : "30%",
     minWidth: windowWidth < 1024 ? "auto" : "300px",
-    position: "relative",
+    position: "relative", // Para posicionar el historial
   }
 
   const searchInputStyles: React.CSSProperties = {
@@ -105,6 +155,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     cursor: "pointer",
   }
 
+  // Estilos para el historial de búsquedas
   const historyContainerStyles: React.CSSProperties = {
     position: "absolute",
     top: "100%",
@@ -127,6 +178,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     alignItems: "center",
   }
 
+  const historyItemHoverStyles: React.CSSProperties = {
+    backgroundColor: "#f5f5f5",
+  }
+
   const clearButtonStyles: React.CSSProperties = {
     padding: "10px 15px",
     backgroundColor: "#f8f8f8",
@@ -137,6 +192,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     textAlign: "center",
     cursor: "pointer",
     fontSize: "14px",
+  }
+
+  const filtersContainerStyles: React.CSSProperties = {
+    display: "flex",
+    flexWrap: windowWidth < 1024 ? "wrap" : "nowrap",
+    gap: "10px",
+    width: windowWidth < 1024 ? "100%" : "calc(60% - 100px)",
+    flexGrow: 1,
+  }
+
+  const selectStyles: React.CSSProperties = {
+    padding: "10px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    fontSize: "14px",
+    flex: "1",
+    minWidth: windowWidth < 1024 ? "45%" : "0",
   }
 
   const filterButtonStyles: React.CSSProperties = {
@@ -163,16 +235,26 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           style={searchInputStyles}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onFocus={() => setShowHistory(true)}
+          onFocus={() => {
+            setShowHistory(true);
+            const storedMemory = JSON.parse(localStorage.getItem("searchMemory") || "[]");
+            setSearchHistory(storedMemory.slice(0, 5));
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleSearch()
+              handleSearch();
             }
           }}
         />
-        <button style={searchButtonStyles} onClick={handleSearch}>→</button>
+        <button style={searchButtonStyles} onClick={handleSearch}>
+          →
+        </button>
 
-        <div ref={historyRef} style={historyContainerStyles}>
+        {/* Updated history container */}
+        <div
+          ref={historyRef}
+          style={{ ...historyContainerStyles, display: showHistory ? "block" : "none" }}
+        >
           {searchHistory.length > 0 ? (
             <>
               {searchHistory.map((item, index) => (
@@ -216,9 +298,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
               </button>
             </>
           ) : (
-            <div style={{ ...historyItemStyles, color: "#999" }}>
-              No hay búsquedas recientes
-            </div>
+            <div style={{ ...historyItemStyles, color: "#999" }}>No hay búsquedas recientes</div>
           )}
         </div>
       </div>
