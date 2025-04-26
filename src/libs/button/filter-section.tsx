@@ -69,9 +69,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     };
   }, []);
 
-  // Función para añadir una búsqueda al historial
-  const addToHistory = (term: string) => {
-    const lowerTerm = term.toLowerCase().trim();
+  // Updated clearHistory function
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.setItem("searchHistory", JSON.stringify([]));
+    localStorage.setItem("searchMemory", JSON.stringify([]));
+  };
+
+  // Función para manejar la búsqueda
+  const handleSearch = async () => {
+    const lowerTerm = searchTerm.toLowerCase().trim();
     if (!lowerTerm) return;
 
     // Visual history
@@ -88,19 +95,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
 
     setSearchTerm(lowerTerm);
     setShowHistory(false);
-  };
-
-  // Función para borrar el historial
-  const clearHistory = () => {
-    setSearchHistory([])
-  }
-
-  // Función para manejar la búsqueda
-  const handleSearch = async () => {
-    const lowerTerm = searchTerm.toLowerCase().trim();
-    if (!lowerTerm) return;
-
-    addToHistory(lowerTerm);
 
     try {
       await guardarBusqueda(5, lowerTerm);
@@ -262,21 +256,29 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                   key={index}
                   style={historyItemStyles}
                   onClick={() => {
-                    setSearchTerm(item)
-                    setShowHistory(false)
+                    setSearchTerm(item);
+                    setShowHistory(false);
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5"
+                    e.currentTarget.style.backgroundColor = "#f5f5f5";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = ""
+                    e.currentTarget.style.backgroundColor = "";
                   }}
                 >
                   <span>{item}</span>
                   <span
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setSearchHistory(searchHistory.filter((_, i) => i !== index))
+                      e.stopPropagation();
+                      const newHistory = searchHistory.filter((_, i) => i !== index);
+                      setSearchHistory(newHistory);
+                      localStorage.setItem("searchHistory", JSON.stringify(newHistory));
+                      localStorage.setItem(
+                        "searchMemory",
+                        JSON.stringify(
+                          Array.from(new Set([...newHistory]))
+                        )
+                      );
                     }}
                     style={{ color: "#999", fontSize: "12px" }}
                   >
