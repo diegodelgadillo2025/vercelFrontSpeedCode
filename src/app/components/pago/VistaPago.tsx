@@ -76,7 +76,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
         <div className="space-y-4">
           <div className="relative flex justify-center">
             <img
-              src={`/${vehiculo.imagen}`}   
+              src={vehiculo.imagen}   
 
               alt={`${vehiculo.marca} ${vehiculo.modelo}`} 
               className="w-[400px] h-[250px] object-cover rounded-lg shadow-lg"
@@ -86,7 +86,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
                 const imageWindow = window.open("", "_blank");
                 if (imageWindow) {
                   imageWindow.document.write(
-                    `<img src="https://vercel-back-speed-code.vercel.app/imagenes/${vehiculo.imagen}" style="width: 100%; height: auto;" />`
+                    `<img src="${vehiculo.imagen}" style="width: 100%; height: auto;" />`
                   );
                 } else {
                   alert("Por favor permite ventanas emergentes para ver la imagen");
