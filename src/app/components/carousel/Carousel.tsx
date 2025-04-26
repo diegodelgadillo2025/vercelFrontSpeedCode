@@ -93,7 +93,7 @@ export default function Carousel() {
         >
           <div className={styles.imageContainer}>
             <img
-              src={vehicle.imageUrl.startsWith('/') ? vehicle.imageUrl : `/${vehicle.imageUrl}`}
+              src={vehicle.imageUrl}
               alt={`${vehicle.brand} ${vehicle.model}`}
               className={styles.image}
               loading="lazy"
