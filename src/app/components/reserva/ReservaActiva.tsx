@@ -42,7 +42,7 @@ export default function ReservaActiva({ id }: ReservaActivaProps) {
     const intervalo = setInterval(() => {
       if (idReserva) {
         axios
-          .get('https://vercel-back-speed-code.vercel.app/reservas/obtenerTiempoReserva/${idReserva}')
+          .get(`https://vercel-back-speed-code.vercel.app/reservas/obtenerTiempoReserva/${idReserva}`)
           .then((response) => {
             if (response.data.success) {
               setEstadoTiempo(response.data.tiempoRestante);
@@ -69,7 +69,7 @@ export default function ReservaActiva({ id }: ReservaActivaProps) {
   const cancelarReserva = async (porTiempo = false) => {
     if (idReserva) {
       try {
-        await axios.post('https://vercel-back-speed-code.vercel.app/reservas/cancelar/${idReserva}');
+        await axios.post(`https://vercel-back-speed-code.vercel.app/reservas/cancelar/${idReserva}`);
         alert("Reserva cancelada correctamente");
         router.push("/reserva-expirada");
       } catch (error) {
@@ -99,7 +99,7 @@ export default function ReservaActiva({ id }: ReservaActivaProps) {
           <p className="mt-2 text-gray-600">Estado: {vehiculo.reserva.estado === 'confirmada' ? 'Confirmada' : 'Pendiente'}</p>
         </div>
         <img
-          src={`/${vehiculo.imagen}`} 
+          src={vehiculo.imagen} 
           alt={vehiculo.marca}
           className="w-full md:w-48 h-auto rounded-lg shadow-md object-cover"
         />

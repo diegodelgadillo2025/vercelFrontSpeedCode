@@ -39,7 +39,7 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage}) => {
           const data = response.data;
 
           if (data?.archivoQR) {
-            setQrURL(`https://vercelbackspeedcode.onrender.com/temp/${data.archivoQR}`);
+            setQrURL(`https://vercelbackspeedcode.onrender.com/qr/${data.archivoQR}`);
           } else {
             alert("Error al crear el QR.");
           }
