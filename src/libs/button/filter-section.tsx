@@ -318,6 +318,21 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           )}
         </div>
       </div>
+
+      <div style={filtersContainerStyles}>
+        <select style={selectStyles}>
+          <option>Filtro 1</option>
+        </select>
+        <select style={selectStyles}>
+          <option>Filtro 2</option>
+        </select>
+        <select style={selectStyles}>
+          <option>Filtro 3</option>
+        </select>
+        <select style={selectStyles}>
+          <option>Filtro 4</option>
+        </select>
+      </div>
       <button style={filterButtonStyles}>Filtrar</button>
     </div>
   )
