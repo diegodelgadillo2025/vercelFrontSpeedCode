@@ -1,7 +1,13 @@
 "use client"
 
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface NavbarProps {
   windowWidth: number;
@@ -9,6 +15,15 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ windowWidth }) => {
   const router = useRouter();
+  const [time, setTime] = useState(dayjs().tz('America/La_Paz').format('HH:mm:ss'));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(dayjs().tz('America/La_Paz').format('HH:mm:ss'));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // Modificar el estilo de la barra de navegación para permitir un diseño de tres secciones
   const navbarStyles: React.CSSProperties = {
@@ -64,6 +79,19 @@ const Navbar: React.FC<NavbarProps> = ({ windowWidth }) => {
     cursor: "pointer",
   }
 
+  const clockStyles: React.CSSProperties = {
+    backgroundColor: "#f4f4f4",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: 500,
+    color: "#333",
+    textAlign: "center",
+    justifySelf: windowWidth < 768 ? "center" : "end",
+    gridColumn: windowWidth < 768 ? "1 / -1" : "3",
+    marginTop: windowWidth < 768 ? "5px" : "0",
+  }
+
   // Modificar el return para usar el nuevo diseño de grid
   return (
     <nav style={navbarStyles}>
@@ -81,8 +109,11 @@ const Navbar: React.FC<NavbarProps> = ({ windowWidth }) => {
         REDIBO
       </span>
       <div style={navButtonsContainerStyles}>
-        </div>
-     </nav>
+      </div>
+      <div style={clockStyles}>
+        {time}
+      </div>
+    </nav>
   )
 }
 
