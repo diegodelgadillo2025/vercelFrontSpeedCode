@@ -233,6 +233,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     marginTop: windowWidth < 1024 ? "10px" : "0",
   }
 
+  const historyItemContentStyles: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    flex: 1,
+    overflow: "hidden",
+  }
+
   return (
     <div style={containerStyles}>
       <div style={searchContainerStyles}>
@@ -280,7 +287,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                     e.currentTarget.style.backgroundColor = "";
                   }}
                 >
-                  <span style={historyTextStyles}>{item}</span>
+                  <div style={historyItemContentStyles}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      viewBox="0 0 16 16"
+                      style={{ marginRight: "8px", color: "#888" }}
+                    >
+                      <path d="M8 3.5a.5.5 0 0 1 .5.5v4h2a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z"/>
+                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8z"/>
+                    </svg>
+                    <span style={historyTextStyles}>{item}</span>
+                  </div>
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
