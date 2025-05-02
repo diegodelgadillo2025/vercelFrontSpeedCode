@@ -39,7 +39,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   useEffect(() => {
     if (idVehiculo) {
       axios
-        .get(`https://vercelbackspeedcode.onrender.com/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
+        .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
         .then((response) => {
           if (response.data.success) {
             const data = response.data.data;

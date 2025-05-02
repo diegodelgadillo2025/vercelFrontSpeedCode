@@ -4,6 +4,7 @@ import { FC, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import Modal from "./Modal";
+import ModalCargando from "./ModalCargando";
 
 interface PagoTarjetaProps {
   nombreTitular: string;
@@ -43,33 +44,33 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const [monto, setMonto] = useState<number | null>(null);
+  const [idReserva, setIdReserva] = useState<number | null>(null);
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
   const [mostrarModalCancelacion, setMostrarModalCancelacion] = useState(false);
   const [mensajeErrorModal, setMensajeErrorModal] = useState<string | null>(null);
-
-  const [idReserva, setIdReserva] = useState<number | null>(null);
+  const [mensajeModalTarjeta, setMensajeModalTarjeta] = useState<string | null>(null);
+  const [errorAnio, setErrorAnio] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const idReserva = searchParams.get("id");
+    const montoParam = searchParams.get("monto");
+
     if (idReserva) {
       const valor = parseInt(idReserva);
-      if (!isNaN(valor)) {
-        setIdReserva(valor);
-      }
+      if (!isNaN(valor)) setIdReserva(valor);
     }
 
-    const montoParam = searchParams.get("monto");
     if (montoParam) {
       const valor = parseFloat(montoParam);
-      if (!isNaN(valor)) {
-        setMonto(valor);
-      }
+      if (!isNaN(valor)) setMonto(valor);
     }
   }, [searchParams]);
 
   const handleConfirmacionReal = async () => {
-    const fechaExpiracion = "${mes}/${anio}";
+    const fechaExpiracion = `${mes}/${anio}`;
     const concepto = "Pago de reserva con tarjeta";
 
     if (
@@ -102,24 +103,43 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
     };
 
     try {
+      setLoading(true);
+
       const response = await axios.post(
         `https://vercelbackspeedcode.onrender.com/pagos/pagarConTarjeta/${idReserva}`,
         datosPago
       );
 
       if (response.status === 200) {
-        alert("¡Pago confirmado con éxito!");
-        router.push("/pago");
+        setMensajeModalTarjeta("Pago realizado con éxito.");
+        setTimeout(async () => {
+          try {
+            const comprobanteURL = response.data.comprobanteURL;
+            const res = await fetch(comprobanteURL);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "comprobante_pago.png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          } catch (err) {
+            setMensajeErrorModal("Ocurrió un error al intentar descargar el comprobante.");
+          }
+        }, 2000);
       } else {
         setMensajeErrorModal("Error en el pago: " + (response.data?.mensaje || "Error desconocido"));
       }
     } catch (error: any) {
-      console.error("Error:", error);
       const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
       setMensajeErrorModal("Error: " + msg);
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 bg-white rounded-xl shadow-lg">
       <h2 className="text-xl md:text-2xl font-bold text-center text-gray-800 mb-6">
@@ -210,12 +230,25 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
                 const currentYear = new Date().getFullYear() % 100;
                 const maxYear = currentYear + 10;
                 const num = parseInt(anio);
-                if (isNaN(num) || num < currentYear || num > maxYear) setAnio('');
+
+                if (isNaN(num) || num < currentYear || num > maxYear) {
+                  setAnio('');
+                  setErrorAnio(true); // Marca error si el valor es inválido
+                } else {
+                  setErrorAnio(false); // Quita el error si el valor es válido
+                  if (anio.length === 1) setAnio('0' + anio);
+                }
               }}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-center"
               placeholder="AA"
             />
+            {errorAnio && (
+              <p className="text-red-500 text-xs mt-1">
+                Ingrese un año válido. Debe estar entre {new Date().getFullYear() % 100} y {(new Date().getFullYear() % 100) + 10}.
+              </p>
+            )}
           </div>
+
 
           {/* CVV */}
           <div className="flex-1">
@@ -317,6 +350,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
           onConfirmar={() => {
             setMostrarModalCancelacion(false);
             router.back();
+            
           }}
           onCancelar={() => setMostrarModalCancelacion(false)}
         />
@@ -329,7 +363,19 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
           onCancelar={() => setMensajeErrorModal(null)}
         />
       )}
+      {mensajeModalTarjeta && (
+        <Modal
+          mensaje={mensajeModalTarjeta}
+          onConfirmar={() => {
+            setMensajeModalTarjeta(null);
+          }}
+          onCancelar={() => setMensajeModalTarjeta(null)}
+        />
+      )}
+
+      {loading && <ModalCargando />}
     </div>
+    
   );
 };
 

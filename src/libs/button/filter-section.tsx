@@ -1,5 +1,6 @@
 "use client"
 
+import dynamic from "next/dynamic";
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { obtenerHistorialBusqueda, guardarBusqueda, autocompletarBusqueda } from '@/libs/historialBusqueda';
@@ -11,7 +12,9 @@ dayjs.locale('es') // Use Spanish locale
 interface FilterSectionProps {
   windowWidth: number
 }
-
+const MapaFiltro = dynamic(() => import('@/app/components/filtroBusqueda/filtroMapaPrecio'), {
+  ssr: false,
+});
 const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   // Estado para el historial de búsquedas
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -24,6 +27,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const [endDate, setEndDate] = useState<Date | null>(null)
   const [currentMonth, setCurrentMonth] = useState(dayjs())
   const datePickerRef = useRef<HTMLDivElement>(null)
+  const [mostrarMapa, setMostrarMapa] = useState(false);
 
   // Load initial visible history
   useEffect(() => {
@@ -168,8 +172,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
 
   const isDateInRange = (date: dayjs.Dayjs) => {
     if (!startDate || !endDate) return false
-    return date.isAfter(dayjs(startDate).startOf('day')) && 
-           date.isBefore(dayjs(endDate).endOf('day'))
+    return date.isAfter(dayjs(startDate).startOf('day')) &&
+      date.isBefore(dayjs(endDate).endOf('day'))
   }
 
   const clearDateRange = (e: React.MouseEvent) => {
@@ -407,8 +411,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                       viewBox="0 0 16 16"
                       style={{ marginRight: "8px", color: "#888" }}
                     >
-                      <path d="M8 3.5a.5.5 0 0 1 .5.5v4h2a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z"/>
-                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8z"/>
+                      <path d="M8 3.5a.5.5 0 0 1 .5.5v4h2a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z" />
+                      <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8z" />
                     </svg>
                     <span style={historyTextStyles}>{item}</span>
                   </div>
@@ -473,8 +477,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
               <div style={{ display: 'flex', gap: '24px' }}>
                 {[currentMonth, currentMonth.add(1, 'month')].map((month, i) => (
                   <div key={i} style={{ flex: 1 }}>
-                    <div style={{ 
-                      display: 'flex', 
+                    <div style={{
+                      display: 'flex',
                       justifyContent: 'space-between',
                       marginBottom: '16px'
                     }}>
@@ -493,7 +497,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                       </button>
                     </div>
 
-                    <div style={{ 
+                    <div style={{
                       display: 'grid',
                       gridTemplateColumns: 'repeat(7, 1fr)',
                       gap: '4px',
@@ -502,13 +506,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                       {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(day => (
                         <div key={day} style={{ padding: '4px', color: '#666' }}>{day}</div>
                       ))}
-                      
+
                       {generateCalendarDays(month).map((day, index) => {
                         const isStartDate = startDate && day.isSame(startDate, 'day')
                         const isEndDate = endDate && day.isSame(endDate, 'day')
                         const isSelected = isStartDate || isEndDate
-                        const isInRange = startDate && endDate && 
-                          day.isAfter(dayjs(startDate).startOf('day')) && 
+                        const isInRange = startDate && endDate &&
+                          day.isAfter(dayjs(startDate).startOf('day')) &&
                           day.isBefore(dayjs(endDate).endOf('day'))
                         const isCurrentMonth = day.month() === month.month()
                         const isPastDate = day.isBefore(dayjs().startOf('day'))
@@ -520,11 +524,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                             disabled={isPastDate}
                             style={{
                               padding: '8px',
-                              backgroundColor: isSelected ? '#FF6B00' : 
-                                            isInRange ? '#FFE4D6' : 'transparent',
+                              backgroundColor: isSelected ? '#FF6B00' :
+                                isInRange ? '#FFE4D6' : 'transparent',
                               color: isPastDate ? '#ccc' :
-                                     isSelected ? 'white' : 
-                                     !isCurrentMonth ? '#ccc' : 'black',
+                                isSelected ? 'white' :
+                                  !isCurrentMonth ? '#ccc' : 'black',
                               borderRadius: '4px',
                               cursor: isPastDate ? 'not-allowed' : 'pointer',
                               border: 'none',
@@ -567,21 +571,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
         <select style={selectStyles}>
           <option>Filtro 3</option>
         </select>
-        <select style={selectStyles}>
-          <option>Filtro 4</option>
-        </select>
+        <button
+          onClick={() => setMostrarMapa((prev) => !prev)}
+          className={`px-4 py-2 rounded-md text-white font-semibold ${mostrarMapa ? "bg-orange-500" : "bg-gray-500"
+            }`}
+        >
+          ver mapa GPS
+        </button>
+
       </div>
       <button style={filterButtonStyles}>Filtrar</button>
+      {mostrarMapa && <MapaFiltro />}
+
     </div>
   )
 }
 
 export default FilterSection
-// comentario para ver que se actualizen los archivos 
-// comentario para ver que se actualizen los archivos 
-// comentario para ver que se actualizen los archivos 
-// comentario para ver que se actualizen los archivos 
-// comentario para ver que se actualizen los archivos 
-// comentario para ver que se actualizen los archivos 
+// comentario para ver que se actualizen los archivos
+// comentario para ver que se actualizen los archivos
+// comentario para ver que se actualizen los archivos
+// comentario para ver que se actualizen los archivos
+// comentario para ver que se actualizen los archivos
+// comentario para ver que se actualizen los archivos
 // comentario para ver que se actualizen los archivos 
 

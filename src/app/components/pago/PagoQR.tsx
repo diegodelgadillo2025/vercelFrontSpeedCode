@@ -77,19 +77,30 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
     }
   };
 
-  const handleDescargarQR = () => {
+  const handleDescargarQR = async () => {
     if (!qrURL) {
       alert("No hay QR para descargar");
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = qrURL;
-    link.download = "codigo-qr.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const response = await fetch(qrURL); // descarga binaria
+      const blob = await response.blob();  // lo convierte en objeto descargable
+      const url = URL.createObjectURL(blob); // crea URL temporal
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "codigo_qr.png"; // nombre del archivo
+      document.body.appendChild(link);
+      link.click(); // dispara la descarga
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url); // limpia la URL temporal
+    } catch (error) {
+      console.error("Error al descargar el QR:", error);
+      alert("Ocurrió un error al intentar descargar el código QR.");
+    }
   };
+
 
   const handleConfirmacionQR = async () => {
     const correoElectronico = "pruebaTEST@gmail.com";
@@ -114,12 +125,32 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
         datosPagoQR
       );
 
-      if (response.status === 200) {
+      if (response.status === 200 && response.data?.comprobanteURL) {
         setMensajeModalQR("Pago realizado con éxito.");
-        setTimeout(() => {
-          router.push("/confirmacion");
+      
+        setTimeout(async () => {
+          try {
+            const comprobanteURL = response.data.comprobanteURL;
+        
+            const res = await fetch(comprobanteURL);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+        
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "comprobante_pago.png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          } catch (err) {
+            console.error("Error al descargar el comprobante:", err);
+            alert("Ocurrió un error al intentar descargar el comprobante.");
+          }
         }, 2000);
-      } else {
+        
+      }
+       else {
         setMensajeModalQR("Error al realizar el pago: " + (response.data?.mensaje || "Error desconocido"));
       }
     } catch (error: any) {
@@ -173,15 +204,16 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
           </button>
 
           <button
-            onClick={handleDescargarQR}
-            className="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-full transition"
-            title="Descargar QR"
-            aria-label="Descargar código QR"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </button>
+          onClick={handleDescargarQR}
+          className="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-full transition"
+          title="Descargar QR"
+          aria-label="Descargar código QR"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        </button>
+
         </div>
 
         {/* Botones de acción */}
