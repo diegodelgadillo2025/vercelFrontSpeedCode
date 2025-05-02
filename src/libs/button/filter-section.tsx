@@ -38,6 +38,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       setSearchHistory(JSON.parse(stored));
     }
   }, []);
+  //estilos del slider del filtro 2 "GPS"
   const distanceSliderStyles: React.CSSProperties = {
     position: 'absolute',
     top: '100%',

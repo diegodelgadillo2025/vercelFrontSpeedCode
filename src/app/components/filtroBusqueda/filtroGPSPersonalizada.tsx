@@ -43,7 +43,7 @@ interface PuntoMapa {
   idVehiculo: number;
   precio: number;
   latitud: number;
-  amplitud: number;
+  longitud: number; // Asegurar que coincida con el nombre del campo de la API
 }
 
 interface DetalleVehiculo {
@@ -54,7 +54,7 @@ interface DetalleVehiculo {
   precio: number;
 }
 
-interface Props {
+export interface FiltroGPSProps {
   distanciaFiltro?: number;
 }
 
@@ -62,52 +62,55 @@ const IrAUbicacion = ({ setUbicacionUsuario }: { setUbicacionUsuario: (pos: [num
   const map = useMap();
 
   useEffect(() => {
-    map.locate({ setView: true, maxZoom: 13 });
-
+    map.locate({ setView: true, maxZoom: 13, enableHighAccuracy: true });
+    
     map.on("locationfound", (e) => {
       const { lat, lng } = e.latlng;
       setUbicacionUsuario([lat, lng]);
     });
 
     map.on("locationerror", (e) => {
-      console.error("No se pudo obtener ubicación:", e.message);
+      console.error("Error de geolocalización:", e.message);
     });
   }, [map, setUbicacionUsuario]);
 
   return null;
 };
 
-export default function FiltroMapaPrecio({ distanciaFiltro = 100 }: Props) {
+export default function FiltroMapaPrecio({ distanciaFiltro }: FiltroGPSProps) {
   const [puntos, setPuntos] = useState<PuntoMapa[]>([]);
   const [detalles, setDetalles] = useState<Record<number, DetalleVehiculo>>({});
   const [ubicacionUsuario, setUbicacionUsuario] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     fetch("https://vercel-back-speed-code.vercel.app/mapa/gps")
-      .then((res) => res.json())
-      .then((data) => setPuntos(data));
+      .then((res) => {
+        if (!res.ok) throw new Error("Error en la respuesta");
+        return res.json();
+      })
+      .then((data) => setPuntos(data))
+      .catch((err) => console.error("Error fetching puntos:", err));
   }, []);
 
   const calcularDistancia = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371; // Radio de la Tierra en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
       Math.sin(dLat/2) * Math.sin(dLat/2) +
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
       Math.sin(dLon/2) * Math.sin(dLon/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
   };
 
   const puntosFiltrados = puntos.filter(punto => {
-    if (!ubicacionUsuario) return true;
-    const distancia = calcularDistancia(
+    if (!ubicacionUsuario || !distanciaFiltro) return true;
+    return calcularDistancia(
       ubicacionUsuario[0],
       ubicacionUsuario[1],
       punto.latitud,
-      punto.amplitud
-    );
-    return distancia <= distanciaFiltro;
+      punto.longitud
+    ) <= distanciaFiltro;
   });
 
   const obtenerDetalle = async (id: number) => {
@@ -124,6 +127,14 @@ export default function FiltroMapaPrecio({ distanciaFiltro = 100 }: Props) {
 
   return (
     <div className="w-full mt-6 rounded-xl shadow-md overflow-hidden border border-gray-200 bg-white">
+      <div className="p-4 border-b">
+        <p className="text-sm text-gray-600">
+          {distanciaFiltro
+            ? `Mostrando ${puntosFiltrados.length} automóviles dentro de ${distanciaFiltro} km`
+            : `Mostrando ${puntosFiltrados.length} automóviles disponibles`}
+        </p>
+      </div>
+      
       <div className="h-[500px] w-full relative z-0">
         <MapContainer
           center={[-17.7833, -63.1833]}
@@ -158,7 +169,7 @@ export default function FiltroMapaPrecio({ distanciaFiltro = 100 }: Props) {
             <Marker
               key={punto.idVehiculo}
               icon={iconoNormal}
-              position={[punto.latitud, punto.amplitud]}
+              position={[punto.latitud, punto.longitud]}
               eventHandlers={{
                 click: () => obtenerDetalle(punto.idVehiculo),
               }}
@@ -196,7 +207,7 @@ export default function FiltroMapaPrecio({ distanciaFiltro = 100 }: Props) {
           {ubicacionUsuario && (
             <Marker position={ubicacionUsuario} icon={iconoUsuario}>
               <Tooltip permanent direction="top" offset={[0, -10]}>
-                Tú estás aquí
+                Tu ubicación actual
               </Tooltip>
             </Marker>
           )}
