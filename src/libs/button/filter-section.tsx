@@ -14,7 +14,8 @@ interface FilterSectionProps {
 }
 const MapaFiltro = dynamic(() => import('@/app/components/filtroBusqueda/filtroMapaPrecio'), {
   ssr: false,
-});
+  loading: () => <p>Cargando mapa...</p>
+})
 const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   // Estado para el historial de búsquedas
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -28,7 +29,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const [currentMonth, setCurrentMonth] = useState(dayjs())
   const datePickerRef = useRef<HTMLDivElement>(null)
   const [mostrarMapa, setMostrarMapa] = useState(false);
-
+  const [showDistanceSlider, setShowDistanceSlider] = useState(false);
+  const [selectedDistance, setSelectedDistance] = useState(10); // Distancia por defecto 10km
   // Load initial visible history
   useEffect(() => {
     const stored = localStorage.getItem("searchHistory");
@@ -36,7 +38,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       setSearchHistory(JSON.parse(stored));
     }
   }, []);
-
+  const distanceSliderStyles: React.CSSProperties = {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    backgroundColor: 'white',
+    padding: '16px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    zIndex: 1000,
+    width: windowWidth < 768 ? '100%' : '300px',
+  }
+  
   // Updated autocomplete effect
   useEffect(() => {
     const storedMemory = JSON.parse(localStorage.getItem("searchMemory") || "[]");
@@ -589,9 +602,56 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           )}
         </div>
 
-        <select style={selectStyles}>
-          <option>Filtro 2</option>
-        </select>
+        <div style={{ position: 'relative', flex: 1, minWidth: windowWidth < 1024 ? '45%' : '0' }}>
+        <button
+          onClick={() => setShowDistanceSlider(!showDistanceSlider)}
+          style={{
+            ...selectStyles,
+            cursor: 'pointer',
+            backgroundColor: showDistanceSlider ? '#f3f4f6' : 'white',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <span>Distancia: {selectedDistance} km</span>
+          <span>▼</span>
+        </button>
+
+        {showDistanceSlider && (
+          <div style={distanceSliderStyles}>
+            <div style={{ marginBottom: '12px' }}>
+              <input
+                type="range"
+                min="1"
+                max="100"
+                value={selectedDistance}
+                onChange={(e) => setSelectedDistance(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                <span>1 km</span>
+                <span>{selectedDistance} km</span>
+                <span>100 km</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowDistanceSlider(false)}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#FF6B00',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                width: '100%'
+              }}
+            >
+              Aceptar
+            </button>
+          </div>
+        )}
+      </div>
         <select style={selectStyles}>
           <option>Filtro 3</option>
         </select>
@@ -606,7 +666,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       </div>
       <button style={filterButtonStyles}>Filtrar</button>
       {mostrarMapa && <MapaFiltro />}
-
     </div>
   )
 }
@@ -619,4 +678,3 @@ export default FilterSection
 // comentario para ver que se actualizen los archivos
 // comentario para ver que se actualizen los archivos
 // comentario para ver que se actualizen los archivos 
-
