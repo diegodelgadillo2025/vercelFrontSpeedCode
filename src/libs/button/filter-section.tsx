@@ -523,7 +523,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                         gap: '4px',
                         textAlign: 'center'
                       }}>
-                        {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(day => (
+                        {['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'].map(day => (
                           <div key={day} style={{ padding: '4px', color: '#666' }}>{day}</div>
                         ))}
 
