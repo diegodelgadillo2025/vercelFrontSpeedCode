@@ -474,93 +474,114 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
 
           {showDatePicker && (
             <div ref={datePickerRef} style={datePickerStyles}>
-              <div style={{ display: 'flex', gap: '24px' }}>
-                {[currentMonth, currentMonth.add(1, 'month')].map((month, i) => (
-                  <div key={i} style={{ flex: 1 }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginBottom: '16px'
+              <div className="w-[90vw] max-w-[400px] mx-auto md:max-w-[700px] overflow-x-auto rounded-lg shadow-md bg-white">
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: windowWidth < 768 ? 'column' : 'row',
+                  gap: '24px', 
+                  padding: '16px',
+                  margin: '0 auto', // Center the content
+                }}>
+                  {[currentMonth, currentMonth.add(1, 'month')].map((month, i) => (
+                    <div key={i} style={{ 
+                      flex: windowWidth < 768 ? 'none' : 1,
+                      width: windowWidth < 768 ? '100%' : 'auto',
+                      minWidth: windowWidth < 768 ? 'auto' : '280px'
                     }}>
-                      <button
-                        onClick={() => setCurrentMonth(prev => prev.subtract(1, 'month'))}
-                        style={{ visibility: i === 0 ? 'visible' : 'hidden' }}
-                      >
-                        ←
-                      </button>
-                      <span>{month.format('MMMM YYYY')}</span>
-                      <button
-                        onClick={() => setCurrentMonth(prev => prev.add(1, 'month'))}
-                        style={{ visibility: i === 1 ? 'visible' : 'hidden' }}
-                      >
-                        →
-                      </button>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '16px',
+                        padding: '0 8px'
+                      }}>
+                        <button
+                          onClick={() => setCurrentMonth(prev => prev.subtract(1, 'month'))}
+                          style={{ 
+                            visibility: i === 0 ? 'visible' : 'hidden',
+                            padding: '4px 8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ←
+                        </button>
+                        <span style={{ fontWeight: 500 }}>{month.format('MMMM YYYY')}</span>
+                        <button
+                          onClick={() => setCurrentMonth(prev => prev.add(1, 'month'))}
+                          style={{ 
+                            visibility: i === 1 ? 'visible' : 'hidden',
+                            padding: '4px 8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          →
+                        </button>
+                      </div>
+
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(7, 1fr)',
+                        gap: '4px',
+                        textAlign: 'center'
+                      }}>
+                        {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(day => (
+                          <div key={day} style={{ padding: '4px', color: '#666' }}>{day}</div>
+                        ))}
+
+                        {generateCalendarDays(month).map((day, index) => {
+                          const isStartDate = startDate && day.isSame(startDate, 'day')
+                          const isEndDate = endDate && day.isSame(endDate, 'day')
+                          const isSelected = isStartDate || isEndDate
+                          const isInRange = startDate && endDate &&
+                            day.isAfter(dayjs(startDate).startOf('day')) &&
+                            day.isBefore(dayjs(endDate).endOf('day'))
+                          const isCurrentMonth = day.month() === month.month()
+                          const isPastDate = day.isBefore(dayjs().startOf('day'))
+
+                          return (
+                            <button
+                              key={index}
+                              onClick={() => handleDateClick(day)}
+                              disabled={isPastDate}
+                              style={{
+                                padding: '8px',
+                                backgroundColor: isSelected ? '#FF6B00' :
+                                  isInRange ? '#FFE4D6' : 'transparent',
+                                color: isPastDate ? '#ccc' :
+                                  isSelected ? 'white' :
+                                    !isCurrentMonth ? '#ccc' : 'black',
+                                borderRadius: '4px',
+                                cursor: isPastDate ? 'not-allowed' : 'pointer',
+                                border: 'none',
+                                outline: 'none',
+                                opacity: isPastDate ? 0.4 : 1,
+                                pointerEvents: isPastDate ? 'none' : 'auto',
+                              }}
+                            >
+                              {day.format('D')}
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(7, 1fr)',
-                      gap: '4px',
-                      textAlign: 'center'
-                    }}>
-                      {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(day => (
-                        <div key={day} style={{ padding: '4px', color: '#666' }}>{day}</div>
-                      ))}
-
-                      {generateCalendarDays(month).map((day, index) => {
-                        const isStartDate = startDate && day.isSame(startDate, 'day')
-                        const isEndDate = endDate && day.isSame(endDate, 'day')
-                        const isSelected = isStartDate || isEndDate
-                        const isInRange = startDate && endDate &&
-                          day.isAfter(dayjs(startDate).startOf('day')) &&
-                          day.isBefore(dayjs(endDate).endOf('day'))
-                        const isCurrentMonth = day.month() === month.month()
-                        const isPastDate = day.isBefore(dayjs().startOf('day'))
-
-                        return (
-                          <button
-                            key={index}
-                            onClick={() => handleDateClick(day)}
-                            disabled={isPastDate}
-                            style={{
-                              padding: '8px',
-                              backgroundColor: isSelected ? '#FF6B00' :
-                                isInRange ? '#FFE4D6' : 'transparent',
-                              color: isPastDate ? '#ccc' :
-                                isSelected ? 'white' :
-                                  !isCurrentMonth ? '#ccc' : 'black',
-                              borderRadius: '4px',
-                              cursor: isPastDate ? 'not-allowed' : 'pointer',
-                              border: 'none',
-                              outline: 'none',
-                              opacity: isPastDate ? 0.4 : 1,
-                              pointerEvents: isPastDate ? 'none' : 'auto',
-                            }}
-                          >
-                            {day.format('D')}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
+                <button
+                  onClick={() => setShowDatePicker(false)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: '#FF6B00',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    marginTop: '16px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Aceptar
+                </button>
               </div>
-
-              <button
-                onClick={() => setShowDatePicker(false)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#FF6B00',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  marginTop: '16px',
-                  cursor: 'pointer'
-                }}
-              >
-                Aceptar
-              </button>
             </div>
           )}
         </div>
