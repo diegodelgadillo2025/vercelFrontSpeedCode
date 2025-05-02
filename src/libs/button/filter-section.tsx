@@ -474,13 +474,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
 
           {showDatePicker && (
             <div ref={datePickerRef} style={datePickerStyles}>
-              <div className="w-[90vw] max-w-[400px] mx-auto md:max-w-[700px] overflow-x-auto rounded-lg shadow-md bg-white">
+              <div 
+                translate="no" 
+                className="w-[90vw] max-w-[400px] mx-auto md:max-w-[700px] overflow-x-auto rounded-lg shadow-md bg-white notranslate"
+              >
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: windowWidth < 768 ? 'column' : 'row',
                   gap: '24px', 
                   padding: '16px',
-                  margin: '0 auto', // Center the content
+                  margin: '0 auto',
                 }}>
                   {[currentMonth, currentMonth.add(1, 'month')].map((month, i) => (
                     <div key={i} style={{ 
