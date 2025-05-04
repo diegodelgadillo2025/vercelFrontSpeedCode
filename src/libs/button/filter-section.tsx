@@ -33,6 +33,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const [mostrarMapa, setMostrarMapa] = useState(false);
   const [showDistanceSlider, setShowDistanceSlider] = useState(false);
   const [selectedDistance, setSelectedDistance] = useState(10); // Distancia por defecto 10km
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [showCalendar, setShowCalendar] = useState(false);
   // Load initial visible history
   useEffect(() => {
     const stored = localStorage.getItem("searchHistory");
@@ -109,6 +111,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Add this function to handle history updates
+  const updateVisibleHistory = (fullHistory: string[]) => {
+    const limitedHistory = fullHistory.slice(0, 5);
+    setSearchHistory(limitedHistory);
+    localStorage.setItem("searchHistory", JSON.stringify(limitedHistory));
+  };
+
   // Updated clearHistory function
   const clearHistory = () => {
     setSearchHistory([]);
@@ -147,7 +156,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   };
 
   const getFormattedDateRange = () => {
-    if (!startDate || !endDate) return "Filtro 1"
+    if (!startDate || !endDate) return "Fechas"
     const start = dayjs(startDate)
     const end = dayjs(endDate)
     return `${start.format('D MMM')} - ${end.format('D MMM')}`.toLowerCase()
@@ -313,7 +322,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   }
 
   const filterButtonStyles: React.CSSProperties = {
-    backgroundColor: "#A9A9A9",
+    backgroundColor: "#FF6B00",
     color: "white",
     border: "none",
     borderRadius: "4px",
@@ -324,6 +333,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     width: windowWidth < 1024 ? "100%" : "auto",
     alignSelf: "flex-end",
     marginTop: windowWidth < 1024 ? "10px" : "0",
+    transition: "background-color 0.2s ease",
   }
 
   const historyItemContentStyles: React.CSSProperties = {
@@ -355,7 +365,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     alignItems: 'center',
     padding: '10px 15px',
     position: 'relative',
-    border: 'none',
+    border: '1px solid #d1d5db',
+    borderRadius: '0.375rem',
     width: '100%',
   }
 
@@ -371,6 +382,43 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     alignItems: 'center',
   }
 
+  const handleKeyNavigation = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showHistory || searchHistory.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev >= searchHistory.length - 1 ? 0 : prev + 1
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev <= 0 ? searchHistory.length - 1 : prev - 1
+        );
+        break;
+      case 'Enter':
+        if (highlightedIndex >= 0) {
+          e.preventDefault();
+          setSearchTerm(searchHistory[highlightedIndex]);
+          setShowHistory(false);
+          handleSearch();
+        }
+        break;
+      case 'Escape':
+        setShowHistory(false);
+        setHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  // Update the button click handler
+  const toggleCalendar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowCalendar(prev => !prev);
+  };
+
   return (
     <div style={containerStyles}>
       <div style={searchContainerStyles}>
@@ -381,15 +429,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           style={searchInputStyles}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyNavigation}
           onFocus={() => {
             setShowHistory(true);
+            setHighlightedIndex(-1);
             const storedMemory = JSON.parse(localStorage.getItem("searchMemory") || "[]");
             setSearchHistory(storedMemory.slice(0, 5));
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
           }}
         />
         <button style={searchButtonStyles} onClick={handleSearch}>
@@ -406,15 +451,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
               {searchHistory.map((item, index) => (
                 <div
                   key={index}
-                  style={historyItemStyles}
+                  style={{
+                    ...historyItemStyles,
+                    backgroundColor: index === highlightedIndex ? "#f5f5f5" : "transparent",
+                  }}
                   onClick={() => {
                     setSearchTerm(item);
                     setShowHistory(false);
                   }}
                   onMouseEnter={(e) => {
+                    setHighlightedIndex(index);
                     e.currentTarget.style.backgroundColor = "#f5f5f5";
                   }}
                   onMouseLeave={(e) => {
+                    if (index === highlightedIndex) return;
                     e.currentTarget.style.backgroundColor = "";
                   }}
                 >
@@ -435,15 +485,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                   <span
                     onClick={(e) => {
                       e.stopPropagation();
-                      const newHistory = searchHistory.filter((_, i) => i !== index);
-                      setSearchHistory(newHistory);
-                      localStorage.setItem("searchHistory", JSON.stringify(newHistory));
-                      localStorage.setItem(
-                        "searchMemory",
-                        JSON.stringify(
-                          Array.from(new Set([...newHistory]))
-                        )
-                      );
+                      // Obtenga el historial completo
+                      const fullHistory = JSON.parse(localStorage.getItem("searchMemory") || "[]");
+                      // Eliminar el elemento eliminado del historial completo
+                      const updatedFullHistory = fullHistory.filter((item: string) => item !== searchHistory[index]);
+                      // Actualizar searchMemory con el historial filtrado
+                      localStorage.setItem("searchMemory", JSON.stringify(updatedFullHistory));
+                      // Actualizar el historial visible con los siguientes 5 elementos
+                      updateVisibleHistory(updatedFullHistory);
                     }}
                     style={deleteButtonStyles}
                   >
@@ -473,13 +522,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       <div style={filtersContainerStyles}>
         <div style={{ position: 'relative', flex: 1, minWidth: windowWidth < 1024 ? '45%' : '0' }}>
           <button
-            onClick={() => setShowDatePicker(!showDatePicker)}
+            onClick={toggleCalendar}
             style={dateButtonStyles}
           >
             <span style={{ flex: 1, textAlign: 'left' }}>{getFormattedDateRange()}</span>
             {(startDate || endDate) && (
               <button
-                onClick={clearDateRange}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setStartDate(null);
+                  setEndDate(null);
+                  setShowCalendar(false);
+                }}
                 style={clearButtonStyles}
                 title="Limpiar fechas"
               >
@@ -488,7 +542,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
             )}
           </button>
 
-          {showDatePicker && (
+          {showCalendar && (
             <div ref={datePickerRef} style={datePickerStyles}>
               <div 
                 translate="no" 
@@ -586,7 +640,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                 </div>
 
                 <button
-                  onClick={() => setShowDatePicker(false)}
+                  onClick={() => setShowCalendar(false)}
                   style={{
                     width: '100%',
                     padding: '12px',
