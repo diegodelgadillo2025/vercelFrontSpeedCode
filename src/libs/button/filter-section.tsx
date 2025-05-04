@@ -35,6 +35,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const [selectedDistance, setSelectedDistance] = useState(10); // Distancia por defecto 10km
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showDateError, setShowDateError] = useState(false);
   // Load initial visible history
   useEffect(() => {
     const stored = localStorage.getItem("searchHistory");
@@ -183,17 +184,42 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     }
 
     if (!startDate || (startDate && endDate)) {
-      setStartDate(date.toDate())
-      setEndDate(null)
+      setStartDate(date.toDate());
+      setEndDate(null);
+      setShowDateError(false);
     } else {
+      // If selecting end date, check if it's within 12 months
+      const maxEndDate = dayjs(startDate).add(12, 'months');
+      if (date.isAfter(maxEndDate)) {
+        setShowDateError(true);
+        setTimeout(() => setShowDateError(false), 3000); // Hide error after 3 seconds
+        return;
+      }
+      
       if (date.isBefore(startDate)) {
-        setStartDate(date.toDate())
-        setEndDate(null)
+        setStartDate(date.toDate());
+        setEndDate(null);
       } else {
-        setEndDate(date.toDate())
+        setEndDate(date.toDate());
+        setShowDateError(false);
       }
     }
-  }
+  };
+
+  const isDateDisabled = (date: dayjs.Dayjs) => {
+    // Disable past dates
+    if (date.isBefore(dayjs().startOf('day'))) {
+      return true;
+    }
+
+    // If start date is selected, disable dates more than 12 months ahead
+    if (startDate && !endDate) {
+      const maxDate = dayjs(startDate).add(12, 'months');
+      return date.isAfter(maxDate);
+    }
+
+    return false;
+  };
 
   const isDateInRange = (date: dayjs.Dayjs) => {
     if (!startDate || !endDate) return false
@@ -609,25 +635,26 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                             day.isBefore(dayjs(endDate).endOf('day'))
                           const isCurrentMonth = day.month() === month.month()
                           const isPastDate = day.isBefore(dayjs().startOf('day'))
+                          const isDisabled = isDateDisabled(day)
 
                           return (
                             <button
                               key={index}
                               onClick={() => handleDateClick(day)}
-                              disabled={isPastDate}
+                              disabled={isPastDate || isDisabled}
                               style={{
                                 padding: '8px',
                                 backgroundColor: isSelected ? '#FF6B00' :
                                   isInRange ? '#FFE4D6' : 'transparent',
-                                color: isPastDate ? '#ccc' :
+                                color: (isPastDate || isDisabled) ? '#ccc' :
                                   isSelected ? 'white' :
                                     !isCurrentMonth ? '#ccc' : 'black',
                                 borderRadius: '4px',
-                                cursor: isPastDate ? 'not-allowed' : 'pointer',
+                                cursor: (isPastDate || isDisabled) ? 'not-allowed' : 'pointer',
                                 border: 'none',
                                 outline: 'none',
-                                opacity: isPastDate ? 0.4 : 1,
-                                pointerEvents: isPastDate ? 'none' : 'auto',
+                                opacity: (isPastDate || isDisabled) ? 0.4 : 1,
+                                pointerEvents: (isPastDate || isDisabled) ? 'none' : 'auto',
                               }}
                             >
                               {day.format('D')}
@@ -723,6 +750,22 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       </div>
       <button style={filterButtonStyles}>Filtrar</button>
       {mostrarMapa && <MapaFiltro />}
+      {showDateError && (
+        <div style={{
+          position: 'absolute',
+          bottom: '70px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#ff4444',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          fontSize: '14px',
+          zIndex: 1001,
+        }}>
+          El período máximo de reserva es de 12 meses
+        </div>
+      )}
     </div>
   )
 }
@@ -734,4 +777,5 @@ export default FilterSection
 // comentario para ver que se actualizen los archivos
 // comentario para ver que se actualizen los archivos
 // comentario para ver que se actualizen los archivos
+// comentario para ver que se actualizen los archivos 
 // comentario para ver que se actualizen los archivos 
