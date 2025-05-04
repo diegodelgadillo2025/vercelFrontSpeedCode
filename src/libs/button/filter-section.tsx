@@ -6,6 +6,8 @@ import { useState, useEffect, useRef } from "react"
 import { obtenerHistorialBusqueda, guardarBusqueda, autocompletarBusqueda } from '@/libs/historialBusqueda';
 import dayjs from 'dayjs'
 import 'dayjs/locale/es' // Import Spanish locale
+import { fetchVehiculosPorFechas } from '../filtroFechas';
+
 
 dayjs.locale('es') // Use Spanish locale
 
