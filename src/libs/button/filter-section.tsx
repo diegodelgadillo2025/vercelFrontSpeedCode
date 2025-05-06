@@ -7,6 +7,7 @@ import { obtenerHistorialBusqueda, guardarBusqueda, autocompletarBusqueda } from
 import dayjs from 'dayjs'
 import 'dayjs/locale/es' // Import Spanish locale
 import { fetchVehiculosPorFechas } from '../filtroFechas';
+import FiltroAeropuerto from "@/app/components/filtroBusqueda/filtroAeropuerto";
 
 
 dayjs.locale('es') // Use Spanish locale
@@ -736,9 +737,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           </div>
         )}
       </div>
-        <select style={selectStyles}>
-          <option>Filtro 3</option>
-        </select>
+        <FiltroAeropuerto/>
         <button
           onClick={() => setMostrarMapa((prev) => !prev)}
           className={`px-4 py-2 rounded-md text-white font-semibold ${mostrarMapa ? "bg-orange-500" : "bg-gray-500"
