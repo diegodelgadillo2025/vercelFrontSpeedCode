@@ -737,7 +737,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
           </div>
         )}
       </div>
-        <FiltroAeropuerto/>
+      <div className="relative">
+          <FiltroAeropuerto />
+      </div>
+
         <button
           onClick={() => setMostrarMapa((prev) => !prev)}
           className={`px-4 py-2 rounded-md text-white font-semibold ${mostrarMapa ? "bg-orange-500" : "bg-gray-500"
