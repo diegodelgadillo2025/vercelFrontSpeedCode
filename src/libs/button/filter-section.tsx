@@ -178,8 +178,27 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
     return days
   }
 
+  // Add new state for filtered vehicles
+  const [filteredVehicles, setFilteredVehicles] = useState([]);
+
+  // Add the fetch function
+  const fetchVehiclesByDateRange = async (start: Date, end: Date) => {
+    try {
+      const startStr = dayjs(start).format('YYYY-MM-DD');
+      const endStr = dayjs(end).format('YYYY-MM-DD');
+      const response = await fetch(
+        `http://localhost:3000/vehiculos/filtroFechas?startDate=${startStr}&endDate=${endStr}`
+      );
+      const data = await response.json();
+      setFilteredVehicles(data);
+      console.log('Filtered vehicles:', data);
+    } catch (error) {
+      console.error('Error fetching vehicles by date:', error);
+    }
+  };
+
+  // Update handleDateClick to trigger the fetch when both dates are selected
   const handleDateClick = (date: dayjs.Dayjs) => {
-    // Don't allow selecting past dates
     if (date.isBefore(dayjs().startOf('day'))) {
       return;
     }
@@ -189,11 +208,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       setEndDate(null);
       setShowDateError(false);
     } else {
-      // If selecting end date, check if it's within 12 months
       const maxEndDate = dayjs(startDate).add(12, 'months');
       if (date.isAfter(maxEndDate)) {
         setShowDateError(true);
-        setTimeout(() => setShowDateError(false), 3000); // Hide error after 3 seconds
+        setTimeout(() => setShowDateError(false), 3000);
         return;
       }
       
@@ -203,6 +221,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
       } else {
         setEndDate(date.toDate());
         setShowDateError(false);
+        // Fetch vehicles when both dates are set
+        fetchVehiclesByDateRange(startDate, date.toDate());
       }
     }
   };
