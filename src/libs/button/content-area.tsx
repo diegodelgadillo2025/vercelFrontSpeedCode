@@ -1,6 +1,10 @@
 import type React from "react"
 
-const ContentArea: React.FC = () => {
+interface ContentAreaProps {
+  vehicles?: any[]; // Hacer la prop opcional
+}
+
+const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valor por defecto
   const contentAreaStyles: React.CSSProperties = {
     backgroundColor: "#f5f5f5",
     padding: "20px",
@@ -22,9 +26,21 @@ const ContentArea: React.FC = () => {
 
   return (
     <div style={contentAreaStyles}>
-      <p style={placeholderTextStyles}>Aqui se mostraran los resultados de la busqueda</p>
-    </div>
-  )
-}
-
+      {vehicles.length === 0 ? (
+        <p style={placeholderTextStyles}>Aquí se mostrarán los resultados de la búsqueda</p>
+      ) : (
+        <div style={{ width: '100%' }}>
+          <h3>Vehículos encontrados: {vehicles.length}</h3>
+          {vehicles.map((vehicle) => (
+            <div key={vehicle.id}>
+              <h4>{vehicle.marca} {vehicle.modelo}</h4>
+              <p>Ubicación: {vehicle.ubicacion.latitud}, {vehicle.ubicacion.longitud}</p>
+              <p>Precio: Bs. {vehicle.precio}/día</p>
+            </div>
+          ))}
+        </div>
+      )}
+      </div>
+    );
+  };
 export default ContentArea

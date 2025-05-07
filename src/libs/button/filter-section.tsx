@@ -13,13 +13,16 @@ import FiltroAeropuerto from "@/app/components/filtroBusqueda/filtroAeropuerto";
 dayjs.locale('es') // Use Spanish locale
 
 interface FilterSectionProps {
-  windowWidth: number
+  windowWidth: number;
+  onFilter: (vehicles: any[]) => void; // Añadir esta línea
 }
+
 const MapaFiltro = dynamic(() => import('@/app/components/filtroBusqueda/filtroMapaPrecio'), {
   ssr: false,
   loading: () => <p>Cargando mapa...</p>
 })
-const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
+
+const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) => {
   // Estado para el historial de búsquedas
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>("")
@@ -37,6 +40,35 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showDateError, setShowDateError] = useState(false);
+  const [gpsVehicles, setGpsVehicles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const fetchGPSVehicles = async (lat: number, lng: number, distance: number) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      // ... código de solicitud
+    } catch (error) {
+      setError("Error al buscar vehículos. Intenta de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Manejador del botón Filtrar
+  const handleFilterClick = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log("[DEBUG] Coordenadas obtenidas:", latitude, longitude); // Log de coordenadas
+        fetchGPSVehicles(latitude, longitude, selectedDistance);
+      },
+      (error) => {
+        console.error("[ERROR] Geolocalización fallida:", error.message);
+        alert("No se pudo obtener tu ubicación. Asegúrate de permitir el acceso.");
+      }
+    );
+  };
   // Load initial visible history
   useEffect(() => {
     const stored = localStorage.getItem("searchHistory");
@@ -769,7 +801,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
         </button>
 
       </div>
-      <button style={filterButtonStyles}>Filtrar</button>
+      <button 
+  style={filterButtonStyles} 
+  onClick={handleFilterClick}
+  disabled={isLoading}
+>
+  {isLoading ? "Buscando..." : "Filtrar"}
+</button>
+{error && <p style={{ color: "red" }}>{error}</p>}
       {mostrarMapa && <MapaFiltro />}
       {showDateError && (
         <div style={{
