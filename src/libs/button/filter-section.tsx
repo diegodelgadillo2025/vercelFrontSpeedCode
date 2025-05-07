@@ -779,7 +779,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
               <input
                 type="range"
                 min="1"
-                max="100"
+                max="1000"
                 value={selectedDistance}
                 onChange={(e) => setSelectedDistance(Number(e.target.value))}
                 style={{ width: '100%' }}
@@ -787,7 +787,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                 <span>1 km</span>
                 <span>{selectedDistance} km</span>
-                <span>100 km</span>
+                <span>1000 km</span>
               </div>
             </div>
             <button
