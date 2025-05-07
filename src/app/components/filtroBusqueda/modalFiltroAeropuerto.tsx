@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 interface Aeropuerto {
-  id: number;
+  idaeropuerto: number;
   nombre: string;
 }
 
@@ -23,7 +23,6 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
   const [aeropuertoTemporal, setAeropuertoTemporal] = useState<Aeropuerto | null>(null);
   const [error, setError] = useState("");
 
-  // Hook para actualizar el input y el aeropuerto temporal después de la hidratación
   useEffect(() => {
     if (isOpen) {
       setInputTexto(aeropuertoSeleccionado?.nombre || "");
@@ -33,7 +32,6 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
     }
   }, [isOpen, aeropuertoSeleccionado]);
 
-  // Hook para hacer el fetch de aeropuertos con debounce
   useEffect(() => {
     const fetchAeropuertos = async () => {
       if (inputTexto.trim() === "") {
@@ -42,7 +40,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
       }
 
       try {
-        const response = await fetch(`http://vercel-back-speed-code.vercel.app/aeropuerto/autocompletar?q=${encodeURIComponent(inputTexto)}`);
+        const response = await fetch(`https://vercel-back-speed-code.vercel.app/aeropuerto/autocompletar?q=${encodeURIComponent(inputTexto)}`);
         if (!response.ok) throw new Error('Error al obtener aeropuertos');
 
         const data: Aeropuerto[] = await response.json();
@@ -54,7 +52,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
       }
     };
 
-    const delay = setTimeout(fetchAeropuertos, 300); // debounce
+    const delay = setTimeout(fetchAeropuertos, 300);
     return () => clearTimeout(delay);
   }, [inputTexto]);
 
@@ -89,7 +87,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
           <ul className="max-h-40 overflow-y-auto border border-gray-200 rounded bg-white shadow-sm">
             {sugerencias.map((aeropuerto) => (
               <li
-                key={aeropuerto.id}
+                key={aeropuerto.idaeropuerto}
                 className={`px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white ${aeropuerto === aeropuertoTemporal ? 'bg-orange-100' : ''}`}
                 onClick={() => {
                   setAeropuertoTemporal(aeropuerto);

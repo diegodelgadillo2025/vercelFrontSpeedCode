@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ModalFiltroAeropuerto from "@/app/components/filtroBusqueda/modalFiltroAeropuerto";
 
 interface Aeropuerto {
-  id: number;
+  idaeropuerto: number;
   nombre: string;
 }
 
@@ -21,24 +21,14 @@ const FiltroAeropuerto: React.FC = () => {
 
   const manejarAplicar = async (aeropuerto: Aeropuerto) => {
     setAeropuertoSeleccionado(aeropuerto);
-    console.log('Aeropuerto seleccionado:', aeropuerto); // Verifica que el aeropuerto tiene el id correcto
     setModalAbierto(false);
     setMensajeSinVehiculos(false);
 
-    console.log('Haciendo fetch con el id del aeropuerto:', aeropuerto.idaeropuerto);
-
     try {
-      //const response = await fetch(`https://vercel-back-speed-code.vercel.app/aeropuerto/vehiculos-cercanos/${aeropuerto.id}`, {
-        const response = await fetch(`http://vercel-back-speed-code.vercel.app/aeropuerto/vehiculos-cercanos/${aeropuerto.idaeropuerto}`, {
-        method: 'GET',
-      });
-
+      const response = await fetch(`https://vercel-back-speed-code.vercel.app/aeropuerto/vehiculos-cercanos/${aeropuerto.idaeropuerto}`);
       if (!response.ok) throw new Error('Error al obtener vehículos');
 
       const data = await response.json();
-
-      console.log('Datos de vehículos:', data); // Verifica los vehículos que se obtienen de la API
-
       setVehiculos(data);
       setMostrarResultados(true);
       setMensajeSinVehiculos(data.length === 0);
@@ -50,7 +40,6 @@ const FiltroAeropuerto: React.FC = () => {
     }
   };
 
-  // Cierra resultados si se hace clic fuera
   useEffect(() => {
     const manejarClickFuera = (event: MouseEvent) => {
       if (contenedorRef.current && !contenedorRef.current.contains(event.target as Node)) {
