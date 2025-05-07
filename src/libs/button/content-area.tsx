@@ -1,4 +1,5 @@
 import type React from "react"
+import { useRouter } from 'next/navigation';
 
 interface Vehicle {
   idvehiculo: number;
@@ -27,7 +28,7 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
     maxWidth: "1200px",
     borderRadius: "8px",
     display: "flex",
-    justifyContent: "center",
+    flexDirection: "column",
     alignItems: "center",
   }
 
@@ -37,26 +38,34 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
     textAlign: "center",
   }
 
+  const router = useRouter();
+
   return (
     <div style={contentAreaStyles}>
       {vehicles.length === 0 ? (
         <p style={placeholderTextStyles}>No hay vehículos para mostrar.</p>
       ) : (
-        <div style={{ width: '100%', padding: '20px' }}>
-          <h3 style={{ marginBottom: '20px' }}>Vehículos encontrados: {vehicles.length}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-            {vehicles.map((vehicle) => (
-              <div key={vehicle.idvehiculo} style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '8px', 
-                padding: '15px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                {/* Imagen a la izquierda */}
+        <ul style={{ listStyle: "none", padding: 0, width: "100%" }}>
+          <h3 style={{ marginBottom: '20px', textAlign: 'left' }}>Vehículos encontrados: {vehicles.length}</h3>
+          {vehicles.map((v) => (
+            <li
+              key={v.idvehiculo}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+                background: "#fff",
+                padding: "12px",
+                borderRadius: "8px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              }}
+            >
+              {/* Imagen a la izquierda */}
               <div style={{ marginRight: "16px", flexShrink: 0 }}>
                 <img
-                  src={vehicle.imagen}
-                  alt={`${vehicle.marca} ${vehicle.modelo}`}
+                  src={v.imagen}
+                  alt={`${v.marca} ${v.modelo}`}
                   style={{
                     width: "120px",
                     height: "80px",
@@ -66,19 +75,38 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
                 />
               </div>
 
-                <h4 style={{ margin: '0 0 10px 0' }}>{vehicle.marca} {vehicle.modelo} {vehicle.anio}</h4>
-                <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                  📍 Ubicación: {vehicle.ubicacion?.latitud?.toFixed(4)}, {vehicle.ubicacion?.longitud?.toFixed(4)}
-                </p>
-                <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                  💰 Precio: Bs. {vehicle.tarifa}/día
-                </p>
+              {/* Detalles del vehículo */}
+              <div style={{ flex: "1 1 auto", textAlign: 'left' }}>
+                <p><strong>{v.marca} {v.modelo} {v.color} años {v.anio}</strong></p>
+                <p>Tarifa: $ {v.tarifa} / día</p>
+                <p>Transmisión: {v.transmision}</p>
+                <p>Consumo: {v.consumo}</p>
+                {/* Ubicación opcional
+                <p>Ubicación: {v.ubicacion?.latitud.toFixed(4)}, {v.ubicacion?.longitud.toFixed(4)}</p>
+                */}
               </div>
-            ))}
-          </div>
-        </div>
+
+              {/* Botón Reservar Ahora a la derecha */}
+              <button
+                style={{
+                  marginLeft: "16px",
+                  padding: "8px 16px",
+                  borderRadius: "4px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: "#FF6B00",
+                  color: "#fff",
+                  flexShrink: 0,
+                }}
+                onClick={() => router.push(`/reserva?id=${v.idvehiculo}`)}
+              >
+                RESERVAR AHORA
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
-      </div>
-    );
-  };
-export default ContentArea
+    </div>
+  );
+};
+export default ContentArea;
