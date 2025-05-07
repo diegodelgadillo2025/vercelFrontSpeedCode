@@ -43,18 +43,21 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const [gpsVehicles, setGpsVehicles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const fetchGPSVehicles = async (lat: number, lng: number, distance: number) => {
+  
+  const fetchGPSVehicles = async (lat: number, lng: number, dkm: number) => {
     setIsLoading(true);
     setError("");
     try {
       const response = await fetch(
-        //"URL DE LA DIRECCION DONDE ESTÁ MANDANDO"
-        `http://localhost:3000/vehiculosxgps/distancia/${lat}/${lng}/${distance}`
+        `https://vercel-back-speed-code.vercel.app/vehiculosxgps/distancia/${lat}/${lng}/${dkm}` // Parámetro dkm incluido
       );
       const data = await response.json();
-      onFilter(Array.isArray(data) ? data : [data]); // Asegurar array
+      onFilter(Array.isArray(data) ? data : [data]);
     } catch (error) {
       console.error("Error:", error);
+      setError("Error al cargar vehículos");
+    } finally {
+      setIsLoading(false);
     }
   };
   

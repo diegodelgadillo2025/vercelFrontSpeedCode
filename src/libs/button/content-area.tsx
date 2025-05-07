@@ -41,7 +41,7 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
               }}>
                 <h4 style={{ margin: '0 0 10px 0' }}>{vehicle.marca} {vehicle.modelo}</h4>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                  📍 Ubicación: {vehicle.ubicacion.latitud.toFixed(4)}, {vehicle.ubicacion.longitud.toFixed(4)}
+                📍 Ubicación: {vehicle.ubicacion?.latitud?.toFixed(4) ?? "N/A"}, {vehicle.ubicacion?.longitud?.toFixed(4) ?? "N/A"}
                 </p>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
                   💰 Precio: Bs. {vehicle.tarifa}/día

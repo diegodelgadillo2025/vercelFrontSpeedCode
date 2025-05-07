@@ -38,11 +38,10 @@ export default function Home() {
       <Navbar windowWidth={windowWidth} />
       <div style={{ marginTop: "60px" }}>
       <FilterSection 
-  windowWidth={windowWidth} 
-  onFilter={(vehicles) => setFilteredVehicles(vehicles)} // <-- Recibir los resultados
-/>
-<ContentArea vehicles={filteredVehicles} />
-
+        windowWidth={windowWidth} 
+        onFilter={(vehicles) => setFilteredVehicles(vehicles)} // <-- Recibir los resultados
+        />
+        <ContentArea vehicles={filteredVehicles} />
       </div>
     </div>
   )
