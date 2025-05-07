@@ -33,7 +33,7 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
           <h3 style={{ marginBottom: '20px' }}>Vehículos encontrados: {vehicles.length}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
             {vehicles.map((vehicle) => (
-              <div key={vehicle.id} style={{ 
+              <div key={vehicle.idvehiculo} style={{ 
                 backgroundColor: 'white', 
                 borderRadius: '8px', 
                 padding: '15px',
@@ -41,7 +41,7 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
               }}>
                 <h4 style={{ margin: '0 0 10px 0' }}>{vehicle.marca} {vehicle.modelo}</h4>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
-                📍 Ubicación: {vehicle.ubicacion?.latitud?.toFixed(4) ?? "N/A"}, {vehicle.ubicacion?.longitud?.toFixed(4) ?? "N/A"}
+                  📍 Ubicación: {vehicle.ubicacion?.latitud?.toFixed(4)}, {vehicle.ubicacion?.longitud?.toFixed(4)}
                 </p>
                 <p style={{ margin: '5px 0', fontSize: '14px' }}>
                   💰 Precio: Bs. {vehicle.tarifa}/día

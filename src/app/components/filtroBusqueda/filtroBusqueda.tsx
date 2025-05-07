@@ -9,8 +9,7 @@ import ContentArea from "../../../libs/button/content-area"
 
 export default function Home() {
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1200)
-  const [filteredVehicles, setFilteredVehicles] = useState<any[]>([]);
-
+  const [filteredVehicles, setFilteredVehicles] = useState<any[]>([]); // 👈 Inicializa como array vacío
 
   useEffect(() => {
     const handleResize = () => {

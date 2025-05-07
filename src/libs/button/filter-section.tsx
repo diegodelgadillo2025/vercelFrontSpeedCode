@@ -14,7 +14,7 @@ dayjs.locale('es') // Use Spanish locale
 
 interface FilterSectionProps {
   windowWidth: number;
-  onFilter: (vehicles: any[]) => void; // Asegurar que está definida
+  onFilter: (vehicles: any[]) => void;
 }
 
 const MapaFiltro = dynamic(() => import('@/app/components/filtroBusqueda/filtroMapaPrecio'), {
@@ -49,12 +49,25 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     setError("");
     try {
       const response = await fetch(
-        `https://vercel-back-speed-code.vercel.app/vehiculosxgps/distancia/${lat}/${lng}/${dkm}` // Parámetro dkm incluido
+        `https://vercel-back-speed-code.vercel.app/vehiculosxgps/distancia/${lat}/${lng}/${dkm}`
       );
       const data = await response.json();
-      onFilter(Array.isArray(data) ? data : [data]);
+      console.log("[DEBUG] Datos recibidos del backend:", data);
+
+      // Transformar datos para incluir campo ubicacion
+      const vehiclesWithLocation = Array.isArray(data)
+        ? data.map(item => ({
+            ...item,
+            ubicacion: { latitud: item.latitud, longitud: item.longitud }
+          }))
+        : [{
+            ...data,
+            ubicacion: { latitud: data.latitud, longitud: data.longitud }
+          }];
+
+      onFilter(vehiclesWithLocation);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("[ERROR] Fetch error:", error);
       setError("Error al cargar vehículos");
     } finally {
       setIsLoading(false);
