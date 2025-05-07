@@ -684,21 +684,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => setShowCalendar(false)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: '#FF6B00',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    marginTop: '16px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Aceptar
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 mt-4 px-4 pb-4">
+                  <button
+                    onClick={() => {
+                      setStartDate(null);
+                      setEndDate(null);
+                    }}
+                    className="w-full sm:w-1/2 py-3 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                  >
+                    Limpiar
+                  </button>
+                  <button
+                    onClick={() => setShowCalendar(false)}
+                    className="w-full sm:w-1/2 py-3 px-4 bg-[#FF6B00] text-white rounded-md hover:bg-[#e55d00] transition-colors duration-200"
+                  >
+                    Aceptar
+                  </button>
+                </div>
               </div>
             </div>
           )}
