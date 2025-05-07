@@ -181,15 +181,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth }) => {
   // Add new state for filtered vehicles
   const [filteredVehicles, setFilteredVehicles] = useState([]);
 
-  // Add the fetch function
+  // Update the fetch function to use the imported one
   const fetchVehiclesByDateRange = async (start: Date, end: Date) => {
     try {
       const startStr = dayjs(start).format('YYYY-MM-DD');
       const endStr = dayjs(end).format('YYYY-MM-DD');
-      const response = await fetch(
-        `http://localhost:3000/vehiculos/filtroFechas?startDate=${startStr}&endDate=${endStr}`
-      );
-      const data = await response.json();
+      const data = await fetchVehiculosPorFechas(startStr, endStr);
       setFilteredVehicles(data);
       console.log('Filtered vehicles:', data);
     } catch (error) {
