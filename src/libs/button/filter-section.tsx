@@ -14,7 +14,7 @@ dayjs.locale('es') // Use Spanish locale
 
 interface FilterSectionProps {
   windowWidth: number;
-  onFilter: (vehicles: any[]) => void; // Añadir esta línea
+  onFilter: (vehicles: any[]) => void; // Asegurar que está definida
 }
 
 const MapaFiltro = dynamic(() => import('@/app/components/filtroBusqueda/filtroMapaPrecio'), {
@@ -47,11 +47,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     setIsLoading(true);
     setError("");
     try {
-      // ... código de solicitud
+      const response = await fetch(
+        //"URL DE LA DIRECCION DONDE ESTÁ MANDANDO"
+        `http://localhost:3000/vehiculosxgps/distancia/${lat}/${lng}/${distance}`
+      );
+      const data = await response.json();
+      onFilter(Array.isArray(data) ? data : [data]); // Asegurar array
     } catch (error) {
-      setError("Error al buscar vehículos. Intenta de nuevo.");
-    } finally {
-      setIsLoading(false);
+      console.error("Error:", error);
     }
   };
   

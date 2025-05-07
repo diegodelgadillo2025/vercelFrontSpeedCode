@@ -29,15 +29,26 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
       {vehicles.length === 0 ? (
         <p style={placeholderTextStyles}>Aquí se mostrarán los resultados de la búsqueda</p>
       ) : (
-        <div style={{ width: '100%' }}>
-          <h3>Vehículos encontrados: {vehicles.length}</h3>
-          {vehicles.map((vehicle) => (
-            <div key={vehicle.id}>
-              <h4>{vehicle.marca} {vehicle.modelo}</h4>
-              <p>Ubicación: {vehicle.ubicacion.latitud}, {vehicle.ubicacion.longitud}</p>
-              <p>Precio: Bs. {vehicle.precio}/día</p>
-            </div>
-          ))}
+        <div style={{ width: '100%', padding: '20px' }}>
+          <h3 style={{ marginBottom: '20px' }}>Vehículos encontrados: {vehicles.length}</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+            {vehicles.map((vehicle) => (
+              <div key={vehicle.id} style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '8px', 
+                padding: '15px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
+                <h4 style={{ margin: '0 0 10px 0' }}>{vehicle.marca} {vehicle.modelo}</h4>
+                <p style={{ margin: '5px 0', fontSize: '14px' }}>
+                  📍 Ubicación: {vehicle.ubicacion.latitud.toFixed(4)}, {vehicle.ubicacion.longitud.toFixed(4)}
+                </p>
+                <p style={{ margin: '5px 0', fontSize: '14px' }}>
+                  💰 Precio: Bs. {vehicle.tarifa}/día
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       </div>
