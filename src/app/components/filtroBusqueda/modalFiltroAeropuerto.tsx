@@ -23,6 +23,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
   const [aeropuertoTemporal, setAeropuertoTemporal] = useState<Aeropuerto | null>(null);
   const [error, setError] = useState("");
 
+  // Hook para actualizar el input y el aeropuerto temporal después de la hidratación
   useEffect(() => {
     if (isOpen) {
       setInputTexto(aeropuertoSeleccionado?.nombre || "");
@@ -32,6 +33,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
     }
   }, [isOpen, aeropuertoSeleccionado]);
 
+  // Hook para hacer el fetch de aeropuertos con debounce
   useEffect(() => {
     const fetchAeropuertos = async () => {
       if (inputTexto.trim() === "") {
@@ -40,8 +42,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/aeropuerto/autocompletar?q=${encodeURIComponent(inputTexto)}`);
-       //const response = await fetch(`http://localhost:3000/aeropuertos/autocompletar?q=${encodeURIComponent(inputTexto)}`);
+        const response = await fetch(`http://vercel-back-speed-code.vercel.app/aeropuerto/autocompletar?q=${encodeURIComponent(inputTexto)}`);
         if (!response.ok) throw new Error('Error al obtener aeropuertos');
 
         const data: Aeropuerto[] = await response.json();
@@ -89,9 +90,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
             {sugerencias.map((aeropuerto) => (
               <li
                 key={aeropuerto.id}
-                className={`px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white ${
-                  aeropuerto === aeropuertoTemporal ? 'bg-orange-100' : ''
-                }`}
+                className={`px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white ${aeropuerto === aeropuertoTemporal ? 'bg-orange-100' : ''}`}
                 onClick={() => {
                   setAeropuertoTemporal(aeropuerto);
                   setInputTexto(aeropuerto.nombre);
@@ -107,16 +106,10 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
         <div className="flex justify-end mt-4 space-x-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-          >
+          <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
             Cancelar
           </button>
-          <button
-            onClick={handleAplicar}
-            className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-          >
+          <button onClick={handleAplicar} className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
             Aplicar
           </button>
         </div>
