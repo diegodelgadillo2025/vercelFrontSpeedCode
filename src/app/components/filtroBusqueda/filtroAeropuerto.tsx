@@ -13,6 +13,7 @@ const FiltroAeropuerto: React.FC = () => {
   const [aeropuertoSeleccionado, setAeropuertoSeleccionado] = useState<Aeropuerto | null>(null);
   const [vehiculos, setVehiculos] = useState<any[]>([]);
   const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [mensajeSinVehiculos, setMensajeSinVehiculos] = useState(false);
   const contenedorRef = useRef<HTMLDivElement>(null);
 
   const abrirModal = () => setModalAbierto(true);
@@ -20,22 +21,32 @@ const FiltroAeropuerto: React.FC = () => {
 
   const manejarAplicar = async (aeropuerto: Aeropuerto) => {
     setAeropuertoSeleccionado(aeropuerto);
+    console.log('Aeropuerto seleccionado:', aeropuerto); // Verifica que el aeropuerto tiene el id correcto
     setModalAbierto(false);
+    setMensajeSinVehiculos(false);
+
+    console.log('Haciendo fetch con el id del aeropuerto:', aeropuerto.idaeropuerto);
 
     try {
-      const response = await fetch('http://localhost:3000/aeropuerto/vehiculos-cercanos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idaeropuerto: aeropuerto.id }),
+      //const response = await fetch(`https://vercel-back-speed-code.vercel.app/aeropuerto/vehiculos-cercanos/${aeropuerto.id}`, {
+        const response = await fetch(`http://vercel-back-speed-code.vercel.app/aeropuerto/vehiculos-cercanos/${aeropuerto.idaeropuerto}`, {
+        method: 'GET',
       });
 
       if (!response.ok) throw new Error('Error al obtener vehículos');
 
       const data = await response.json();
+
+      console.log('Datos de vehículos:', data); // Verifica los vehículos que se obtienen de la API
+
       setVehiculos(data);
       setMostrarResultados(true);
+      setMensajeSinVehiculos(data.length === 0);
     } catch (error) {
       console.error('Error al hacer fetch de vehículos:', error);
+      setVehiculos([]);
+      setMostrarResultados(true);
+      setMensajeSinVehiculos(true);
     }
   };
 
@@ -67,7 +78,7 @@ const FiltroAeropuerto: React.FC = () => {
         aeropuertoSeleccionado={aeropuertoSeleccionado}
       />
 
-      {mostrarResultados && vehiculos.length > 0 && (
+      {mostrarResultados && (
         <div className="absolute z-50 mt-2 left-0 w-[360px] max-w-[90vw] bg-white p-4 rounded-xl shadow-xl border border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Vehículos cercanos</h3>
@@ -78,21 +89,26 @@ const FiltroAeropuerto: React.FC = () => {
               ✕ Cerrar
             </button>
           </div>
-          <div className="space-y-4 max-h-[300px] overflow-y-auto">
-            {vehiculos.map((vehiculo, index) => (
-              <div key={index} className="flex items-center border p-3 rounded shadow-sm space-x-4">
-                <img
-                  src={vehiculo.imagen}
-                  alt="Vehículo"
-                  className="w-24 h-16 object-cover rounded-md"
-                />
-                <div className="text-sm">
-                  <p><strong>Precio:</strong> {vehiculo.precio}</p>
-                  <p><strong>Distancia:</strong> {vehiculo.distancia} km</p>
+
+          {mensajeSinVehiculos ? (
+            <p className="text-gray-600 text-sm">No se encontraron vehículos cercanos a este aeropuerto.</p>
+          ) : (
+            <div className="space-y-4 max-h-[300px] overflow-y-auto">
+              {vehiculos.map((vehiculo, index) => (
+                <div key={index} className="flex items-center border p-3 rounded shadow-sm space-x-4">
+                  <img
+                    src={vehiculo.imagen}
+                    alt="Vehículo"
+                    className="w-24 h-16 object-cover rounded-md"
+                  />
+                  <div className="text-sm">
+                    <p><strong>Precio:</strong> {vehiculo.precio}</p>
+                    <p><strong>Distancia:</strong> {vehiculo.distancia} km</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
