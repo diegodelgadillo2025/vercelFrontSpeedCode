@@ -253,31 +253,48 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     }
   });
 
-  // Update the Accept button handler in the calendar
+  // Update the Accept button handler with proper API integration and error handling
   const handleAcceptDateClick = async () => {
-    if (!startDate || !endDate) return;
+    // Validate date selection
+    if (!startDate || !endDate) {
+      setError("Selecciona ambas fechas");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
 
     try {
-      setIsLoading(true);
-      setError("");
-      
-      const startStr = dayjs(startDate).format('YYYY-MM-DD');
-      const endStr = dayjs(endDate).format('YYYY-MM-DD');
-      
-      const response = await fetchVehiculosPorFechas(startStr, endStr);
-      const mappedVehicles = Array.isArray(response) 
-        ? response.map(mapVehicleData)
-        : [];
-      
+      // Format dates for API query
+      const startStr = dayjs(startDate).format("YYYY-MM-DD");
+      const endStr = dayjs(endDate).format("YYYY-MM-DD");
+
+      // Fetch available vehicles
+      const response = await fetch(
+        `https://vercel-back-speed-code.vercel.app/vehiculosxfechas/vehiculos-disponibles?fechaInicio=${startStr}&fechaFin=${endStr}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al obtener vehículos");
+      }
+
+      const { data } = await response.json();
+
+      // Validate data array
+      if (!data || !Array.isArray(data)) {
+        throw new Error("No hay vehículos disponibles");
+      }
+
+      // Use the existing mapVehicleData helper to transform vehicles
+      const mappedVehicles = data.map(mapVehicleData);
+
+      // Update ContentArea with filtered vehicles
       onFilter(mappedVehicles);
-      console.log("[DEBUG] Vehículos disponibles por fecha:", mappedVehicles);
-      
-      // Close the calendar after successful fetch and display
       setShowCalendar(false);
     } catch (error) {
       console.error("[ERROR] Error al filtrar por fechas:", error);
-      setError("Error al buscar vehículos disponibles");
-      onFilter([]);
+      setError("No hay vehículos disponibles para estas fechas");
+      onFilter([]); // Show empty state
     } finally {
       setIsLoading(false);
     }
