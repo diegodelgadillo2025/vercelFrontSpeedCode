@@ -44,6 +44,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
+  // Add state for selected date range
+  const [selectedDateRange, setSelectedDateRange] = useState<{
+    startDate: Date | null;
+    endDate: Date | null;
+  }>({ startDate: null, endDate: null });
+
   const fetchGPSVehicles = async (lat: number, lng: number, dkm: number) => {
     setIsLoading(true);
     setError("");
@@ -229,49 +235,51 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     return days
   }
 
-  // Add new state for filtered vehicles
-  const [filteredVehicles, setFilteredVehicles] = useState([]);
+  // Add vehicle data mapping helper
+  const mapVehicleData = (vehicle: any) => ({
+    idvehiculo: vehicle.idvehiculo || vehicle.id || 0,
+    imagen: vehicle.imagen || vehicle.image || '',
+    marca: vehicle.marca || vehicle.brand || '',
+    modelo: vehicle.modelo || vehicle.model || '',
+    tarifa: vehicle.tarifa || vehicle.rate || 0,
+    transmision: vehicle.transmision || vehicle.transmission || '',
+    consumo: vehicle.consumo || vehicle.consumption || '',
+    tipo_auto: vehicle.tipo_auto || vehicle.car_type || '',
+    color: vehicle.color || '',
+    anio: vehicle.anio || vehicle.year || 0,
+    ubicacion: {
+      latitud: vehicle.latitud || vehicle.ubicacion?.latitud || 0,
+      longitud: vehicle.longitud || vehicle.ubicacion?.longitud || 0
+    }
+  });
 
-  // Update the fetch function to use the imported one
-  const fetchVehiclesByDateRange = async (start: Date, end: Date) => {
+  // Update the Accept button handler in the calendar
+  const handleAcceptDateClick = async () => {
+    if (!startDate || !endDate) return;
+
     try {
-      const startStr = dayjs(start).format('YYYY-MM-DD');
-      const endStr = dayjs(end).format('YYYY-MM-DD');
-      const data = await fetchVehiculosPorFechas(startStr, endStr);
-      setFilteredVehicles(data);
-      console.log('Filtered vehicles:', data);
-    } catch (error) {
-      console.error('Error fetching vehicles by date:', error);
-    }
-  };
-
-  // Update handleDateClick to trigger the fetch when both dates are selected
-  const handleDateClick = (date: dayjs.Dayjs) => {
-    if (date.isBefore(dayjs().startOf('day'))) {
-      return;
-    }
-
-    if (!startDate || (startDate && endDate)) {
-      setStartDate(date.toDate());
-      setEndDate(null);
-      setShowDateError(false);
-    } else {
-      const maxEndDate = dayjs(startDate).add(12, 'months');
-      if (date.isAfter(maxEndDate)) {
-        setShowDateError(true);
-        setTimeout(() => setShowDateError(false), 3000);
-        return;
-      }
+      setIsLoading(true);
+      setError("");
       
-      if (date.isBefore(startDate)) {
-        setStartDate(date.toDate());
-        setEndDate(null);
-      } else {
-        setEndDate(date.toDate());
-        setShowDateError(false);
-        // Fetch vehicles when both dates are set
-        fetchVehiclesByDateRange(startDate, date.toDate());
-      }
+      const startStr = dayjs(startDate).format('YYYY-MM-DD');
+      const endStr = dayjs(endDate).format('YYYY-MM-DD');
+      
+      const response = await fetchVehiculosPorFechas(startStr, endStr);
+      const mappedVehicles = Array.isArray(response) 
+        ? response.map(mapVehicleData)
+        : [];
+      
+      onFilter(mappedVehicles);
+      console.log("[DEBUG] Vehículos disponibles por fecha:", mappedVehicles);
+      
+      // Close the calendar after successful fetch and display
+      setShowCalendar(false);
+    } catch (error) {
+      console.error("[ERROR] Error al filtrar por fechas:", error);
+      setError("Error al buscar vehículos disponibles");
+      onFilter([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -514,6 +522,34 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     setShowCalendar(prev => !prev);
   };
 
+  // Add this function back
+  const handleDateClick = (date: dayjs.Dayjs) => {
+    if (date.isBefore(dayjs().startOf('day'))) {
+      return;
+    }
+
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(date.toDate());
+      setEndDate(null);
+      setShowDateError(false);
+    } else {
+      const maxEndDate = dayjs(startDate).add(12, 'months');
+      if (date.isAfter(maxEndDate)) {
+        setShowDateError(true);
+        setTimeout(() => setShowDateError(false), 3000);
+        return;
+      }
+      
+      if (date.isBefore(startDate)) {
+        setStartDate(date.toDate());
+        setEndDate(null);
+      } else {
+        setEndDate(date.toDate());
+        setShowDateError(false);
+      }
+    }
+  };
+
   return (
     <div style={containerStyles}>
       <div style={searchContainerStyles}>
@@ -746,10 +782,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                     Limpiar
                   </button>
                   <button
-                    onClick={() => setShowCalendar(false)}
-                    className="w-full sm:w-1/2 py-3 px-4 bg-[#FF6B00] text-white rounded-md hover:bg-[#e55d00] transition-colors duration-200"
+                    onClick={handleAcceptDateClick}
+                    disabled={!startDate || !endDate || isLoading}
+                    className="w-full sm:w-1/2 py-3 px-4 bg-[#FF6B00] text-white rounded-md hover:bg-[#e55d00] transition-colors duration-200 disabled:opacity-50"
                   >
-                    Aceptar
+                    {isLoading ? "Buscando..." : "Aceptar"}
                   </button>
                 </div>
               </div>
