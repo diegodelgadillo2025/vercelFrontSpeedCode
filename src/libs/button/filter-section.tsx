@@ -282,7 +282,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
 
       // Validate data array
       if (!data || !Array.isArray(data)) {
-        throw new Error("No hay vehículos disponibles");
+        setError("No hay vehículos disponibles para estas fechas");
+        onFilter([]);
+        setShowCalendar(false); // Close calendar even when no vehicles found
+        return;
       }
 
       // Use the existing mapVehicleData helper to transform vehicles
@@ -295,6 +298,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
       console.error("[ERROR] Error al filtrar por fechas:", error);
       setError("No hay vehículos disponibles para estas fechas");
       onFilter([]); // Show empty state
+      setShowCalendar(false); // Close calendar on error
     } finally {
       setIsLoading(false);
     }
