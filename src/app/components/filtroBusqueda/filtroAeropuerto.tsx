@@ -16,7 +16,9 @@ const FiltroAeropuerto: React.FC = () => {
   const [mensajeSinVehiculos, setMensajeSinVehiculos] = useState(false);
   const contenedorRef = useRef<HTMLDivElement>(null);
 
-  const abrirModal = () => setModalAbierto(true);
+  const abrirModal = () => {
+    setMostrarResultados(false);
+    setModalAbierto(true);}
   const cerrarModal = () => setModalAbierto(false);
 
   const manejarAplicar = async (aeropuerto: Aeropuerto) => {
@@ -29,9 +31,11 @@ const FiltroAeropuerto: React.FC = () => {
       if (!response.ok) throw new Error('Error al obtener vehículos');
 
       const data = await response.json();
-      setVehiculos(data);
+      const vehiculosArray = Array.isArray(data) ? data : [];
+      setVehiculos(vehiculosArray);
       setMostrarResultados(true);
-      setMensajeSinVehiculos(data.length === 0);
+      setMensajeSinVehiculos(vehiculosArray.length === 0);
+
     } catch (error) {
       console.error('Error al hacer fetch de vehículos:', error);
       setVehiculos([]);
@@ -80,7 +84,8 @@ const FiltroAeropuerto: React.FC = () => {
           </div>
 
           {mensajeSinVehiculos ? (
-            <p className="text-gray-600 text-sm">No se encontraron vehículos cercanos a este aeropuerto.</p>
+            <p className="text-gray-600 text-sm">
+              No se encontraron vehículos cercanos a este aeropuerto.</p>
           ) : (
             <div className="space-y-4 max-h-[300px] overflow-y-auto">
               {Array.isArray(vehiculos) && vehiculos.map((vehiculo, index) => (
