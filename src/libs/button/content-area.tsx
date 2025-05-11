@@ -12,7 +12,7 @@ interface Vehicle {
   tipo_auto: string;
   color: string;
   anio: number;
-  ubicacion?: { latitud: number; longitud: number };
+  ubicacion: { latitud: number; longitud: number };
 }
 
 interface ContentAreaProps {
@@ -77,13 +77,11 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
 
               {/* Detalles del vehículo */}
               <div style={{ flex: "1 1 auto", textAlign: 'left' }}>
-                <p><strong>{v.marca} {v.modelo} {v.color} años {v.anio}</strong></p>
+                <p><strong>{v.marca} {v.modelo} {v.color} año {v.anio}</strong></p>
                 <p>Tarifa: $ {v.tarifa} / día</p>
                 <p>Transmisión: {v.transmision}</p>
                 <p>Consumo: {v.consumo}</p>
-                {/* Ubicación opcional
-                <p>Ubicación: {v.ubicacion?.latitud.toFixed(4)}, {v.ubicacion?.longitud.toFixed(4)}</p>
-                */}
+                <p>Ubicación: {v.ubicacion.latitud}, {v.ubicacion.longitud}</p>
               </div>
 
               {/* Botón Reservar Ahora a la derecha */}

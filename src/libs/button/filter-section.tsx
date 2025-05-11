@@ -36,7 +36,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const datePickerRef = useRef<HTMLDivElement>(null)
   const [mostrarMapa, setMostrarMapa] = useState(false);
   const [showDistanceSlider, setShowDistanceSlider] = useState(false);
-  const [selectedDistance, setSelectedDistance] = useState(10); // Distancia por defecto 10km
+  const [selectedDistance, setSelectedDistance] = useState(50); // Distancia por defecto 50km
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showDateError, setShowDateError] = useState(false);
@@ -44,12 +44,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // Add state for selected date range
-  const [selectedDateRange, setSelectedDateRange] = useState<{
-    startDate: Date | null;
-    endDate: Date | null;
-  }>({ startDate: null, endDate: null });
-
   const fetchGPSVehicles = async (lat: number, lng: number, dkm: number) => {
     setIsLoading(true);
     setError("");
@@ -235,72 +229,49 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     return days
   }
 
-  // Add vehicle data mapping helper
-  const mapVehicleData = (vehicle: any) => ({
-    idvehiculo: vehicle.idvehiculo || vehicle.id || 0,
-    imagen: vehicle.imagen || vehicle.image || '',
-    marca: vehicle.marca || vehicle.brand || '',
-    modelo: vehicle.modelo || vehicle.model || '',
-    tarifa: vehicle.tarifa || vehicle.rate || 0,
-    transmision: vehicle.transmision || vehicle.transmission || '',
-    consumo: vehicle.consumo || vehicle.consumption || '',
-    tipo_auto: vehicle.tipo_auto || vehicle.car_type || '',
-    color: vehicle.color || '',
-    anio: vehicle.anio || vehicle.year || 0,
-    ubicacion: {
-      latitud: vehicle.latitud || vehicle.ubicacion?.latitud || 0,
-      longitud: vehicle.longitud || vehicle.ubicacion?.longitud || 0
-    }
-  });
+  // Add new state for filtered vehicles
+  const [filteredVehicles, setFilteredVehicles] = useState([]);
 
-  // Update the Accept button handler with proper API integration and error handling
-  const handleAcceptDateClick = async () => {
-    // Validate date selection
-    if (!startDate || !endDate) {
-      setError("Selecciona ambas fechas");
+  // Update the fetch function to use the imported one
+  const fetchVehiclesByDateRange = async (start: Date, end: Date) => {
+    try {
+      const startStr = dayjs(start).format('YYYY-MM-DD');
+      const endStr = dayjs(end).format('YYYY-MM-DD');
+      const data = await fetchVehiculosPorFechas(startStr, endStr);
+      setFilteredVehicles(data);
+      console.log('Filtered vehicles:', data);
+    } catch (error) {
+      console.error('Error fetching vehicles by date:', error);
+    }
+  };
+
+  // Update handleDateClick to trigger the fetch when both dates are selected
+  const handleDateClick = (date: dayjs.Dayjs) => {
+    if (date.isBefore(dayjs().startOf('day'))) {
       return;
     }
 
-    setIsLoading(true);
-    setError("");
-
-    try {
-      // Format dates for API query
-      const startStr = dayjs(startDate).format("YYYY-MM-DD");
-      const endStr = dayjs(endDate).format("YYYY-MM-DD");
-
-      // Fetch available vehicles
-      const response = await fetch(
-        `https://vercel-back-speed-code.vercel.app/vehiculosxfechas/vehiculos-disponibles?fechaInicio=${startStr}&fechaFin=${endStr}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Error al obtener vehículos");
-      }
-
-      const { data } = await response.json();
-
-      // Validate data array
-      if (!data || !Array.isArray(data)) {
-        setError("No hay vehículos disponibles para estas fechas");
-        onFilter([]);
-        setShowCalendar(false); // Close calendar even when no vehicles found
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(date.toDate());
+      setEndDate(null);
+      setShowDateError(false);
+    } else {
+      const maxEndDate = dayjs(startDate).add(12, 'months');
+      if (date.isAfter(maxEndDate)) {
+        setShowDateError(true);
+        setTimeout(() => setShowDateError(false), 3000);
         return;
       }
-
-      // Use the existing mapVehicleData helper to transform vehicles
-      const mappedVehicles = data.map(mapVehicleData);
-
-      // Update ContentArea with filtered vehicles
-      onFilter(mappedVehicles);
-      setShowCalendar(false);
-    } catch (error) {
-      console.error("[ERROR] Error al filtrar por fechas:", error);
-      setError("No hay vehículos disponibles para estas fechas");
-      onFilter([]); // Show empty state
-      setShowCalendar(false); // Close calendar on error
-    } finally {
-      setIsLoading(false);
+      
+      if (date.isBefore(startDate)) {
+        setStartDate(date.toDate());
+        setEndDate(null);
+      } else {
+        setEndDate(date.toDate());
+        setShowDateError(false);
+        // Fetch vehicles when both dates are set
+        fetchVehiclesByDateRange(startDate, date.toDate());
+      }
     }
   };
 
@@ -543,34 +514,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     setShowCalendar(prev => !prev);
   };
 
-  // Add this function back
-  const handleDateClick = (date: dayjs.Dayjs) => {
-    if (date.isBefore(dayjs().startOf('day'))) {
-      return;
-    }
-
-    if (!startDate || (startDate && endDate)) {
-      setStartDate(date.toDate());
-      setEndDate(null);
-      setShowDateError(false);
-    } else {
-      const maxEndDate = dayjs(startDate).add(12, 'months');
-      if (date.isAfter(maxEndDate)) {
-        setShowDateError(true);
-        setTimeout(() => setShowDateError(false), 3000);
-        return;
-      }
-      
-      if (date.isBefore(startDate)) {
-        setStartDate(date.toDate());
-        setEndDate(null);
-      } else {
-        setEndDate(date.toDate());
-        setShowDateError(false);
-      }
-    }
-  };
-
   return (
     <div style={containerStyles}>
       <div style={searchContainerStyles}>
@@ -803,11 +746,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                     Limpiar
                   </button>
                   <button
-                    onClick={handleAcceptDateClick}
-                    disabled={!startDate || !endDate || isLoading}
-                    className="w-full sm:w-1/2 py-3 px-4 bg-[#FF6B00] text-white rounded-md hover:bg-[#e55d00] transition-colors duration-200 disabled:opacity-50"
+                    onClick={() => setShowCalendar(false)}
+                    className="w-full sm:w-1/2 py-3 px-4 bg-[#FF6B00] text-white rounded-md hover:bg-[#e55d00] transition-colors duration-200"
                   >
-                    {isLoading ? "Buscando..." : "Aceptar"}
+                    Aceptar
                   </button>
                 </div>
               </div>
@@ -836,32 +778,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
             <div style={{ marginBottom: '12px' }}>
               <input
                 type="range"
-                min="1"
+                min="50"
                 max="1000"
                 value={selectedDistance}
                 onChange={(e) => setSelectedDistance(Number(e.target.value))}
                 style={{ width: '100%' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span>1 km</span>
+                <span>50 km</span>
                 <span>{selectedDistance} km</span>
                 <span>1000 km</span>
               </div>
             </div>
-            <button
-              onClick={() => setShowDistanceSlider(false)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#FF6B00',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                width: '100%'
-              }}
-            >
-              Aceptar
-            </button>
           </div>
         )}
       </div>
@@ -883,7 +811,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   onClick={handleFilterClick}
   disabled={isLoading}
 >
-  {isLoading ? "Buscando..." : "Filtrar"}
+  {isLoading ? "Filtrar" : "Filtrar"}
 </button>
 {error && <p style={{ color: "red" }}>{error}</p>}
       {mostrarMapa && <MapaFiltro />}
