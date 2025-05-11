@@ -12,6 +12,7 @@ interface Vehicle {
   tipo_auto: string;
   color: string;
   anio: number;
+  distance: number;
   ubicacion: { latitud: number; longitud: number };
 }
 
@@ -22,11 +23,10 @@ interface ContentAreaProps {
 const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valor por defecto
   const contentAreaStyles: React.CSSProperties = {
     backgroundColor: "#f5f5f5",
-    padding: "20px",
     margin: "0 auto 40px",
-    width: "80%",
+    width: "90%",
     maxWidth: "1200px",
-    borderRadius: "8px",
+    borderRadius: "10px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -43,7 +43,7 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
   return (
     <div style={contentAreaStyles}>
       {vehicles.length === 0 ? (
-        <p style={placeholderTextStyles}>No hay vehículos para mostrar.</p>
+        <p style={placeholderTextStyles}>No se encontraron coches disponibles</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0, width: "100%" }}>
           <h3 style={{ marginBottom: '20px', textAlign: 'left' }}>Vehículos encontrados: {vehicles.length}</h3>
@@ -81,7 +81,8 @@ const ContentArea: React.FC<ContentAreaProps> = ({ vehicles = [] }) => { // Valo
                 <p>Tarifa: $ {v.tarifa} / día</p>
                 <p>Transmisión: {v.transmision}</p>
                 <p>Consumo: {v.consumo}</p>
-                <p>Ubicación: {v.ubicacion.latitud}, {v.ubicacion.longitud}</p>
+                {/*<p>Ubicación: Latitud({v.ubicacion.latitud.toFixed(2)}) , Longitud({v.ubicacion.longitud.toFixed(2)})</p>*/} 
+                <p>{v.distance !== undefined && ` Distancia aproximada: ${v.distance.toFixed(2)} km`}</p>
               </div>
 
               {/* Botón Reservar Ahora a la derecha */}
