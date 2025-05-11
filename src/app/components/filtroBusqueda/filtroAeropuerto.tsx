@@ -83,7 +83,8 @@ const FiltroAeropuerto: React.FC = () => {
             <p className="text-gray-600 text-sm">No se encontraron vehículos cercanos a este aeropuerto.</p>
           ) : (
             <div className="space-y-4 max-h-[300px] overflow-y-auto">
-              {vehiculos.map((vehiculo, index) => (
+              {Array.isArray(vehiculos) && vehiculos.map((vehiculo, index) => (
+
                 <div key={index} className="flex items-center border p-3 rounded shadow-sm space-x-4">
                   <img
                     src={vehiculo.imagen}
