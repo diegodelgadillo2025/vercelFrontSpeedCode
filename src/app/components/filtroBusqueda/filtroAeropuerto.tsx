@@ -91,8 +91,8 @@ const FiltroAeropuerto: React.FC = () => {
                     className="w-24 h-16 object-cover rounded-md"
                   />
                   <div className="text-sm">
-                    <p><strong>Precio:</strong> {vehiculo.precio}</p>
-                    <p><strong>Distancia:</strong> {vehiculo.distancia} km</p>
+                    <p><strong>Precio:</strong> {vehiculo.precio} Bs.</p>
+                    <p><strong>Distancia:</strong> {vehiculo.distancia}</p>
                   </div>
                 </div>
               ))}

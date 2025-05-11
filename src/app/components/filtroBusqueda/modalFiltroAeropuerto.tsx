@@ -48,7 +48,7 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
       } catch (err) {
         console.error(err);
         setSugerencias([]);
-        setError("Error de red. Intenta nuevamente.");
+        setError("La búsqueda debe estar relacionada con aeropuertos. Por favor, intente nuevamente.");
       }
     };
 
