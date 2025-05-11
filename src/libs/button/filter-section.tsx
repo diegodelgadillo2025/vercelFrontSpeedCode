@@ -76,6 +76,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
             },
             distance: calculateDistance(lat, lng, item.latitud || item.ubicacion?.latitud, item.longitud || item.ubicacion?.longitud)
           }))
+          .sort((a, b) => a.distance - b.distance) // Ordenar aquí
         : [];
 
       setGpsVehicles(vehiclesWithLocation);
