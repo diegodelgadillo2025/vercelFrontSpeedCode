@@ -8,7 +8,13 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/es' // Import Spanish locale
 import { fetchVehiculosPorFechas } from '../filtroFechas';
 import FiltroAeropuerto from "@/app/components/filtroBusqueda/filtroAeropuerto";
+import updateLocale from 'dayjs/plugin/updateLocale'
+import weekday from 'dayjs/plugin/weekday'
 
+// Configure dayjs to use Monday as start of week
+dayjs.extend(updateLocale)
+dayjs.extend(weekday)
+dayjs.updateLocale('es', { weekStart: 1 })
 
 dayjs.locale('es') // Use Spanish locale
 
@@ -32,7 +38,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
-  const [currentMonth, setCurrentMonth] = useState(dayjs())
+  const [currentMonth, setCurrentMonth] = useState(dayjs());
   const datePickerRef = useRef<HTMLDivElement>(null)
   const [mostrarMapa, setMostrarMapa] = useState(false);
   const [showDistanceSlider, setShowDistanceSlider] = useState(false);
@@ -275,42 +281,43 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
 
   // Update handleDateClick to trigger the fetch when both dates are selected
   const handleDateClick = (date: dayjs.Dayjs) => {
-    if (date.isBefore(dayjs().startOf('day'))) return;
+    const today = dayjs().startOf('day');
+    if (date.isBefore(today)) return;
 
     if (isSelectingStart) {
-      setStartDate(date.toDate());
+      setStartDate(date.startOf('day').toDate());
       setEndDate(null);
       setIsSelectingStart(false);
     } else {
-      if (date.isBefore(startDate)) {
+      if (date.isBefore(dayjs(startDate).startOf('day'))) {
         setError("La fecha final debe ser posterior a la inicial");
         return;
       }
       
-      const maxEndDate = dayjs(startDate).add(12, 'months');
+      const maxEndDate = dayjs(startDate).startOf('day').add(12, 'months');
       if (date.isAfter(maxEndDate)) {
         setShowDateError(true);
         setTimeout(() => setShowDateError(false), 3000);
         return;
       }
 
-      setEndDate(date.toDate());
+      setEndDate(date.startOf('day').toDate());
       setShowCalendar(false);
-      
-      // Fetch vehicles for the selected date range
       handleAcceptDateClick();
     }
   };
 
   const isDateDisabled = (date: dayjs.Dayjs) => {
+    const today = dayjs().startOf('day');
+    
     // Disable past dates
-    if (date.isBefore(dayjs().startOf('day'))) {
+    if (date.isBefore(today)) {
       return true;
     }
 
     // If start date is selected, disable dates more than 12 months ahead
-    if (startDate && !endDate) {
-      const maxDate = dayjs(startDate).add(12, 'months');
+    if (startDate) {
+      const maxDate = dayjs(startDate).startOf('day').add(12, 'months');
       return date.isAfter(maxDate);
     }
 
@@ -318,10 +325,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   };
 
   const isDateInRange = (date: dayjs.Dayjs) => {
-    if (!startDate || !endDate) return false
+    if (!startDate || !endDate) return false;
     return date.isAfter(dayjs(startDate).startOf('day')) &&
-      date.isBefore(dayjs(endDate).endOf('day'))
-  }
+      date.isBefore(dayjs(endDate).endOf('day'));
+  };
 
   const clearDateRange = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent opening the calendar
@@ -791,7 +798,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                         gap: '4px',
                         textAlign: 'center'
                       }}>
-                        {['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'].map(day => (
+                        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
                           <div key={day} style={{ padding: '4px', color: '#666' }}>{day}</div>
                         ))}
 
