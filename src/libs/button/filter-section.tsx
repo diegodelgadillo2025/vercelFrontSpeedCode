@@ -44,6 +44,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const distanceSliderRef = useRef<HTMLDivElement>(null);
+  const [isSelectingStart, setIsSelectingStart] = useState(true);
+  const [activeButton, setActiveButton] = useState<'start' | 'end' | null>(null);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371;
@@ -273,31 +275,30 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
 
   // Update handleDateClick to trigger the fetch when both dates are selected
   const handleDateClick = (date: dayjs.Dayjs) => {
-    if (date.isBefore(dayjs().startOf('day'))) {
-      return;
-    }
+    if (date.isBefore(dayjs().startOf('day'))) return;
 
-    if (!startDate || (startDate && endDate)) {
+    if (isSelectingStart) {
       setStartDate(date.toDate());
       setEndDate(null);
-      setShowDateError(false);
+      setIsSelectingStart(false);
     } else {
+      if (date.isBefore(startDate)) {
+        setError("La fecha final debe ser posterior a la inicial");
+        return;
+      }
+      
       const maxEndDate = dayjs(startDate).add(12, 'months');
       if (date.isAfter(maxEndDate)) {
         setShowDateError(true);
         setTimeout(() => setShowDateError(false), 3000);
         return;
       }
+
+      setEndDate(date.toDate());
+      setShowCalendar(false);
       
-      if (date.isBefore(startDate)) {
-        setStartDate(date.toDate());
-        setEndDate(null);
-      } else {
-        setEndDate(date.toDate());
-        setShowDateError(false);
-        // Fetch vehicles when both dates are set
-        fetchVehiclesByDateRange(startDate, date.toDate());
-      }
+      // Fetch vehicles for the selected date range
+      handleAcceptDateClick();
     }
   };
 
@@ -476,32 +477,42 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     width: windowWidth < 768 ? '100%' : '600px',
   }
 
-  const dateButtonStyles: React.CSSProperties = {
-    ...selectStyles,
-    cursor: 'pointer',
-    backgroundColor: startDate ? '#FF6B00' : showDatePicker ? '#f3f4f6' : 'white',
-    color: startDate ? 'white' : 'black',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '10px 15px',
+  const dateButtonContainerStyles: React.CSSProperties = {
     position: 'relative',
+    flex: 1,
+    minWidth: windowWidth < 1024 ? '45%' : '0',
+    display: 'flex',
     border: '1px solid #d1d5db',
     borderRadius: '0.375rem',
-    width: '100%',
-  }
+    overflow: 'hidden',
+    backgroundColor: '#d1d5db'
+  };
 
-  const clearButtonStyles: React.CSSProperties = {
-    marginLeft: '8px',
-    cursor: 'pointer',
-    backgroundColor: 'transparent',
-    border: 'none',
-    padding: '0 4px',
-    fontSize: '16px',
-    color: startDate ? 'white' : '#666',
+  const dateButtonSectionStyles: React.CSSProperties = {
+    flex: 1,
+    height: '44px',
     display: 'flex',
     alignItems: 'center',
-  }
+    justifyContent: 'center',
+    cursor: 'pointer',
+    backgroundColor: 'white',
+    border: 'none',
+    fontSize: '14px',
+    color: '#374151',
+    fontWeight: 500,
+    transition: 'all 0.2s ease'
+  };
+
+  const dateLabelStyles: React.CSSProperties = {
+    fontSize: '12px',
+    color: '#6B7280',
+    marginBottom: '4px'
+  };
+
+  const dateValueStyles: React.CSSProperties = {
+    fontSize: '14px',
+    color: '#111827'
+  };
 
   const handleKeyNavigation = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showHistory || searchHistory.length === 0) return;
@@ -538,6 +549,43 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const toggleCalendar = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowCalendar(prev => !prev);
+  };
+
+  // Update the click outside handler to also reset activeButton
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+        setShowCalendar(false);
+        setActiveButton(null); // Reset active button when clicking outside
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Add this function near the other handlers
+  const handleAcceptDateClick = async () => {
+    if (!startDate || !endDate) return;
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const startStr = dayjs(startDate).format("YYYY-MM-DD");
+      const endStr = dayjs(endDate).format("YYYY-MM-DD");
+      
+      const response = await fetchVehiculosPorFechas(startStr, endStr);
+      const mappedVehicles = Array.isArray(response) ? response : [];
+      
+      onFilter(mappedVehicles);
+    } catch (error) {
+      console.error("[ERROR] Error al filtrar por fechas:", error);
+      setError("No hay vehículos disponibles para estas fechas");
+      onFilter([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -642,26 +690,52 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
 
       <div style={filtersContainerStyles}>
         <div style={{ position: 'relative', flex: 1, minWidth: windowWidth < 1024 ? '45%' : '0' }}>
-          <button
-            onClick={toggleCalendar}
-            style={dateButtonStyles}
-          >
-            <span style={{ flex: 1, textAlign: 'left' }}>{getFormattedDateRange()}</span>
-            {(startDate || endDate) && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setStartDate(null);
-                  setEndDate(null);
+          <div style={dateButtonContainerStyles}>
+            <button
+              onClick={() => {
+                if (showCalendar && activeButton === 'start') {
                   setShowCalendar(false);
-                }}
-                style={clearButtonStyles}
-                title="Limpiar fechas"
-              >
-                ✕
-              </button>
-            )}
-          </button>
+                  setActiveButton(null);
+                } else {
+                  setShowCalendar(true);
+                  setIsSelectingStart(true);
+                  setActiveButton('start');
+                  setError("");
+                }
+              }}
+              style={{
+                ...dateButtonSectionStyles,
+                backgroundColor: startDate ? '#FFE4D6' : 'white',
+                borderRight: '1px solid #d1d5db'
+              }}
+            >
+              {startDate ? `Desde: ${dayjs(startDate).format('D MMM')}` : 'Desde'}
+            </button>
+            
+            <button
+              onClick={() => {
+                if (!startDate) {
+                  setError("Selecciona primero la fecha inicial");
+                  return;
+                }
+                if (showCalendar && activeButton === 'end') {
+                  setShowCalendar(false);
+                  setActiveButton(null);
+                } else {
+                  setShowCalendar(true);
+                  setIsSelectingStart(false);
+                  setActiveButton('end');
+                  setError("");
+                }
+              }}
+              style={{
+                ...dateButtonSectionStyles,
+                backgroundColor: endDate ? '#FFE4D6' : 'white'
+              }}
+            >
+              {endDate ? `Hasta: ${dayjs(endDate).format('D MMM')}` : 'Hasta'}
+            </button>
+          </div>
 
           {showCalendar && (
             <div ref={datePickerRef} style={datePickerStyles}>
