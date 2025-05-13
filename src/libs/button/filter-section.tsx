@@ -792,7 +792,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                         <button
                           onClick={() => {
                             const prevMonth = currentMonth.subtract(1, 'month');
-                            // Only allow navigation if prevMonth is not before current month
                             if (!prevMonth.isBefore(dayjs().startOf('month'))) {
                               setCurrentMonth(prevMonth);
                             }
@@ -807,7 +806,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                         >
                           ←
                         </button>
-                        <span style={{ fontWeight: 500 }}>{month.format('MMMM YYYY')}</span>
+                        <span style={{ fontWeight: 500 }}>
+                          {month.format('MMMM YYYY').replace(/^\w/, c => c.toUpperCase())}
+                        </span>
                         <button
                           onClick={() => setCurrentMonth(prev => prev.add(1, 'month'))}
                           style={{ 
