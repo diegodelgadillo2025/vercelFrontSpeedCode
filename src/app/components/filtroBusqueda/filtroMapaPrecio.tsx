@@ -51,6 +51,8 @@ interface DetalleVehiculo {
   nombre: string;
   descripcion: string;
   precio: number;
+  calificacion: number | null; // ← nuevo campo
+
 }
 
 const IrAUbicacion = ({ setUbicacionUsuario }: { setUbicacionUsuario: (pos: [number, number]) => void }) => {
@@ -94,6 +96,24 @@ export default function FiltroMapaPrecio() {
       }
     }
   };
+
+  const renderEstrellas = (cal: number | null) => {
+    if (cal == null) return "Sin calificación";
+  
+    const llenas = Math.floor(cal);
+    const media = cal % 1 >= 0.5;
+    const vacias = 5 - llenas - (media ? 1 : 0);
+  
+    return (
+      <div className="absolute top-2 left-2 bg-white bg-opacity-80 px-2 py-1 rounded text-xs font-semibold text-yellow-500">
+        {"★".repeat(llenas)}
+        {media ? "½" : ""}
+        {"☆".repeat(vacias)}
+      </div>
+    );
+  };
+  
+
 
   return (
     <div className="w-full mt-6 rounded-xl shadow-md overflow-hidden border border-gray-200 bg-white">
@@ -142,26 +162,34 @@ export default function FiltroMapaPrecio() {
 
               {detalles[punto.idVehiculo] && (
                 <Popup closeButton={false} autoClose={false}>
-                  <div className="w-[250px] max-w-[90vw]">
-                    <img
-                      src={detalles[punto.idVehiculo].imagen}
-                      alt={detalles[punto.idVehiculo].nombre}
-                      className="w-full h-32 object-cover rounded-md mb-2"
-                    />
-                    <h3 className="text-sm font-semibold text-gray-800">
-                      {detalles[punto.idVehiculo].nombre}
-                    </h3>
-                    <p className="text-xs text-gray-600">
-                      {detalles[punto.idVehiculo].descripcion}
-                    </p>
-                    <p className="text-orange-600 font-bold text-sm mt-1">
-                      Bs. {detalles[punto.idVehiculo].precio}/día
-                    </p>
-                    <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-1 px-3 rounded-md text-sm font-medium">
-                      Ver Detalles
-                    </button>
-                  </div>
-                </Popup>
+                <div className="w-[160px] sm:w-[220px] md:w-[260px] max-w-[90vw] relative">
+                  {/* ⭐ Calificación arriba a la izquierda */}
+                  {renderEstrellas(detalles[punto.idVehiculo].calificacion)}
+
+                  <img
+                    src={detalles[punto.idVehiculo].imagen}
+                    alt={detalles[punto.idVehiculo].nombre}
+                    className="w-full h-14 sm:h-24 object-cover rounded-md mb-1"
+                  />
+                  <h3 className="text-[9px] sm:text-sm font-semibold text-gray-800 leading-tight">
+                    {detalles[punto.idVehiculo].nombre}
+                  </h3>
+
+                  <span className="text-green-600 font-semibold text-[8px] sm:text-xs">
+                    Disponible
+                  </span>
+
+                  <p className="text-[8px] sm:text-xs text-gray-600 mt-1 leading-tight">
+                    {detalles[punto.idVehiculo].descripcion}
+                  </p>
+                  <p className="text-orange-600 font-bold text-[9px] sm:text-sm mt-1">
+                    Bs. {detalles[punto.idVehiculo].precio}/día
+                  </p>
+                  <button className="mt-2 w-full bg-[#808080] hover:bg-[#6e6e6e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium">
+                    Ver Detalles
+                  </button>
+                </div>
+              </Popup>
               )}
             </Marker>
           ))}
