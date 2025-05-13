@@ -303,8 +303,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
       }
 
       setEndDate(date.startOf('day').toDate());
-      setShowCalendar(false);
-      handleAcceptDateClick();
     }
   };
 
@@ -596,6 +594,32 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     }
   };
 
+  // Add this helper function to check if a day is truly selected
+  const isDateSelected = (day: dayjs.Dayjs, selectedDate: Date | null) => {
+    return selectedDate && day.isSame(dayjs(selectedDate), 'day');
+  };
+
+  // Add this helper to check if a day is truly in range
+  const isDateInSelectedRange = (day: dayjs.Dayjs, start: Date | null, end: Date | null) => {
+    if (!start || !end) return false;
+    
+    const startDay = dayjs(start).startOf('day');
+    const endDay = dayjs(end).startOf('day');
+    
+    return day.isSame(startDay, 'day') || 
+           day.isSame(endDay, 'day') || 
+           (day.isAfter(startDay) && day.isBefore(endDay));
+  };
+
+  // Update the Accept button click handler
+  const handleAcceptClick = () => {
+    if (startDate && endDate) {
+      handleAcceptDateClick();
+    }
+    setShowCalendar(false);
+    setCalendarField(null);
+  };
+
   return (
     <div style={containerStyles}>
       <div style={searchContainerStyles}>
@@ -806,15 +830,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                         ))}
 
                         {generateCalendarDays(month).map((day, index) => {
-                          const isStartDate = startDate && day.isSame(startDate, 'day')
-                          const isEndDate = endDate && day.isSame(endDate, 'day')
-                          const isSelected = isStartDate || isEndDate
-                          const isInRange = startDate && endDate &&
-                            day.isAfter(dayjs(startDate).startOf('day')) &&
-                            day.isBefore(dayjs(endDate).endOf('day'))
-                          const isCurrentMonth = day.month() === month.month()
-                          const isPastDate = day.isBefore(dayjs().startOf('day'))
-                          const isDisabled = isDateDisabled(day)
+                          const isStartDate = isDateSelected(day, startDate);
+                          const isEndDate = isDateSelected(day, endDate);
+                          const isSelected = isStartDate || isEndDate;
+                          const isInRange = isDateInSelectedRange(day, startDate, endDate);
+                          const isCurrentMonth = day.month() === month.month();
+                          const isPastDate = day.isBefore(dayjs().startOf('day'));
+                          const isDisabled = isDateDisabled(day);
 
                           return (
                             <button
@@ -824,7 +846,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                               style={{
                                 padding: '8px',
                                 backgroundColor: isSelected ? '#FF6B00' :
-                                  isInRange ? '#FFE4D6' : 'transparent',
+                                  isInRange && isCurrentMonth ? '#FFE4D6' : 'transparent',
                                 color: (isPastDate || isDisabled) ? '#ccc' :
                                   isSelected ? 'white' :
                                     !isCurrentMonth ? '#ccc' : 'black',
@@ -856,7 +878,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                     Limpiar
                   </button>
                   <button
-                    onClick={() => setShowCalendar(false)}
+                    onClick={handleAcceptClick}
                     className="w-full sm:w-1/2 py-3 px-4 bg-[#FF6B00] text-white rounded-md hover:bg-[#e55d00] transition-colors duration-200"
                   >
                     Aceptar
