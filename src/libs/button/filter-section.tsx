@@ -770,12 +770,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                         padding: '0 8px'
                       }}>
                         <button
-                          onClick={() => setCurrentMonth(prev => prev.subtract(1, 'month'))}
+                          onClick={() => {
+                            const prevMonth = currentMonth.subtract(1, 'month');
+                            // Only allow navigation if prevMonth is not before current month
+                            if (!prevMonth.isBefore(dayjs().startOf('month'))) {
+                              setCurrentMonth(prevMonth);
+                            }
+                          }}
                           style={{ 
                             visibility: i === 0 ? 'visible' : 'hidden',
                             padding: '4px 8px',
-                            cursor: 'pointer'
+                            cursor: currentMonth.isSame(dayjs().startOf('month'), 'month') ? 'not-allowed' : 'pointer',
+                            opacity: currentMonth.isSame(dayjs().startOf('month'), 'month') ? 0.5 : 1
                           }}
+                          disabled={currentMonth.isSame(dayjs().startOf('month'), 'month')}
                         >
                           ←
                         </button>
