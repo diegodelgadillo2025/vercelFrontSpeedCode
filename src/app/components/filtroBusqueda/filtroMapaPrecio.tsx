@@ -40,17 +40,14 @@ const iconoUsuario = new L.Icon({
 });
 
 interface Vehiculo {
-  idvehiculo: number;
-  tarifa: number;
-  descripcion: string;
+  id: number;
   imagen: string;
-  marca: string;
-  modelo: string;
-  calificaciones: { puntaje: number }[];
-  ubicacion: {
-    latitud: number;
-    longitud: number;
-  };
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  calificacion: number | null;
+  latitud: number;
+  longitud: number;
 }
 
 const IrAUbicacion = ({
@@ -121,8 +118,8 @@ export default function FiltroMapaPrecio() {
         console.log(
           "Puntos GPS:",
           vehs.map((v) => ({
-            lat: v.ubicacion.latitud,
-            lng: v.ubicacion.longitud,
+            lat: v.latitud,
+            lng: v.longitud,
           }))
         );
       } else {
@@ -133,7 +130,6 @@ export default function FiltroMapaPrecio() {
     }
   };
 
-  // Llamada inicial + intervalos
   useEffect(() => {
     fetchVehiculos(); // Llamada inicial
 
@@ -144,14 +140,8 @@ export default function FiltroMapaPrecio() {
     return () => clearInterval(interval);
   }, [ubicacionUsuario, precioMin, precioMax]);
 
-  const calcularPromedio = (calificaciones: Vehiculo["calificaciones"]) => {
-    if (calificaciones.length === 0) return null;
-    const total = calificaciones.reduce((acc, cur) => acc + cur.puntaje, 0);
-    return total / calificaciones.length;
-  };
-
   const renderEstrellas = (cal: number | null) => {
-    if (cal == null) return "Sin calificación";
+    if (cal === null) return "Sin calificación";
 
     const llenas = Math.floor(cal);
     const media = cal % 1 >= 0.5;
@@ -219,23 +209,23 @@ export default function FiltroMapaPrecio() {
 
           {vehiculos.map((v) => (
             <Marker
-              key={v.idvehiculo}
-              position={[v.ubicacion.latitud, v.ubicacion.longitud]}
+              key={v.id}
+              position={[v.latitud, v.longitud]}
               icon={iconoNormal}
             >
               <Tooltip permanent direction="top" offset={[0, -20]}>
-                Bs. {v.tarifa}
+                Bs. {v.precio}
               </Tooltip>
               <Popup closeButton={false} autoClose={false}>
                 <div className="w-[160px] sm:w-[220px] md:w-[260px] max-w-[90vw] relative">
-                  {renderEstrellas(calcularPromedio(v.calificaciones))}
+                  {renderEstrellas(v.calificacion)}
                   <img
                     src={v.imagen}
-                    alt={v.modelo}
+                    alt={v.nombre}
                     className="w-full h-14 sm:h-24 object-cover rounded-md mb-1"
                   />
                   <h3 className="text-[9px] sm:text-sm font-semibold text-gray-800 leading-tight">
-                    {v.marca} {v.modelo}
+                    {v.nombre}
                   </h3>
                   <span className="text-green-600 font-semibold text-[8px] sm:text-xs">
                     Disponible
@@ -244,7 +234,7 @@ export default function FiltroMapaPrecio() {
                     {v.descripcion}
                   </p>
                   <p className="text-orange-600 font-bold text-[9px] sm:text-sm mt-1">
-                    Bs. {v.tarifa}/día
+                    Bs. {v.precio}/día
                   </p>
                   <button className="mt-2 w-full bg-[#808080] hover:bg-[#6e6e6e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium">
                     Ver Detalles
