@@ -52,6 +52,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   const distanceSliderRef = useRef<HTMLDivElement>(null);
   const [isSelectingStart, setIsSelectingStart] = useState(true);
   const [activeButton, setActiveButton] = useState<'start' | 'end' | null>(null);
+  const [calendarField, setCalendarField] = useState<"desde" | "hasta" | null>(null);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371;
@@ -700,15 +701,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
           <div style={dateButtonContainerStyles}>
             <button
               onClick={() => {
-                if (showCalendar && activeButton === 'start') {
-                  setShowCalendar(false);
-                  setActiveButton(null);
-                } else {
-                  setShowCalendar(true);
-                  setIsSelectingStart(true);
-                  setActiveButton('start');
-                  setError("");
+                if (!startDate && calendarField === "hasta") {
+                  setError("Selecciona primero la fecha inicial");
+                  return;
                 }
+                setCalendarField(prev => prev === "desde" ? null : "desde");
+                setIsSelectingStart(true);
+                setShowCalendar(true);
+                setError("");
               }}
               style={{
                 ...dateButtonSectionStyles,
@@ -725,15 +725,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                   setError("Selecciona primero la fecha inicial");
                   return;
                 }
-                if (showCalendar && activeButton === 'end') {
-                  setShowCalendar(false);
-                  setActiveButton(null);
-                } else {
-                  setShowCalendar(true);
-                  setIsSelectingStart(false);
-                  setActiveButton('end');
-                  setError("");
-                }
+                setCalendarField(prev => prev === "hasta" ? null : "hasta");
+                setIsSelectingStart(false);
+                setShowCalendar(true);
+                setError("");
               }}
               style={{
                 ...dateButtonSectionStyles,
@@ -744,7 +739,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
             </button>
           </div>
 
-          {showCalendar && (
+          {calendarField && showCalendar && (
             <div ref={datePickerRef} style={datePickerStyles}>
               <div 
                 translate="no" 
