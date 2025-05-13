@@ -257,7 +257,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     let day = start
 
     while (day.isBefore(end)) {
-      days.push(day)
+      // Only add the day if it's in the current month, otherwise add null
+      days.push(day.month() === month.month() ? day : null)
       day = day.add(1, 'day')
     }
 
@@ -830,11 +831,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                         ))}
 
                         {generateCalendarDays(month).map((day, index) => {
+                          if (!day) {
+                            // Render empty slot for days outside current month
+                            return <div key={index} style={{ padding: '8px' }} />;
+                          }
+
                           const isStartDate = isDateSelected(day, startDate);
                           const isEndDate = isDateSelected(day, endDate);
                           const isSelected = isStartDate || isEndDate;
                           const isInRange = isDateInSelectedRange(day, startDate, endDate);
-                          const isCurrentMonth = day.month() === month.month();
                           const isPastDate = day.isBefore(dayjs().startOf('day'));
                           const isDisabled = isDateDisabled(day);
 
@@ -846,10 +851,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                               style={{
                                 padding: '8px',
                                 backgroundColor: isSelected ? '#FF6B00' :
-                                  isInRange && isCurrentMonth ? '#FFE4D6' : 'transparent',
+                                  isInRange ? '#FFE4D6' : 'transparent',
                                 color: (isPastDate || isDisabled) ? '#ccc' :
-                                  isSelected ? 'white' :
-                                    !isCurrentMonth ? '#ccc' : 'black',
+                                  isSelected ? 'white' : 'black',
                                 borderRadius: '4px',
                                 cursor: (isPastDate || isDisabled) ? 'not-allowed' : 'pointer',
                                 border: 'none',
@@ -860,7 +864,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
                             >
                               {day.format('D')}
                             </button>
-                          )
+                          );
                         })}
                       </div>
                     </div>
