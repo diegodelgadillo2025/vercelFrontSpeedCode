@@ -2,11 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ModalFiltroAeropuerto from "@/app/components/filtroBusqueda/modalFiltroAeropuerto";
+import { FaPlane } from "react-icons/fa";
 
 interface Aeropuerto {
   idaeropuerto: number;
   nombre: string;
-  imagen: string; // ✅ Se incluye esta propiedad para evitar el error TS2719
 }
 
 const FiltroAeropuerto: React.FC = () => {
@@ -31,8 +31,6 @@ const FiltroAeropuerto: React.FC = () => {
 
     try {
       const response = await fetch(`https://vercel-back-speed-code.vercel.app/aeropuerto/vehiculos-cercanos/${aeropuerto.idaeropuerto}`);
-      if (!response.ok) throw new Error('Error al obtener vehículos');
-
       const data = await response.json();
       const vehiculosArray = Array.isArray(data) ? data : [];
       setVehiculos(vehiculosArray);
@@ -52,7 +50,6 @@ const FiltroAeropuerto: React.FC = () => {
         setMostrarResultados(false);
       }
     };
-
     document.addEventListener("mousedown", manejarClickFuera);
     return () => document.removeEventListener("mousedown", manejarClickFuera);
   }, []);
@@ -61,9 +58,10 @@ const FiltroAeropuerto: React.FC = () => {
     <div className="relative inline-block" ref={contenedorRef}>
       <button
         onClick={abrirModal}
-        className="px-4 py-2 rounded border border-gray-300 hover:bg-orange-500 hover:text-white transition-colors cursor-pointer"
+        className="flex items-center space-x-2 px-4 py-2 rounded border border-gray-300 hover:bg-orange-500 hover:text-white transition-colors cursor-pointer"
       >
-        {aeropuertoSeleccionado ? aeropuertoSeleccionado.nombre : 'Aeropuerto'}
+        <FaPlane className="text-orange-500" />
+        <span>{aeropuertoSeleccionado ? aeropuertoSeleccionado.nombre : 'Aeropuerto'}</span>
       </button>
 
       <ModalFiltroAeropuerto
@@ -91,7 +89,7 @@ const FiltroAeropuerto: React.FC = () => {
             </p>
           ) : (
             <div className="space-y-4 max-h-[300px] overflow-y-auto">
-              {Array.isArray(vehiculos) && vehiculos.map((vehiculo, index) => (
+              {vehiculos.map((vehiculo, index) => (
                 <div key={index} className="flex items-center border p-3 rounded shadow-sm space-x-4">
                   <img
                     src={vehiculo.imagen}

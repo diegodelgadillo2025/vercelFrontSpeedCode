@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { FaPlane } from "react-icons/fa";
 
 interface Aeropuerto {
   idaeropuerto: number;
   nombre: string;
- // imagen: string; // Nueva propiedad //** */
- imagen: string; // nueva propiedad
 }
 
 interface ModalFiltroAeropuertoProps {
@@ -44,7 +43,6 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
       try {
         const response = await fetch(`https://vercel-back-speed-code.vercel.app/aeropuerto/autocompletar?q=${encodeURIComponent(inputTexto)}`);
         if (!response.ok) throw new Error('Error al obtener aeropuertos');
-
         const data: Aeropuerto[] = await response.json();
         setSugerencias(data);
       } catch (err) {
@@ -86,23 +84,22 @@ const ModalFiltroAeropuerto: React.FC<ModalFiltroAeropuertoProps> = ({
         />
 
         {sugerencias.length > 0 && (
-
-          <ul className="max-h-40 overflow-y-auto border border-gray-200 rounded bg-white shadow-sm"> {sugerencias.map((aeropuerto) => ( <li key={aeropuerto.idaeropuerto} className="flex items-center space-x-3 px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white" onClick={() => { setAeropuertoTemporal(aeropuerto); setInputTexto(aeropuerto.nombre); setSugerencias([]); }} > <img src={aeropuerto.imagen} alt={aeropuerto.nombre} className="w-10 h-10 object-cover rounded" /> <span>{aeropuerto.nombre}</span> </li> ))} </ul>
-          /*<ul className="max-h-40 overflow-y-auto border border-gray-200 rounded bg-white shadow-sm">
+          <ul className="max-h-40 overflow-y-auto border border-gray-200 rounded bg-white shadow-sm">
             {sugerencias.map((aeropuerto) => (
               <li
                 key={aeropuerto.idaeropuerto}
-                className={`px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white ${aeropuerto === aeropuertoTemporal ? 'bg-orange-100' : ''}`}
+                className="flex items-center space-x-3 px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white"
                 onClick={() => {
                   setAeropuertoTemporal(aeropuerto);
                   setInputTexto(aeropuerto.nombre);
                   setSugerencias([]);
                 }}
               >
-                {aeropuerto.nombre}
+                <FaPlane className="text-orange-500" />
+                <span>{aeropuerto.nombre}</span>
               </li>
             ))}
-          </ul>*/
+          </ul>
         )}
 
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
