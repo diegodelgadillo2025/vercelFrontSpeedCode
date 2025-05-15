@@ -6,6 +6,7 @@ import ModalFiltroAeropuerto from "@/app/components/filtroBusqueda/modalFiltroAe
 interface Aeropuerto {
   idaeropuerto: number;
   nombre: string;
+  imagen: string; // ✅ Se incluye esta propiedad para evitar el error TS2719
 }
 
 const FiltroAeropuerto: React.FC = () => {
@@ -18,7 +19,9 @@ const FiltroAeropuerto: React.FC = () => {
 
   const abrirModal = () => {
     setMostrarResultados(false);
-    setModalAbierto(true);}
+    setModalAbierto(true);
+  };
+
   const cerrarModal = () => setModalAbierto(false);
 
   const manejarAplicar = async (aeropuerto: Aeropuerto) => {
@@ -35,7 +38,6 @@ const FiltroAeropuerto: React.FC = () => {
       setVehiculos(vehiculosArray);
       setMostrarResultados(true);
       setMensajeSinVehiculos(vehiculosArray.length === 0);
-
     } catch (error) {
       console.error('Error al hacer fetch de vehículos:', error);
       setVehiculos([]);
@@ -85,11 +87,11 @@ const FiltroAeropuerto: React.FC = () => {
 
           {mensajeSinVehiculos ? (
             <p className="text-gray-600 text-sm">
-              No se encontraron vehículos cercanos a este aeropuerto.</p>
+              No se encontraron vehículos cercanos a este aeropuerto.
+            </p>
           ) : (
             <div className="space-y-4 max-h-[300px] overflow-y-auto">
               {Array.isArray(vehiculos) && vehiculos.map((vehiculo, index) => (
-
                 <div key={index} className="flex items-center border p-3 rounded shadow-sm space-x-4">
                   <img
                     src={vehiculo.imagen}

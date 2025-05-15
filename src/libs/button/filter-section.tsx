@@ -951,7 +951,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   {isLoading ? "Filtrar" : "Filtrar"}
 </button>
 {error && <p style={{ color: "red" }}>{error}</p>}
-      {mostrarMapa && <MapaFiltro />}
+      {mostrarMapa && (
+  <MapaFiltro
+    texto={searchTerm}
+    distancia={selectedDistance.toString()}
+    fechaInicio={startDate ? dayjs(startDate).format("YYYY-MM-DD") : ""}
+    fechaFin={endDate ? dayjs(endDate).format("YYYY-MM-DD") : ""}
+  />
+)}
+
       {showDateError && (
         <div style={{
           position: 'absolute',

@@ -9,7 +9,8 @@ import {
   Popup,
   LayersControl,
   Tooltip,
-} from "react-leaflet";
+} 
+from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -73,13 +74,30 @@ const IrAUbicacion = ({
   return null;
 };
 
-export default function FiltroMapaPrecio() {
+interface FiltroMapaPrecioProps {
+  texto: string;
+  distancia: string;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+export default function FiltroMapaPrecio({
+  texto,
+  distancia,
+  fechaInicio,
+  fechaFin
+}: FiltroMapaPrecioProps) {
+
+
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
-  const [ubicacionUsuario, setUbicacionUsuario] = useState<
-    [number, number] | null
-  >(null);
+  const [ubicacionUsuario, setUbicacionUsuario] = useState<[number, number] | null>(null);
   const [precioMin, setPrecioMin] = useState<string>("");
   const [precioMax, setPrecioMax] = useState<string>("");
+
+  //const [texto, setTexto] = useState<string>(""); // Para el texto de búsqueda
+  //const [distancia, setDistancia] = useState<string>(""); // Para la distancia
+  //const [fechaInicio, setFechaInicio] = useState<string>(""); // Fecha de inicio
+  //const [fechaFin, setFechaFin] = useState<string>(""); // Fecha de fin
 
   const lastParams = useRef<string>("");
 
@@ -87,6 +105,17 @@ export default function FiltroMapaPrecio() {
     try {
       const params = new URLSearchParams();
 
+      // Filtro de texto
+      if (texto.trim() !== "") params.append("texto", texto.trim());
+
+      // Filtro de distancia
+      if (distancia.trim() !== "") params.append("dkm", distancia.trim());
+
+      // Filtro de fechas
+      if (fechaInicio.trim() !== "") params.append("fechaInicio", fechaInicio.trim());
+      if (fechaFin.trim() !== "") params.append("fechaFin", fechaFin.trim());
+
+      // Filtro de ubicación (latitud y longitud)
       if (
         ubicacionUsuario &&
         !isNaN(ubicacionUsuario[0]) &&
@@ -96,6 +125,7 @@ export default function FiltroMapaPrecio() {
         params.append("lng", String(ubicacionUsuario[1]));
       }
 
+      // Filtros de precio
       if (precioMin.trim() !== "") params.append("precioMin", precioMin.trim());
       if (precioMax.trim() !== "") params.append("precioMax", precioMax.trim());
 
@@ -106,6 +136,7 @@ export default function FiltroMapaPrecio() {
 
       lastParams.current = queryString;
 
+      // URL del backend
       const url = `https://vercel-back-speed-code.vercel.app/mapa/?${queryString}`;
       const res = await fetch(url);
       const data = await res.json();
@@ -138,7 +169,7 @@ export default function FiltroMapaPrecio() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [ubicacionUsuario, precioMin, precioMax]);
+  },  [ubicacionUsuario, precioMin, precioMax, texto, distancia, fechaInicio, fechaFin]);
 
   const renderEstrellas = (cal: number | null) => {
     if (cal === null) return "Sin calificación";
@@ -175,7 +206,7 @@ export default function FiltroMapaPrecio() {
           className="border px-3 py-1 rounded-md text-sm"
         />
       </div>
-
+      
       {/* Mapa */}
       <div className="h-[500px] w-full relative z-0">
         <MapContainer
