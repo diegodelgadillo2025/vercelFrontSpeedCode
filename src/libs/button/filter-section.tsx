@@ -112,6 +112,41 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
       }
     );
   };
+  // Guardar y cargar estado del filtro
+useEffect(() => {
+  // Cargar estado al montar
+  const savedState = localStorage.getItem('filterState');
+  if (savedState) {
+    const { savedDistance, savedStartDate, savedEndDate } = JSON.parse(savedState);
+    setSelectedDistance(savedDistance || 50);
+    setStartDate(savedStartDate ? new Date(savedStartDate) : null);
+    setEndDate(savedEndDate ? new Date(savedEndDate) : null);
+  }
+}, []);
+
+useEffect(() => {
+  // Guardar estado cuando cambia
+  const stateToSave = {
+    savedDistance: selectedDistance,
+    savedStartDate: startDate?.toISOString(),
+    savedEndDate: endDate?.toISOString()
+  };
+  localStorage.setItem('filterState', JSON.stringify(stateToSave));
+}, [selectedDistance, startDate, endDate]);
+
+// Efecto para aplicar filtros guardados al cargar
+useEffect(() => {
+  const applySavedFilters = async () => {
+    if (startDate && endDate) {
+      await fetchVehiclesByDateRange(startDate, endDate);
+    }
+    if (selectedDistance !== 50) {
+      handleFilterClick();
+    }
+  };
+
+  applySavedFilters();
+}, []); // Solo se ejecuta al montar
   // Load initial visible history
   useEffect(() => {
     const stored = localStorage.getItem("searchHistory");
@@ -331,11 +366,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   };
 
   const clearDateRange = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent opening the calendar
-    setStartDate(null)
-    setEndDate(null)
-    setShowDatePicker(false)
-  }
+  e.stopPropagation();
+  setStartDate(null);
+  setEndDate(null);
+  setShowDatePicker(false);
+  localStorage.removeItem('filterState');
+};
 
   // Estilos
   const containerStyles: React.CSSProperties = {
