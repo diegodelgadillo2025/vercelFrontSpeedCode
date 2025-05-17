@@ -964,15 +964,15 @@ useEffect(() => {
               <input
                 type="range"
                 min="0"
-                max="500"
+                max="300"
                 value={selectedDistance}
                 onChange={(e) => setSelectedDistance(Number(e.target.value))}
                 style={{ width: '100%' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span>0 km</span>
+                <span>5 km</span>
                 <span>{selectedDistance} km</span>
-                <span>500 km</span>
+                <span>300 km</span>
               </div>
             </div>
           </div>

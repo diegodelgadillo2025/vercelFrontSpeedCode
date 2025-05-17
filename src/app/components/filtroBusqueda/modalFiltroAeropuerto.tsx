@@ -4,6 +4,9 @@ import { FaPlane } from "react-icons/fa";
 interface Aeropuerto {
   idaeropuerto: number;
   nombre: string;
+  codigo: string;
+  latitud: number;
+  longitud: number;
 }
 
 interface ModalFiltroAeropuertoProps {
