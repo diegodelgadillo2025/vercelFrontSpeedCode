@@ -936,8 +936,13 @@ useEffect(() => {
                 <div className="flex flex-col sm:flex-row gap-2 mt-4 px-4 pb-4">
                   <button
                     onClick={() => {
+                      // Reset all date-related states
                       setStartDate(null);
                       setEndDate(null);
+                      setIsSelectingStart(true);
+                      setCalendarField(null);
+                      setShowDateError(false);
+                      setError("");
                     }}
                     className="w-full sm:w-1/2 py-3 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200"
                   >
