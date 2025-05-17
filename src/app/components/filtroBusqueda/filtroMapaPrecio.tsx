@@ -210,22 +210,31 @@ export default function FiltroMapaPrecio({
   };
   return (
     <div className="w-full mt-6 rounded-xl shadow-md overflow-hidden border border-gray-200 bg-white">
-      {/* Inputs de precio */}
-      <div className="p-4 flex gap-4 items-center">
-        <input
-          type="number"
-          placeholder="Precio mínimo"
-          value={precioMin}
-          onChange={(e) => setPrecioMin(e.target.value)}
-          className="border px-3 py-1 rounded-md text-sm"
-        />
-        <input
-          type="number"
-          placeholder="Precio máximo"
-          value={precioMax}
-          onChange={(e) => setPrecioMax(e.target.value)}
-          className="border px-3 py-1 rounded-md text-sm"
-        />
+      {/* Inputs de precio con label, texto "Bs./día" y diseño responsivo */}
+      <div className="p-4">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Rango de precios (Bs./día)
+        </label>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col w-full">
+            <input
+              type="number"
+              placeholder="Precio mínimo"
+              value={precioMin}
+              onChange={(e) => setPrecioMin(e.target.value)}
+              className="border px-3 py-1 rounded-md text-sm w-full"
+            />
+          </div>
+          <div className="flex flex-col w-full">
+            <input
+              type="number"
+              placeholder="Precio máximo"
+              value={precioMax}
+              onChange={(e) => setPrecioMax(e.target.value)}
+              className="border px-3 py-1 rounded-md text-sm w-full"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Mapa */}
