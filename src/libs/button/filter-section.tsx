@@ -70,7 +70,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     setIsLoading(true);
     setError("");
     try {
+      /*
+      aqui debe recuperar longitud, latitud, distancia, texto, fecha inicio, fecha fin
+      <MapaFiltro
+    texto={searchTerm}
+    distancia={selectedDistance.toString()}
+    fechaInicio={startDate ? dayjs(startDate).format("YYYY-MM-DD") : ""}
+    fechaFin={endDate ? dayjs(endDate).format("YYYY-MM-DD") : ""}
+  />
+   const url = `https://vercel-back-speed-code.vercel.app/mapa/?${queryString}`;
+      const res = await fetch(url);
+      */
       const response = await fetch(
+
         `https://vercel-back-speed-code.vercel.app/vehiculosxgps/distancia/${lat}/${lng}/${dkm}`
       );
       const data = await response.json();

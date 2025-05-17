@@ -1,5 +1,77 @@
 import type React from "react"
 import { useRouter } from 'next/navigation';
+/*actualizar aqui segun este dato de salida ajustar segun esto "{
+  "vehiculos": {
+    "cantidad": 5,
+    "vehiculos": [
+      {
+        "id": 61,
+        "imagen": "https://i.pinimg.com/736x/5b/56/1b/5b561ba5754a6cfabbd75c876e36d374.jpg",
+        "nombre": "Toyota - Corolla",
+        "descripcion": "Vehículo cómodo y eficiente",
+        "precio": 40.5,
+        "calificacion": null,
+        "latitud": -17.3895,
+        "longitud": -66.1568,
+        "anio": 2020,
+        "transmision": "Automático",
+        "consumo": "15km/l"
+      },
+      {
+        "id": 81,
+        "imagen": "https://i.pinimg.com/736x/58/a2/e2/58a2e20ad3f20f2fba379a1496f8a26f.jpg",
+        "nombre": "Toyota - Yaris",
+        "descripcion": "Práctico y ahorrador",
+        "precio": 34,
+        "calificacion": 4.3,
+        "latitud": -17.4032,
+        "longitud": -66.0389,
+        "anio": 2019,
+        "transmision": "Manual",
+        "consumo": "17km/l"
+      },
+      {
+        "id": 86,
+        "imagen": "https://i.pinimg.com/736x/5b/56/1b/5b561ba5754a6cfabbd75c876e36d374.jpg",
+        "nombre": "Toyota - Corolla",
+        "descripcion": "Vehículo cómodo y eficiente",
+        "precio": 40.5,
+        "calificacion": 4.1,
+        "latitud": -17.3895,
+        "longitud": -66.1568,
+        "anio": 2020,
+        "transmision": "Automático",
+        "consumo": "15km/l"
+      },
+      {
+        "id": 41,
+        "imagen": "https://i.pinimg.com/736x/6a/3f/cb/6a3fcb9eef7f7629d14ad14070fdb38d.jpg",
+        "nombre": "Toyota - Corolla",
+        "descripcion": "Vehículo en excelente estado",
+        "precio": 250,
+        "calificacion": 4.5,
+        "latitud": -17.7833,
+        "longitud": -63.1833,
+        "anio": 2020,
+        "transmision": "Automática",
+        "consumo": "Gasolina"
+      },
+      {
+        "id": 56,
+        "imagen": "https://i.pinimg.com/736x/7b/e4/01/7be40125278b16da5d73c274bb553afc.jpg",
+        "nombre": "Toyota - RAV4",
+        "descripcion": "Híbrido y espacioso para la familia",
+        "precio": 310,
+        "calificacion": 3.6,
+        "latitud": -22.0833,
+        "longitud": -65.6,
+        "anio": 2021,
+        "transmision": "Automática",
+        "consumo": "Híbrido"
+      }
+    ]
+  }
+}"*/
 
 interface Vehicle {
   idvehiculo: number;
