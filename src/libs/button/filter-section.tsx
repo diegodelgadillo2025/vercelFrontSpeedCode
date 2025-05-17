@@ -818,6 +818,19 @@ useEffect(() => {
                 translate="no" 
                 className="w-[90vw] max-w-[400px] mx-auto md:max-w-[700px] overflow-x-auto rounded-lg shadow-md bg-white notranslate"
               >
+                {/* Add placeholder message when no dates selected */}
+                {!startDate && !endDate && (
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    textAlign: 'center',
+                    padding: '12px 16px 0',
+                    marginBottom: '8px'
+                  }}>
+                    Selecciona un rango de fechas para filtrar los vehículos
+                  </div>
+                )}
+
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: windowWidth < 768 ? 'column' : 'row',
@@ -923,8 +936,13 @@ useEffect(() => {
                 <div className="flex flex-col sm:flex-row gap-2 mt-4 px-4 pb-4">
                   <button
                     onClick={() => {
+                      // Reset all date-related states
                       setStartDate(null);
                       setEndDate(null);
+                      setIsSelectingStart(true);
+                      setCalendarField(null);
+                      setShowDateError(false);
+                      setError("");
                     }}
                     className="w-full sm:w-1/2 py-3 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200"
                   >
@@ -970,7 +988,7 @@ useEffect(() => {
                 style={{ width: '100%' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span>5 km</span>
+                <span>0 km</span>
                 <span>{selectedDistance} km</span>
                 <span>300 km</span>
               </div>
