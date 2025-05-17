@@ -7,6 +7,7 @@ import ModalSeleccionPago from "./ModalSeleccionPago";
 import PagoTargeta from "./PagoTargeta";
 import PagoQR from "./PagoQR";
 import "../../globals.css";
+import { IoArrowBack } from "react-icons/io5";
 
 interface VistaPagoProps {
   id: string | null;
@@ -39,7 +40,9 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   useEffect(() => {
     if (idVehiculo) {
       axios
-        .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`)
+        .get(
+          `https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${idVehiculo}`
+        )
         .then((response) => {
           if (response.data.success) {
             const data = response.data.data;
@@ -69,9 +72,19 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
 
     return (
       <div className="max-w-3xl mx-auto px-4 py-6 bg-white rounded-xl shadow-lg">
-        <h2 className="text-xl md:text-2xl font-bold text-center text-gray-800 mb-6">
-          Información del Vehículo
-        </h2>
+        <div className="relative mb-6">
+          <button
+            onClick={() => setModoPago(null)} 
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 flex items-center gap-1 text-blue-600 hover:text-blue-800 transition text-sm font-medium focus:outline-none"
+            aria-label="Volver atrás"
+          >
+            <IoArrowBack size={18} />
+          </button>
+
+          <h2 className="text-xl md:text-2xl font-bold text-center text-gray-800">
+            Información del Vehículo
+          </h2>
+        </div>
 
         <div className="space-y-4">
           <div className="relative flex justify-center">
@@ -88,7 +101,9 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
                     `<img src="${vehiculo.imagen}" style="width: 100%; height: auto;" />`
                   );
                 } else {
-                  alert("Por favor permite ventanas emergentes para ver la imagen");
+                  alert(
+                    "Por favor permite ventanas emergentes para ver la imagen"
+                  );
                 }
               }}
               className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition"
