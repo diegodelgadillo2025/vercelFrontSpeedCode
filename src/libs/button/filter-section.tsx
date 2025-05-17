@@ -818,6 +818,19 @@ useEffect(() => {
                 translate="no" 
                 className="w-[90vw] max-w-[400px] mx-auto md:max-w-[700px] overflow-x-auto rounded-lg shadow-md bg-white notranslate"
               >
+                {/* Add placeholder message when no dates selected */}
+                {!startDate && !endDate && (
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    textAlign: 'center',
+                    padding: '12px 16px 0',
+                    marginBottom: '8px'
+                  }}>
+                    Selecciona un rango de fechas para filtrar los vehículos
+                  </div>
+                )}
+
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: windowWidth < 768 ? 'column' : 'row',
