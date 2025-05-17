@@ -9,6 +9,7 @@ import {
   Popup,
   LayersControl,
   Tooltip,
+  Circle,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -313,11 +314,25 @@ export default function FiltroMapaPrecio({
           ))}
 
           {ubicacionUsuario && (
-            <Marker position={ubicacionUsuario} icon={iconoUsuario}>
-              <Tooltip permanent direction="top" offset={[0, -10]}>
-                Tú estás aquí
-              </Tooltip>
-            </Marker>
+            <>
+              <Marker position={ubicacionUsuario} icon={iconoUsuario}>
+                <Tooltip permanent direction="top" offset={[0, -10]}>
+                  Tú estás aquí
+                </Tooltip>
+              </Marker>
+
+              {distancia.trim() !== "" && (
+                <Circle
+                  center={ubicacionUsuario}
+                  radius={Number(distancia.trim()) * 1000} // convertir km a metros
+                  pathOptions={{
+                    color: "blue",
+                    fillColor: "blue",
+                    fillOpacity: 0.1,
+                  }}
+                />
+              )}
+            </>
           )}
         </MapContainer>
       </div>
