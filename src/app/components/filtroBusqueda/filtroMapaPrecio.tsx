@@ -9,10 +9,10 @@ import {
   Popup,
   LayersControl,
   Tooltip,
-} 
-from "react-leaflet";
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 const iconoNormal = new L.Icon({
   iconUrl:
@@ -85,12 +85,12 @@ export default function FiltroMapaPrecio({
   texto,
   distancia,
   fechaInicio,
-  fechaFin
+  fechaFin,
 }: FiltroMapaPrecioProps) {
-
-
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
-  const [ubicacionUsuario, setUbicacionUsuario] = useState<[number, number] | null>(null);
+  const [ubicacionUsuario, setUbicacionUsuario] = useState<
+    [number, number] | null
+  >(null);
   const [precioMin, setPrecioMin] = useState<string>("");
   const [precioMax, setPrecioMax] = useState<string>("");
 
@@ -112,7 +112,8 @@ export default function FiltroMapaPrecio({
       if (distancia.trim() !== "") params.append("dkm", distancia.trim());
 
       // Filtro de fechas
-      if (fechaInicio.trim() !== "") params.append("fechaInicio", fechaInicio.trim());
+      if (fechaInicio.trim() !== "")
+        params.append("fechaInicio", fechaInicio.trim());
       if (fechaFin.trim() !== "") params.append("fechaFin", fechaFin.trim());
 
       // Filtro de ubicación (latitud y longitud)
@@ -169,24 +170,44 @@ export default function FiltroMapaPrecio({
     }, 10000);
 
     return () => clearInterval(interval);
-  },  [ubicacionUsuario, precioMin, precioMax, texto, distancia, fechaInicio, fechaFin]);
+  }, [
+    ubicacionUsuario,
+    precioMin,
+    precioMax,
+    texto,
+    distancia,
+    fechaInicio,
+    fechaFin,
+  ]);
 
   const renderEstrellas = (cal: number | null) => {
-    if (cal === null) return "Sin calificación";
+    const baseClass =
+      "absolute top-2 left-2 bg-white bg-opacity-80 px-2 py-1 rounded text-xs font-semibold text-yellow-500 flex items-center gap-[2px]";
+
+    if (cal === null) {
+      return (
+        <div className={baseClass}>
+          <span>Sin calificación</span>
+        </div>
+      );
+    }
 
     const llenas = Math.floor(cal);
-    const media = cal % 1 >= 0.5;
-    const vacias = 5 - llenas - (media ? 1 : 0);
+    const media = cal % 1 >= 0.5 ? 1 : 0;
+    const vacias = 5 - llenas - media;
 
     return (
-      <div className="absolute top-2 left-2 bg-white bg-opacity-80 px-2 py-1 rounded text-xs font-semibold text-yellow-500">
-        {"★".repeat(llenas)}
-        {media ? "½" : ""}
-        {"☆".repeat(vacias)}
+      <div className={baseClass}>
+        {Array.from({ length: llenas }, (_, i) => (
+          <FaStar key={`full-${i}`} />
+        ))}
+        {media === 1 && <FaStarHalfAlt />}
+        {Array.from({ length: vacias }, (_, i) => (
+          <FaRegStar key={`empty-${i}`} />
+        ))}
       </div>
     );
   };
-
   return (
     <div className="w-full mt-6 rounded-xl shadow-md overflow-hidden border border-gray-200 bg-white">
       {/* Inputs de precio */}
@@ -206,7 +227,7 @@ export default function FiltroMapaPrecio({
           className="border px-3 py-1 rounded-md text-sm"
         />
       </div>
-      
+
       {/* Mapa */}
       <div className="h-[500px] w-full relative z-0">
         <MapContainer
@@ -250,23 +271,30 @@ export default function FiltroMapaPrecio({
               <Popup closeButton={false} autoClose={false}>
                 <div className="w-[160px] sm:w-[220px] md:w-[260px] max-w-[90vw] relative">
                   {renderEstrellas(v.calificacion)}
+
                   <img
                     src={v.imagen}
                     alt={v.nombre}
-                    className="w-full h-14 sm:h-24 object-cover rounded-md mb-1"
+                    className="w-full h-[75px] sm:h-[82px] object-cover rounded-md mb-[2px]"
                   />
-                  <h3 className="text-[9px] sm:text-sm font-semibold text-gray-800 leading-tight">
+
+                  <div className="text-gray-800 text-[9px] sm:text-sm font-semibold leading-tight m-0 p-0">
                     {v.nombre}
-                  </h3>
-                  <span className="text-green-600 font-semibold text-[8px] sm:text-xs">
-                    Disponible
-                  </span>
-                  <p className="text-[8px] sm:text-xs text-gray-600 mt-1 leading-tight">
+                  </div>
+
+                  <div className="text-gray-600 text-[8px] sm:text-xs leading-tight m-0 p-0">
                     {v.descripcion}
-                  </p>
-                  <p className="text-orange-600 font-bold text-[9px] sm:text-sm mt-1">
-                    Bs. {v.precio}/día
-                  </p>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[8px] sm:text-xs mt-[2px] leading-tight m-0 p-0">
+                    <span className="text-orange-600 font-bold text-[9px] sm:text-sm">
+                      Bs. {v.precio}/día
+                    </span>
+                    <span className="text-green-600 font-semibold">
+                      Disponible
+                    </span>
+                  </div>
+
                   <button className="mt-2 w-full bg-[#808080] hover:bg-[#6e6e6e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium">
                     Ver Detalles
                   </button>

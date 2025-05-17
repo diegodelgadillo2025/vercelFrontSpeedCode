@@ -74,7 +74,7 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
       <div className="max-w-3xl mx-auto px-4 py-6 bg-white rounded-xl shadow-lg">
         <div className="relative mb-6">
           <button
-            onClick={() => setModoPago(null)} 
+            onClick={() => setModoPago(null)}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 flex items-center gap-1 text-blue-600 hover:text-blue-800 transition text-sm font-medium focus:outline-none"
             aria-label="Volver atrás"
           >
