@@ -66,6 +66,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     return R * c;
   };
 
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
   const fetchGPSVehicles = async (lat: number, lng: number, dkm: number) => {
     setIsLoading(true);
     setError("");
@@ -110,20 +112,24 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
     }
   };
   
-  // Manejador del botón Filtrar
+  // Actualiza el handleFilterClick para pasar la ubicación
   const handleFilterClick = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log("[DEBUG] Coordenadas obtenidas:", latitude, longitude); // Log de coordenadas
-        fetchGPSVehicles(latitude, longitude, selectedDistance);
-      },
-      (error) => {
-        console.error("[ERROR] Geolocalización fallida:", error.message);
-        alert("No se pudo obtener tu ubicación. Asegúrate de permitir el acceso.");
-      }
-    );
+    if (userLocation) {
+      fetchGPSVehicles(userLocation[0], userLocation[1], selectedDistance);
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+          fetchGPSVehicles(latitude, longitude, selectedDistance);
+        },
+        (error) => {
+          console.error("Error de geolocalización:", error);
+        }
+      );
+    }
   };
+  
   // Guardar y cargar estado del filtro
 useEffect(() => {
   // Cargar estado al montar
@@ -1023,6 +1029,7 @@ useEffect(() => {
     distancia={selectedDistance.toString()}
     fechaInicio={startDate ? dayjs(startDate).format("YYYY-MM-DD") : ""}
     fechaFin={endDate ? dayjs(endDate).format("YYYY-MM-DD") : ""}
+    onLocationChange={setUserLocation} // Prop agregada
   />
 )}
 
