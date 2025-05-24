@@ -80,6 +80,7 @@ interface FiltroMapaPrecioProps {
   distancia: string;
   fechaInicio: string;
   fechaFin: string;
+  onLocationChange?: (pos: [number, number]) => void; // Nueva prop
 }
 
 export default function FiltroMapaPrecio({
@@ -87,6 +88,7 @@ export default function FiltroMapaPrecio({
   distancia,
   fechaInicio,
   fechaFin,
+  onLocationChange // Añade esta prop desestructurada
 }: FiltroMapaPrecioProps) {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [ubicacionUsuario, setUbicacionUsuario] = useState<
@@ -164,12 +166,8 @@ export default function FiltroMapaPrecio({
   };
 
   useEffect(() => {
-    fetchVehiculos(); // Llamada inicial
-
-    const interval = setInterval(() => {
-      fetchVehiculos(); // cada 10s
-    }, 10000);
-
+    fetchVehiculos();
+    const interval = setInterval(fetchVehiculos, 10000);
     return () => clearInterval(interval);
   }, [
     ubicacionUsuario,
@@ -315,16 +313,27 @@ export default function FiltroMapaPrecio({
 
           {ubicacionUsuario && (
             <>
-              <Marker position={ubicacionUsuario} icon={iconoUsuario}>
+              <Marker 
+                position={ubicacionUsuario} 
+                icon={iconoUsuario}
+                draggable={true}
+                eventHandlers={{
+                  dragend: (e) => {
+                    const newPos = e.target.getLatLng();
+                    setUbicacionUsuario([newPos.lat, newPos.lng]);
+                    onLocationChange?.([newPos.lat, newPos.lng]); // Usa la prop desestructurada
+                  }
+                }}
+              >
                 <Tooltip permanent direction="top" offset={[0, -10]}>
-                  Tú estás aquí
+                  Arrástrame para buscar vehículos cercanos
                 </Tooltip>
               </Marker>
 
               {distancia.trim() !== "" && (
                 <Circle
                   center={ubicacionUsuario}
-                  radius={Number(distancia.trim()) * 1000} // convertir km a metros
+                  radius={Number(distancia.trim()) * 1000}
                   pathOptions={{
                     color: "blue",
                     fillColor: "blue",
