@@ -1,7 +1,7 @@
 'use client';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import ReservaActiva from '@/app/components/reserva/ReservaActiva';
+import ReservaVehiculo from '@/app/components/reserva/ReservaVehiculo';
 
 export default function Page() {
   return (
@@ -14,8 +14,7 @@ export default function Page() {
 function ReservaContent() {
   const searchParams = useSearchParams();
   const idParam = searchParams.get('id');
-  const id = idParam ? parseInt(idParam) : null; // Convertir a número aquí
+  const id = idParam ? parseInt(idParam) : null;
 
-  return <ReservaActiva id={id} />;
-
+  return <ReservaVehiculo id={id} />;
 }

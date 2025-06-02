@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Modal from "./Modal";
-
+//pago qr
 interface PagoQRProps {
   loading: boolean;
   qrImage: string;

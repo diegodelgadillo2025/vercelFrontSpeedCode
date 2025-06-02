@@ -13,7 +13,7 @@ interface VistaPagoProps {
   id: string | null;
   monto: string | null;
 }
-
+//cambio de prueba
 const VistaPago = ({ id, monto }: VistaPagoProps) => {
   const router = useRouter();
   const [modoPago, setModoPago] = useState<string | null>(null);
@@ -23,6 +23,9 @@ const VistaPago = ({ id, monto }: VistaPagoProps) => {
   const [vehiculo, setVehiculo] = useState<any>(null);
   const [idReserva, setIdReserva] = useState<number | null>(null);
 
+  
+
+  
   const [nombreTitular, setNombreTitular] = useState("");
   const [numeroTarjeta, setNumeroTarjeta] = useState("");
   const [cvv, setCvv] = useState("");

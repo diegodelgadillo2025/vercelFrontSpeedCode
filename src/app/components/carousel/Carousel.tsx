@@ -127,4 +127,5 @@ export default function Carousel() {
       </button>
     </div>
   );
-}
+} 
+// comentario guia para el desarrollo de la pagina de inicio
