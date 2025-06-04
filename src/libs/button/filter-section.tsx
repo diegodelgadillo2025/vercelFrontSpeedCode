@@ -114,21 +114,24 @@ const FilterSection: React.FC<FilterSectionProps> = ({ windowWidth, onFilter }) 
   
   // Actualiza el handleFilterClick para pasar la ubicación
   const handleFilterClick = () => {
-    if (userLocation) {
-      fetchGPSVehicles(userLocation[0], userLocation[1], selectedDistance);
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
-          fetchGPSVehicles(latitude, longitude, selectedDistance);
-        },
-        (error) => {
-          console.error("Error de geolocalización:", error);
-        }
-      );
+    if (typeof window !== "undefined") {
+      if (userLocation) {
+        fetchGPSVehicles(userLocation[0], userLocation[1], selectedDistance);
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setUserLocation([latitude, longitude]);
+            fetchGPSVehicles(latitude, longitude, selectedDistance);
+          },
+          (error) => {
+            console.error("Error de geolocalización:", error);
+          }
+        );
+      }
     }
   };
+  
   
   // Guardar y cargar estado del filtro
 useEffect(() => {
@@ -1002,9 +1005,14 @@ useEffect(() => {
           </div>
         )}
       </div>
-      <div className="relative">
-          <FiltroAeropuerto />
-      </div>
+      <div style={{ flex: 1, minWidth: windowWidth < 1024 ? '45%' : '200px', position: 'relative' }}>
+      <FiltroAeropuerto
+  onUbicacionSeleccionada={(lat: number, lng: number) => {
+    setUserLocation([lat, lng]);        // Guarda ubicación manual
+    fetchGPSVehicles(lat, lng, selectedDistance); // Aplica filtro
+  }}
+/>
+</div>
 
         <button
           onClick={() => setMostrarMapa((prev) => !prev)}
@@ -1023,15 +1031,18 @@ useEffect(() => {
   {isLoading ? "Filtrar" : "Filtrar"}
 </button>
 {error && <p style={{ color: "red" }}>{error}</p>}
-      {mostrarMapa && (
+{mostrarMapa && (
   <MapaFiltro
     texto={searchTerm}
     distancia={selectedDistance.toString()}
     fechaInicio={startDate ? dayjs(startDate).format("YYYY-MM-DD") : ""}
     fechaFin={endDate ? dayjs(endDate).format("YYYY-MM-DD") : ""}
-    onLocationChange={setUserLocation} // Prop agregada
+    lat={userLocation?.[0]}
+    lng={userLocation?.[1]}
+    onLocationChange={setUserLocation}
   />
 )}
+
 
       {showDateError && (
         <div style={{

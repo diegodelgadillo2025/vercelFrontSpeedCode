@@ -1,21 +1,17 @@
-import '../globals.css'
+import '../globals.css';
 
 export const metadata = {
   generator: 'REDIBO'
 };
 
-export default function RootLayout({
+export default function Layout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <title>REDIBO</title>
-        <meta name="description" content="REDIBO Busqueda de Vehiculos" />
-      </head>
-      <body style={{ margin: 0, padding: 0 }}>{children}</body>
-    </html>
-  )
+    <main style={{ margin: 0, padding: 0 }}>
+      {children}
+    </main>
+  );
 }

@@ -92,8 +92,13 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
       link.href = url;
       link.download = "codigo_qr.png"; // nombre del archivo
       document.body.appendChild(link);
-      link.click(); // dispara la descarga
-      document.body.removeChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode === document.body) {
+          document.body.removeChild(link);
+        }
+      }, 0);
+         
       URL.revokeObjectURL(url); // limpia la URL temporal
     } catch (error) {
       console.error("Error al descargar el QR:", error);
@@ -141,7 +146,12 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
             link.download = "comprobante_pago.png";
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
+            setTimeout(() => {
+              if (link.parentNode === document.body) {
+                document.body.removeChild(link);
+              }
+            }, 0);
+            
             URL.revokeObjectURL(url);
           } catch (err) {
             console.error("Error al descargar el comprobante:", err);

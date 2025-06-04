@@ -8,11 +8,18 @@ export default function ReservaExpirada() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = '/dist/cancelacion.js';
     script.defer = true;
     document.body.appendChild(script);
+  
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
   }, []);
+  
 
   return (
     <div className="container text-center p-6 space-y-4">
