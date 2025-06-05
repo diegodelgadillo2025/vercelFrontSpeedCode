@@ -1,5 +1,5 @@
 "use client";
-
+//filtros version 2
 import { useRef, useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
