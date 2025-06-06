@@ -31,6 +31,17 @@ export default function MapaConFiltrosEstaticos() {
   const [aeropuertoStyle, setAeropuertoStyle] = useState({ top: 0, left: 0 });
   const [distanciaStyle, setDistanciaStyle] = useState({ top: 0, left: 0 });
   const [nombreAeropuerto, setNombreAeropuerto] = useState("Aeropuerto");
+  /*Agregado para back filtrar aeropuerto */
+  const [busquedaAeropuerto, setBusquedaAeropuerto] = useState("");
+  const [resultadosAeropuerto, setResultadosAeropuerto] = useState<
+    { idUbicacion: number; nombre: string; latitud: number; longitud: number }[]
+  >([]);
+  const [aeropuertoSeleccionado, setAeropuertoSeleccionado] = useState<{
+    nombre: string;
+    latitud: number;
+    longitud: number;
+  } | null>(null);
+  /*hasta aqui de filtrar aeropuerto*/
   const [mostrarFechaInicio, setMostrarFechaInicio] = useState(false);
   const [mostrarFechaFin, setMostrarFechaFin] = useState(false);
   const [fechaInicio, setFechaInicio] = useState<string | null>(null);
@@ -43,7 +54,30 @@ export default function MapaConFiltrosEstaticos() {
   const [precioMax, setPrecioMax] = useState<number | null>(null);
   const [precioMinStyle, setPrecioMinStyle] = useState({ top: 0, left: 0 });
   const [precioMaxStyle, setPrecioMaxStyle] = useState({ top: 0, left: 0 });
+  /*para recuperar el filtrar aeropuerto*/
+  useEffect(() => {
+    if (busquedaAeropuerto.trim() === "") {
+      setResultadosAeropuerto([]);
+      return;
+    }
 
+    const fetchResultados = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/autocompletar/aeropuerto?q=${busquedaAeropuerto}`
+        );
+        const data = await res.json();
+        setResultadosAeropuerto(data);
+      } catch (err) {
+        console.error("Error al buscar aeropuerto:", err);
+      }
+    };
+
+    const timeout = setTimeout(fetchResultados, 300); // debounce
+    return () => clearTimeout(timeout);
+  }, [busquedaAeropuerto]);
+
+  /*hasta aqui es para recuperar el filtrar aeropuerto */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -236,13 +270,49 @@ export default function MapaConFiltrosEstaticos() {
           <label className="block text-sm mb-1">Buscar aeropuerto:</label>
           <input
             type="text"
-            value="Wilsterman"
-            readOnly
+            value={busquedaAeropuerto}
+            onChange={(e) => {
+              setBusquedaAeropuerto(e.target.value);
+              setAeropuertoSeleccionado(null); // limpiar selección previa
+            }}
+            placeholder="Ej: Wilstermann"
             className="w-full border p-1 rounded mb-2 text-sm"
           />
+          {resultadosAeropuerto.length > 0 && (
+            <ul className="border rounded max-h-40 overflow-y-auto mb-2">
+              {resultadosAeropuerto.map((a) => (
+                <li
+                  key={a.idUbicacion}
+                  onClick={() => {
+                    setAeropuertoSeleccionado({
+                      nombre: a.nombre,
+                      latitud: a.latitud,
+                      longitud: a.longitud,
+                    });
+                    setBusquedaAeropuerto(a.nombre);
+                    setResultadosAeropuerto([]);
+                  }}
+                  className="cursor-pointer px-2 py-1 hover:bg-gray-200 text-sm"
+                >
+                  {a.nombre}
+                </li>
+              ))}
+            </ul>
+          )}
           <button
-            onClick={aplicarAeropuerto}
-            className="w-full bg-green-600 text-white rounded px-2 py-1 text-sm"
+            onClick={() => {
+              if (!aeropuertoSeleccionado)
+                return alert("Selecciona un aeropuerto");
+              setLat(aeropuertoSeleccionado.latitud);
+              setLng(aeropuertoSeleccionado.longitud);
+              setEstadoUbicacion("aeropuerto");
+              setNombreAeropuerto(aeropuertoSeleccionado.nombre);
+              setMostrarAeropuerto(false);
+              setBusquedaAeropuerto("");
+              setResultadosAeropuerto([]);
+            }}
+            className="w-full bg-green-600 text-white rounded px-2 py-1 text-sm disabled:bg-gray-400"
+            disabled={!aeropuertoSeleccionado}
           >
             Aplicar
           </button>
