@@ -119,63 +119,59 @@ export default function MapaConFiltrosEstaticos() {
     };
   }, []);
 
+
+  // ✅ Solo se debe mostrar un panel a la vez
+  const cerrarTodosLosPaneles = () => {
+    setMostrarSelector(false);
+    setMostrarAeropuerto(false);
+    setMostrarDistanciaSlider(false);
+    setMostrarFechaInicio(false);
+    setMostrarFechaFin(false);
+    setMostrarPrecioMin(false);
+    setMostrarPrecioMax(false);
+  };
+
   const handleUbicacion = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-    setDropdownStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarSelector((prev) => !prev);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDropdownStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarSelector(true);
   };
   const handleAeropuerto = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-    setAeropuertoStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarAeropuerto((prev) => !prev);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setAeropuertoStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarAeropuerto(true);
   };
   const handleDistancia = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-    setDistanciaStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarDistanciaSlider((prev) => !prev);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDistanciaStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarDistanciaSlider(true);
   };
   const handleFechaInicio = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setFechaInicioStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarFechaInicio((prev) => !prev);
+    setFechaInicioStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarFechaInicio(true);
   };
-
   const handleFechaFin = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setFechaFinStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarFechaFin((prev) => !prev);
+    setFechaFinStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarFechaFin(true);
   };
   const handlePrecioMin = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setPrecioMinStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarPrecioMin((prev) => !prev);
+    setPrecioMinStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarPrecioMin(true);
   };
-
   const handlePrecioMax = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setPrecioMaxStyle({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-    });
-    setMostrarPrecioMax((prev) => !prev);
+    setPrecioMaxStyle({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    cerrarTodosLosPaneles();
+    setMostrarPrecioMax(true);
   };
 
   const aplicarAeropuerto = () => {
