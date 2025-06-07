@@ -9,10 +9,12 @@ import {
   TileLayer,
   Marker,
   useMap,
+  useMapEvents,
   Circle,
   Tooltip,
   Popup,
 } from "react-leaflet";
+
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -23,6 +25,20 @@ function ChangeMapCenter({ lat, lng }: { lat: number; lng: number }) {
   }, [lat, lng]);
   return null;
 }
+
+function ClickOutsideMapHandler({
+  onClickOutside,
+}: {
+  onClickOutside: () => void;
+}) {
+  useMapEvents({
+    click: () => {
+      onClickOutside();
+    },
+  });
+  return null;
+}
+
 function getEstrellas(calificacion: number) {
   const estrellas = [];
   for (let i = 1; i <= 5; i++) {
@@ -36,6 +52,8 @@ function getEstrellas(calificacion: number) {
   }
   return estrellas;
 }
+
+
 export default function MapaConFiltrosEstaticos() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mostrarSelector, setMostrarSelector] = useState(false);
@@ -185,6 +203,37 @@ export default function MapaConFiltrosEstaticos() {
     };
   }, []);
 
+   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const ignorarSelectors = [
+        "button",
+        "input",
+        "form",
+        "label",
+        ".leaflet-container",
+        ".leaflet-popup",
+        ".leaflet-marker-icon",
+        ".leaflet-control",
+        ".leaflet-pane",
+        ".leaflet-interactive",
+        ".leaflet-control-zoom",
+        ".fixed.z-[2000]"
+      ];
+      const clickEnElementoValido = ignorarSelectors.some((selector) =>
+        [...document.querySelectorAll(selector)].some((el) => el.contains(target))
+      );
+      if (!clickEnElementoValido) {
+        cerrarTodosLosPaneles();
+        setResultadosAeropuerto([]);
+      }
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   // ✅ Solo se debe mostrar un panel a la vez
   const cerrarTodosLosPaneles = () => {
     setMostrarSelector(false);
@@ -314,35 +363,38 @@ export default function MapaConFiltrosEstaticos() {
   return (
     <div className="w-full h-screen flex flex-col md:flex-row overflow-hidden px-2 md:px-4 relative">
       {mostrarSelector && (
-        <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
-          style={dropdownStyle}
-        >
-          <form onSubmit={manejarEnlaceGoogleMaps}>
-            <input
-              name="mapUrl"
-              type="text"
-              placeholder="Pegar link aquí"
-              className="w-full border p-1 rounded text-sm mb-2"
-            />
-            <button
-              type="submit"
-              className="w-full bg-orange-500 text-white rounded px-2 py-1 text-sm mb-1"
-            >
-              Usar link personalizada
-            </button>
-          </form>
-          <button
-            onClick={usarUbicacionActual}
-            disabled={cargandoUbicacion}
-            className="w-full bg-blue-700 text-white rounded px-2 py-1 text-sm"
-          >
-            {cargandoUbicacion
-              ? "Obteniendo ubicación..."
-              : "usar mi ubicacion actual"}
-          </button>
-        </div>
-      )}
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={dropdownStyle}
+  >
+    {/* 🔗 Enlace personalizado */}
+    <form onSubmit={manejarEnlaceGoogleMaps} className="space-y-2">
+      <input
+        name="mapUrl"
+        type="text"
+        placeholder="Pegar link de Google Maps"
+        className="w-full border border-gray-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+      />
+      <button
+        type="submit"
+        className="w-full bg-[var(--naranja)] hover:bg-[var(--naranjaOscuro)] text-white rounded-md px-3 py-1.5 text-sm font-semibold transition-colors"
+      >
+        Usar ubicación personalizada
+      </button>
+    </form>
+
+    {/* 📍 Ubicación actual */}
+    <button
+      onClick={usarUbicacionActual}
+      disabled={cargandoUbicacion}
+      className={`mt-2 w-full ${
+        cargandoUbicacion ? "bg-gray-400 cursor-not-allowed" : "bg-[var(--azul-oscuro)] hover:bg-[#0e234c]"
+      } text-white rounded-md px-3 py-1.5 text-sm font-semibold transition-colors`}
+    >
+      {cargandoUbicacion ? "Obteniendo ubicación..." : "Usar mi ubicación actual"}
+    </button>
+  </div>
+)}
 
       {mostrarAeropuerto && (
         <div
@@ -567,6 +619,12 @@ export default function MapaConFiltrosEstaticos() {
             scrollWheelZoom={false}
             className="w-full h-full"
           >
+              <ClickOutsideMapHandler
+    onClickOutside={() => {
+      cerrarTodosLosPaneles();
+      setResultadosAeropuerto([]);
+    }}
+  />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -705,40 +763,44 @@ export default function MapaConFiltrosEstaticos() {
         <div className="flex-1 overflow-y-auto">
           <h2 className="font-bold text-lg mb-3">Resultados</h2>
           <div className="space-y-4">
-            {vehiculos.map((auto) => (
-              <div
-                key={auto.id}
-                className="flex gap-3 border-b pb-3 items-start"
-              >
-                <img
-                  src={auto.imagenUrl || "/no-image.jpg"}
-                  alt="imagen"
-                  className="rounded-md w-20 h-20 object-cover"
-                />
-                <div>
-                  <p className="font-semibold text-sm">
-                    {auto.nombre}{" "}
-                    <span className="bg-yellow-100 px-2 py-0.5 rounded">
-                      BOB. {auto.precio}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-600">{auto.descripcion}</p>
-                  <p className="text-xs text-yellow-500 font-bold flex items-center gap-1">
-                    {auto.calificacion?.toFixed(1)}{" "}
-                    {getEstrellas(auto.calificacion || 0)}
-                  </p>
-                  {auto.distancia !== null && (
-                    <p className="text-xs text-gray-600">
-                      {auto.distancia.toFixed(1)} km - aquí disponible
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-600">
-                    Año: {auto.anio}, Transmisión: {auto.transmision}, Consumo:{" "}
-                    {auto.consumo}
-                  </p>
-                </div>
-              </div>
-            ))}
+{vehiculos.map((auto) => (
+  <div
+    key={auto.id}
+    className="flex gap-3 border-b border-gray-200 pb-3 items-start hover:bg-gray-50 transition-colors rounded-md p-2"
+  >
+    <img
+      src={auto.imagenUrl || "/no-image.jpg"}
+      alt="imagen"
+      className="rounded-md w-20 h-20 object-cover border border-gray-300"
+    />
+    <div className="flex flex-col gap-1 text-[13px]">
+      <p className="font-semibold text-gray-800">
+        {auto.nombre}{" "}
+        <span className="bg-[var(--naranja-46)] text-[var(--negro)] px-2 py-0.5 rounded text-xs">
+          BOB. {auto.precio}
+        </span>
+      </p>
+
+      <p className="text-xs text-gray-600 line-clamp-2">{auto.descripcion}</p>
+
+      <p className="text-xs text-[var(--naranja)] font-bold flex items-center gap-1">
+        {auto.calificacion?.toFixed(1)}{" "}
+        {getEstrellas(auto.calificacion || 0)}
+      </p>
+
+      {auto.distancia !== null && (
+        <p className="text-xs text-gray-600">
+          {auto.distancia.toFixed(1)} km - aquí disponible
+        </p>
+      )}
+
+      <p className="text-xs text-gray-600">
+        Año: {auto.anio}, Transmisión: {auto.transmision}, Consumo: {auto.consumo}
+      </p>
+    </div>
+  </div>
+))}
+
           </div>
         </div>
       </div>
