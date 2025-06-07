@@ -120,7 +120,6 @@ export default function MapaConFiltrosEstaticos() {
     }
   };
 
-
   /*para recuperar el filtrar aeropuerto*/
   useEffect(() => {
     if (busquedaAeropuerto.trim() === "") {
@@ -619,16 +618,38 @@ export default function MapaConFiltrosEstaticos() {
                   </span>
                 </Tooltip>
                 <Popup>
-                  <div className="w-52">
-                    <img
-                      src={auto.imagenUrl || "/no-image.jpg"}
-                      className="w-full h-28 object-cover rounded mb-2"
-                    />
-                    <p className="font-bold text-sm">{auto.nombre}</p>
-                    <p className="text-xs text-gray-600">{auto.descripcion}</p>
-                    <p className="flex gap-0.5 text-yellow-400 mt-1">
-                      {getEstrellas(auto.calificacion || 0)}
-                    </p>
+                  <div className="w-[160px] sm:w-[220px] md:w-[260px] max-w-[90vw] relative">
+                    <div className="relative w-full h-[75px] sm:h-[82px]">
+                      <img
+                        src={auto.imagenUrl || "/no-image.jpg"}
+                        alt={auto.nombre}
+                        className="w-full h-full object-cover rounded-md mb-[2px]"
+                      />
+                      <div className="absolute top-1 left-1 bg-white/80 px-1 rounded text-yellow-500 text-[10px] sm:text-sm flex gap-0.5">
+                        {getEstrellas(auto.calificacion || 0)}
+                      </div>
+                    </div>
+
+                    <div className="text-gray-800 text-[9px] sm:text-sm font-semibold leading-tight m-0 p-0">
+                      {auto.nombre}
+                    </div>
+
+                    <div className="text-gray-600 text-[8px] sm:text-xs leading-tight m-0 p-0">
+                      {auto.descripcion}
+                    </div>
+
+                    <div className="flex justify-between items-center text-[8px] sm:text-xs mt-[2px] leading-tight m-0 p-0">
+                      <span className="text-orange-600 font-bold text-[9px] sm:text-sm">
+                        Bs. {auto.precio}/día
+                      </span>
+                      <span className="text-green-600 font-semibold">
+                        Disponible
+                      </span>
+                    </div>
+
+                    <button className="mt-2 w-full bg-[#808080] hover:bg-[#6e6e6e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium">
+                      Ver Detalles
+                    </button>
                   </div>
                 </Popup>
               </Marker>
