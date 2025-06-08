@@ -3,7 +3,8 @@
 import { useRef, useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+
+import { FaStar, FaStarHalfAlt, FaRegStar, FaCarSide } from "react-icons/fa";
 import {
   MapContainer,
   TileLayer,
@@ -403,10 +404,13 @@ export default function MapaConFiltrosEstaticos() {
 
       {mostrarAeropuerto && (
         <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
           style={aeropuertoStyle}
         >
-          <label className="block text-sm mb-1">Buscar aeropuerto:</label>
+          {/* 🔍 Campo de búsqueda */}
+          <label className="block text-sm mb-1 text-[var(--foreground)] font-medium">
+            Buscar aeropuerto:
+          </label>
           <input
             type="text"
             value={busquedaAeropuerto}
@@ -415,10 +419,12 @@ export default function MapaConFiltrosEstaticos() {
               setAeropuertoSeleccionado(null); // limpiar selección previa
             }}
             placeholder="Ej: Wilstermann"
-            className="w-full border p-1 rounded mb-2 text-sm"
+            className="w-full border border-gray-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
+
+          {/* 📋 Lista de resultados */}
           {resultadosAeropuerto.length > 0 && (
-            <ul className="border rounded max-h-40 overflow-y-auto mb-2">
+            <ul className="mt-2 border border-gray-300 rounded-md max-h-40 overflow-y-auto scrollbar-hide">
               {resultadosAeropuerto.map((a) => (
                 <li
                   key={a.idUbicacion}
@@ -431,13 +437,15 @@ export default function MapaConFiltrosEstaticos() {
                     setBusquedaAeropuerto(a.nombre);
                     setResultadosAeropuerto([]);
                   }}
-                  className="cursor-pointer px-2 py-1 hover:bg-gray-200 text-sm"
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-[var(--naranja-46)] transition-colors"
                 >
                   {a.nombre}
                 </li>
               ))}
             </ul>
           )}
+
+          {/* ✅ Botón aplicar */}
           <button
             onClick={() => {
               if (!aeropuertoSeleccionado)
@@ -450,8 +458,12 @@ export default function MapaConFiltrosEstaticos() {
               setBusquedaAeropuerto("");
               setResultadosAeropuerto([]);
             }}
-            className="w-full bg-green-600 text-white rounded px-2 py-1 text-sm disabled:bg-gray-400"
             disabled={!aeropuertoSeleccionado}
+            className={`mt-3 w-full ${
+              aeropuertoSeleccionado
+                ? "bg-[var(--azul-oscuro)] hover:bg-[#0e234c]"
+                : "bg-gray-400 cursor-not-allowed"
+            } text-white rounded-md px-3 py-1.5 text-sm font-semibold transition-colors`}
           >
             Aplicar
           </button>
@@ -460,65 +472,78 @@ export default function MapaConFiltrosEstaticos() {
 
       {mostrarDistanciaSlider && (
         <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
           style={distanciaStyle}
         >
-          <label className="text-sm mb-1 block">
+          {/* 🎯 Etiqueta del slider */}
+          <label className="block text-sm text-[var(--foreground)] mb-2 font-medium">
             Seleccionar distancia (km):
           </label>
+
+          {/* 📏 Slider */}
           <input
             type="range"
             min="1"
             max="50"
             value={selectedDistance}
             onChange={(e) => setSelectedDistance(Number(e.target.value))}
-            className="w-full"
+            className="w-full accent-[var(--naranja)] cursor-pointer"
           />
-          <div className="text-center text-sm mt-2">{selectedDistance} km</div>
+
+          {/* 📍 Distancia seleccionada */}
+          <div className="text-center text-sm mt-3 font-semibold text-[var(--foreground)]">
+            {selectedDistance} km
+          </div>
         </div>
       )}
+
       {mostrarFechaInicio && (
         <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
           style={fechaInicioStyle}
         >
-          <label className="text-sm block mb-2">
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
             Selecciona fecha de inicio:
           </label>
           <input
             type="date"
             value={fechaInicio || ""}
             onChange={(e) => setFechaInicio(e.target.value)}
-            className="w-full border px-2 py-1 text-sm rounded"
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
         </div>
       )}
 
       {mostrarFechaFin && (
         <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
           style={fechaFinStyle}
         >
-          <label className="text-sm block mb-2">Selecciona fecha de fin:</label>
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Selecciona fecha de fin:
+          </label>
           <input
             type="date"
             value={fechaFin || ""}
             onChange={(e) => setFechaFin(e.target.value)}
-            className="w-full border px-2 py-1 text-sm rounded"
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
         </div>
       )}
+
       {mostrarPrecioMin && (
         <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
           style={precioMinStyle}
         >
-          <label className="text-sm block mb-2">Precio mínimo (BOB):</label>
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Precio mínimo (BOB):
+          </label>
           <input
             type="number"
             value={precioMin !== null ? precioMin : ""}
             onChange={(e) => setPrecioMin(Number(e.target.value))}
-            className="w-full border px-2 py-1 text-sm rounded"
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
             min={0}
           />
         </div>
@@ -526,15 +551,17 @@ export default function MapaConFiltrosEstaticos() {
 
       {mostrarPrecioMax && (
         <div
-          className="fixed z-[2000] bg-white border-black border rounded p-3 shadow-xl w-64"
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
           style={precioMaxStyle}
         >
-          <label className="text-sm block mb-2">Precio máximo (BOB):</label>
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Precio máximo (BOB):
+          </label>
           <input
             type="number"
             value={precioMax !== null ? precioMax : ""}
             onChange={(e) => setPrecioMax(Number(e.target.value))}
-            className="w-full border px-2 py-1 text-sm rounded"
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
             min={0}
           />
         </div>
@@ -773,12 +800,18 @@ export default function MapaConFiltrosEstaticos() {
                 key={auto.id}
                 className="flex gap-3 border-b border-gray-200 pb-3 items-start hover:bg-gray-50 transition-colors rounded-md p-2"
               >
-                <img
-                  src={auto.imagenUrl || "/no-image.jpg"}
-                  alt="imagen"
-                  className="rounded-md w-20 h-20 object-cover border border-gray-300"
-                />
-                <div className="flex flex-col gap-1 text-[13px]">
+                <div className="min-w-[80px] max-w-[80px] h-[80px] flex-shrink-0">
+                  <img
+                    src={
+                      auto.imagenUrl ||
+                      "https://previews.123rf.com/images/nastudio/nastudio2007/nastudio200700383/152011677-silhouette-car-icon-for-logo-vehicle-view-from-side-vector-illustration.jpg"
+                    }
+                    alt="imagen"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1 text-[13px] flex-1">
                   <p className="font-semibold text-gray-800">
                     {auto.nombre}{" "}
                     <span className="bg-[var(--naranja-46)] text-[var(--negro)] px-2 py-0.5 rounded text-xs">
@@ -797,7 +830,10 @@ export default function MapaConFiltrosEstaticos() {
 
                   {auto.distancia !== null && (
                     <p className="text-xs text-gray-600">
-                      {auto.distancia.toFixed(1)} km - aquí disponible
+                      {auto.distancia.toFixed(1)} km -{" "}
+                      <span className="text-[var(--verde)] font-semibold">
+                        DISPONIBLE
+                      </span>
                     </p>
                   )}
 
