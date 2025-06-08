@@ -379,7 +379,7 @@ export default function MapaConFiltrosEstaticos() {
             />
             <button
               type="submit"
-              className="w-full bg-[var(--naranja)] hover:bg-[var(--naranjaOscuro)] text-white rounded-md px-3 py-1.5 text-sm font-semibold transition-colors"
+              className="w-full bg-[var(--naranja)] hover:bg-[var(--naranja)] text-white rounded-md px-3 py-1.5 text-sm font-semibold transition-colors"
             >
               Usar ubicación personalizada
             </button>
@@ -568,73 +568,96 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       <div className="md:w-2/3 w-full h-1/2 md:h-full relative flex flex-col">
-        <div className="z-[1000] bg-white py-4 relative">
+        <div className="z-[1000] bg-[var(--blanco)] py-4 relative">
           <div
             ref={scrollRef}
             className="overflow-x-auto whitespace-nowrap scrollbar-hide px-1 cursor-grab"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             <div className="inline-flex gap-2 min-w-max items-start">
+              {/* Ubicación */}
               <button
                 type="button"
                 onClick={handleUbicacion}
-                className={`transition rounded-full px-4 py-2 border shadow font-medium text-sm flex items-center gap-1 ${
-                  mostrarSelector ? "bg-gray-100" : "bg-white"
+                className={`transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white ${
+                  mostrarSelector
+                    ? "bg-[var(--naranja)] text-white"
+                    : "bg-[var(--blanco)]"
                 }`}
               >
                 {textoUbicacion} ▼
               </button>
+
+              {/* Aeropuerto */}
               <button
                 type="button"
                 onClick={handleAeropuerto}
-                className="transition rounded-full px-4 py-2 border shadow font-medium text-sm"
+                className="transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white bg-[var(--blanco)]"
               >
                 {nombreAeropuerto} ▼
               </button>
+
+              {/* Distancia */}
               <button
                 type="button"
                 onClick={handleDistancia}
-                className={`transition rounded-full px-4 py-2 border shadow font-medium text-sm flex items-center gap-1 ${
-                  mostrarDistanciaSlider ? "bg-gray-100" : "bg-white"
+                className={`transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white ${
+                  mostrarDistanciaSlider
+                    ? "bg-[var(--naranja)] text-white"
+                    : "bg-[var(--blanco)]"
                 }`}
               >
                 Distancia: {selectedDistance} km ▼
               </button>
+
+              {/* Fecha inicio */}
               <button
                 type="button"
                 onClick={handleFechaInicio}
-                className={`transition rounded-full px-4 py-2 border shadow font-medium text-sm ${
-                  mostrarFechaInicio ? "bg-gray-100" : "bg-white"
+                className={`transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white ${
+                  mostrarFechaInicio
+                    ? "bg-[var(--naranja)] text-white"
+                    : "bg-[var(--blanco)]"
                 }`}
               >
                 {fechaInicio ? `Inicio: ${fechaInicio}` : "FECHA INICIO"} ▼
               </button>
 
+              {/* Fecha fin */}
               <button
                 type="button"
                 onClick={handleFechaFin}
-                className={`transition rounded-full px-4 py-2 border shadow font-medium text-sm ${
-                  mostrarFechaFin ? "bg-gray-100" : "bg-white"
+                className={`transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white ${
+                  mostrarFechaFin
+                    ? "bg-[var(--naranja)] text-white"
+                    : "bg-[var(--blanco)]"
                 }`}
               >
                 {fechaFin ? `Fin: ${fechaFin}` : "FECHA FIN"} ▼
               </button>
+
+              {/* Precio mínimo */}
               <button
                 type="button"
                 onClick={handlePrecioMin}
-                className={`transition rounded-full px-4 py-2 border shadow font-medium text-sm ${
-                  mostrarPrecioMin ? "bg-gray-100" : "bg-white"
+                className={`transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white ${
+                  mostrarPrecioMin
+                    ? "bg-[var(--naranja)] text-white"
+                    : "bg-[var(--blanco)]"
                 }`}
               >
                 {precioMin !== null ? `Mín: BOB ${precioMin}` : "PRECIO MINIMO"}{" "}
                 ▼
               </button>
 
+              {/* Precio máximo */}
               <button
                 type="button"
                 onClick={handlePrecioMax}
-                className={`transition rounded-full px-4 py-2 border shadow font-medium text-sm ${
-                  mostrarPrecioMax ? "bg-gray-100" : "bg-white"
+                className={`transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white ${
+                  mostrarPrecioMax
+                    ? "bg-[var(--naranja)] text-white"
+                    : "bg-[var(--blanco)]"
                 }`}
               >
                 {precioMax !== null ? `Máx: BOB ${precioMax}` : "PRECIO MAXIMO"}{" "}
@@ -711,7 +734,10 @@ export default function MapaConFiltrosEstaticos() {
                   <div className="w-[160px] sm:w-[220px] md:w-[260px] max-w-[90vw] relative">
                     <div className="relative w-full h-[75px] sm:h-[82px]">
                       <img
-                        src={auto.imagenUrl || "/no-image.jpg"}
+                        src={
+                          auto.imagenUrl ||
+                          "https://previews.123rf.com/images/nastudio/nastudio2007/nastudio200700383/152011677-silhouette-car-icon-for-logo-vehicle-view-from-side-vector-illustration.jpg"
+                        }
                         alt={auto.nombre}
                         className="w-full h-full object-cover rounded-md mb-[2px]"
                       />
@@ -729,7 +755,7 @@ export default function MapaConFiltrosEstaticos() {
                     </div>
 
                     <div className="flex justify-between items-center text-[8px] sm:text-xs mt-[2px] leading-tight m-0 p-0">
-                      <span className="text-orange-600 font-bold text-[9px] sm:text-sm">
+                      <span className="text-[var(--naranja)] font-bold text-[9px] sm:text-sm">
                         Bs. {auto.precio}/día
                       </span>
                       <span className="text-green-600 font-semibold">
@@ -750,8 +776,8 @@ export default function MapaConFiltrosEstaticos() {
               center={[lat, lng]}
               radius={selectedDistance * 1000}
               pathOptions={{
-                fillColor: "rgba(0, 162, 255, 0.3)",
-                color: "#00A2FF",
+                fillColor: "var(--azul-opaco)",
+                color: "var(--azul-oscuro)",
               }}
             />
           </MapContainer>
@@ -812,7 +838,7 @@ export default function MapaConFiltrosEstaticos() {
                 </div>
 
                 <div className="flex flex-col gap-1 text-[13px] flex-1">
-                  <p className="font-semibold text-gray-800">
+                  <p className="font-semibold text-[var(--azul-oscuro)]">
                     {auto.nombre}{" "}
                     <span className="bg-[var(--naranja-46)] text-[var(--negro)] px-2 py-0.5 rounded text-xs">
                       BOB. {auto.precio}
