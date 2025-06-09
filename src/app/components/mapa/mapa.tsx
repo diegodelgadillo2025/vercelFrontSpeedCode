@@ -4,6 +4,8 @@ import { useRef, useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 
+import MensajeRedireccion from "../mapa/MensajeRedireccion";
+
 import { FaStar, FaStarHalfAlt, FaRegStar, FaCarSide } from "react-icons/fa";
 import {
   MapContainer,
@@ -55,6 +57,10 @@ function getEstrellas(calificacion: number) {
 }
 
 export default function MapaConFiltrosEstaticos() {
+
+  const [mostrarMensaje, setMostrarMensaje] = useState(false);
+  const [autoReservado, setAutoReservado] = useState<any | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mostrarSelector, setMostrarSelector] = useState(false);
   const [mostrarAeropuerto, setMostrarAeropuerto] = useState(false);
@@ -361,7 +367,6 @@ export default function MapaConFiltrosEstaticos() {
       : estadoUbicacion === "aeropuerto"
       ? "Ubicación: Aeropuerto definido"
       : "Ubicación: Dirección personalizada";
-
   return (
     <div className="w-full h-screen flex flex-col md:flex-row overflow-hidden px-2 md:px-4 relative">
       {mostrarSelector && (
@@ -763,9 +768,21 @@ export default function MapaConFiltrosEstaticos() {
                       </span>
                     </div>
 
-                    <button className="mt-2 w-full bg-[#808080] hover:bg-[#6e6e6e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium">
-                      Ver Detalles
-                    </button>
+<button
+  className="mt-2 w-full bg-[#FCA311] hover:bg-[#e6950e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium"
+  onClick={() => {
+    if (!auto.disponible) {
+      setAutoReservado(auto);
+      setMostrarMensaje(true);
+    } else {
+      // Navegar a la página de detalles del vehículo
+      window.location.href = `/vehiculo/${auto.id}`;
+    }
+  }}
+>
+  RESERVAR
+</button>
+
                   </div>
                 </Popup>
               </Marker>
@@ -883,6 +900,16 @@ export default function MapaConFiltrosEstaticos() {
           scrollbar-width: none;
         }
       `}</style>
+{mostrarMensaje && autoReservado && (
+  <MensajeRedireccion
+    onCerrar={() => setMostrarMensaje(false)}
+    onAceptar={() => {
+      setMostrarMensaje(false);
+      // Redirigir al usuario a la lista filtrada de autos similares
+      window.location.href = `/buscar?similares=true&preferencias=${encodeURIComponent(JSON.stringify(autoReservado))}`;
+    }}
+  />
+)}
     </div>
   );
 }
