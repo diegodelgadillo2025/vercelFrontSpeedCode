@@ -24,15 +24,17 @@ export default function MensajeRedireccion({ onCerrar, onAceptar }: MensajeRedir
 
   return (
     <div
-      className={`fixed inset-0 z-[3000] bg-black bg-opacity-50 flex items-center justify-center transition-opacity ${
-        cerrando ? "opacity-0" : "opacity-100"
-      }`}
-    >
-      <div
-        className={`bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 relative transform transition-transform duration-300 ${
-          visible && !cerrando ? "scale-100" : "scale-95"
-        }`}
-      >
+  className={`fixed inset-0 z-[3000] flex items-center justify-center transition-opacity ${
+    cerrando ? "opacity-0" : "opacity-100"
+  } pointer-events-none`}
+>
+
+<div
+  className={`bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 relative transform transition-transform duration-300 ${
+    visible && !cerrando ? "scale-100" : "scale-95"
+  } pointer-events-auto`}
+>
+
         {/* Botón de cerrar (x) */}
         <button
           onClick={manejarCierre}
