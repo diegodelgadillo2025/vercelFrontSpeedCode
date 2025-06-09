@@ -767,22 +767,21 @@ export default function MapaConFiltrosEstaticos() {
                         Disponible
                       </span>
                     </div>
-
-<button
-  className="mt-2 w-full bg-[#FCA311] hover:bg-[#e6950e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium"
-  onClick={() => {
-    if (!auto.disponible) {
-      setAutoReservado(auto);
-      setMostrarMensaje(true);
-    } else {
-      // Navegar a la página de detalles del vehículo
-      window.location.href = `/vehiculo/${auto.id}`;
-    }
-  }}
->
-  RESERVAR
-</button>
-
+                      <button
+                        className="mt-2 w-full bg-[#FCA311] hover:bg-[#e6950e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium"
+                        onClick={() => {
+                          // if (!auto.disponible) {
+                          if (auto.id !== 60) {
+                            setAutoReservado(auto);
+                            setMostrarMensaje(true);
+                          } else {
+                            // Navegar a la página de detalles del vehículo
+                            window.location.href = `/vehiculo/${auto.id}`;
+                          }
+                        }}
+                      >
+                        RESERVAR
+                      </button>
                   </div>
                 </Popup>
               </Marker>
