@@ -53,12 +53,14 @@ export default function MensajeRedireccion({ onCerrar, onAceptar }: MensajeRedir
           </p>
           
           <div className="flex justify-center gap-3">
-            <button
-              onClick={onAceptar}
-              className="bg-[var(--naranja)] hover:bg-[var(--naranja-oscuro)] text-white font-medium py-2 px-6 rounded-md transition-colors"
-            >
-              Sí, por favor
-            </button>
+          <button
+  onClick={onAceptar}
+  className="bg-[#f97316] hover:bg-[#ea580c] text-white font-medium py-2 px-6 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#f97316]"
+>
+  Sí, por favor
+</button>
+
+
             <button
               onClick={manejarCierre}
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-6 rounded-md transition-colors"
