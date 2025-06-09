@@ -776,7 +776,7 @@ export default function MapaConFiltrosEstaticos() {
                             setMostrarMensaje(true);
                           } else {
                             // Navegar a la página de detalles del vehículo
-                            window.location.href = `/vehiculo/${auto.id}`;
+                            window.location.href = `/pago`;
                           }
                         }}
                       >
@@ -899,16 +899,16 @@ export default function MapaConFiltrosEstaticos() {
           scrollbar-width: none;
         }
       `}</style>
-{mostrarMensaje && autoReservado && (
-  <MensajeRedireccion
-    onCerrar={() => setMostrarMensaje(false)}
-    onAceptar={() => {
-      setMostrarMensaje(false);
-      // Redirigir al usuario a la lista filtrada de autos similares
-      window.location.href = `/buscar?similares=true&preferencias=${encodeURIComponent(JSON.stringify(autoReservado))}`;
-    }}
-  />
-)}
+      {mostrarMensaje && autoReservado && (
+        <MensajeRedireccion
+          onCerrar={() => setMostrarMensaje(false)}
+          onAceptar={() => {
+            setMostrarMensaje(false);
+            // Redirigir al usuario a la lista filtrada de autos similares
+            window.location.href = `/mapa`;
+          }}
+        />
+      )}
     </div>
   );
 }
