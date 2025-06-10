@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { AiOutlineClockCircle } from "react-icons/ai";
@@ -21,6 +21,7 @@ export default function BuscadorVehiculo({
 }: BuscadorVehiculoProps) {
   const [historial, setHistorial] = useState<Busqueda[]>([]);
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
+  const refBuscador = useRef<HTMLDivElement>(null);
   const usuarioId = 1;
 
   const fetchHistorial = async () => {
@@ -63,14 +64,27 @@ export default function BuscadorVehiculo({
     fetchHistorial();
   }, [textoBusqueda]);
 
+  // Cerrar historial si se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (refBuscador.current && !refBuscador.current.contains(event.target as Node)) {
+        setMostrarHistorial(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative flex-1 w-full max-w-md">
+    <div ref={refBuscador} className="relative flex-1 w-full max-w-md">
       <input
         type="text"
         placeholder="Buscar vehículos..."
         value={textoBusqueda}
         onChange={(e) => setTextoBusqueda(e.target.value)}
         className="block w-full pl-10 pr-10 py-2 border border-black rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FCA311] focus:border-transparent text-gray-700"
+        onFocus={() => setMostrarHistorial(true)} // mostrar historial al enfocar
       />
       <button
         type="button"
@@ -114,7 +128,6 @@ export default function BuscadorVehiculo({
               </button>
             </div>
           ))}
-
           <div
             onClick={limpiarHistorialVisual}
             className="text-center py-2 text-sm text-[#FCA311] font-semibold cursor-pointer hover:underline"
