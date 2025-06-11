@@ -143,12 +143,12 @@ export default function MapaGPS({
                 <span className="text-[var(--naranja)] font-bold text-[9px] sm:text-sm">
                   Bs. {auto.precio}/día
                 </span>
-                <span className="text-green-600 font-semibold">Disponible</span>
+                <span className="text-green-600 font-semibold">Estado: {auto.estado}</span>
               </div>
               <button
                 className="mt-2 w-full bg-[#FCA311] hover:bg-[#e6950e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium"
                 onClick={() => {
-                  if (auto.id !== 60) {
+                  if (auto.estado) {
                     setAutoReservado(auto);
                     setMostrarMensaje(true);
                   } else {
