@@ -78,12 +78,44 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
     }
   };
 
-  const guardarConfiguracion = () => {
-    // Aquí iría la lógica para guardar la configuración
-    alert("Configuración de conductores guardada correctamente");
-    setMostrarModalConfirmacion(false);
-    router.back();
-  };
+  const guardarConfiguracion = async () => {
+    //logica del back
+  if (!idReserva) {
+    alert("ID de reserva inválido");
+    return;
+  }
+
+  // Por ahora simula con IDs de usuario que ya existan en tu base de datos
+  const idUsuarios = [4,6,25]; //  Reemplaza con IDs reales desde tu tabla `usuario`
+
+  try {
+    const response = await fetch("http://localhost:3001/api/conductores/asignar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idReserva,
+        idUsuarios,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Conductores asignados correctamente");
+      setMostrarModalConfirmacion(false);
+      router.back();
+    } else {
+      console.error("Error desde backend:", data.error);
+      alert("Error al asignar conductores: " + data.error);
+    }
+  } catch (error) {
+    console.error("Error de red:", error);
+    alert("Error de red al asignar conductores");
+  }
+};
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
