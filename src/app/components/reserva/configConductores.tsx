@@ -89,7 +89,7 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
   const idUsuarios = [4,6,25]; //  Reemplaza con IDs reales desde tu tabla `usuario`
 
   try {
-    const response = await fetch("http://localhost:3001/api/conductores/asignar", {
+    const response = await fetch("https://vercel-back-speed-code.vercel.app/api/conductores/asignar", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
