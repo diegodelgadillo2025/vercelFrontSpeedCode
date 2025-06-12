@@ -520,23 +520,17 @@ export default function MapaConFiltrosEstaticos() {
           </label>
           <input
             type="number"
-            value={precioMax !== null ? precioMax : ""}
-            min={precioMin !== null ? precioMin + 1 : 1}
+            value={precioMin !== null ? precioMin : ""}
             onChange={(e) => {
               const valor = Number(e.target.value);
-              if (isNaN(valor)) return;
-
-              if (precioMin !== null) {
-                // Si hay precio mínimo, el máximo debe ser mayor
-                if (valor <= precioMin) return;
-              } else {
-                // Si no hay mínimo, el máximo debe ser mayor a 0
-                if (valor <= 0) return;
+              if (valor <= 0) return; // ❌ No permitir 0 ni negativos
+              setPrecioMin(valor);
+              if (precioMax !== null && valor >= precioMax) {
+                setPrecioMax(null); // ❌ Resetea máximo si ya no es válido
               }
-
-              setPrecioMax(valor);
             }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+            min={1} // también visualmente
           />
         </div>
       )}
@@ -552,9 +546,13 @@ export default function MapaConFiltrosEstaticos() {
           <input
             type="number"
             value={precioMax !== null ? precioMax : ""}
-            onChange={(e) => setPrecioMax(Number(e.target.value))}
+            onChange={(e) => {
+              const valor = Number(e.target.value);
+              if (valor <= 0 || isNaN(valor)) return; // ❌ no permitir 0 o negativo
+              setPrecioMax(valor);
+            }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-            min={0}
+            min={1} // ayuda visual (pero no bloquea funcionalidad)
           />
         </div>
       )}
