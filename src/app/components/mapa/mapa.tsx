@@ -444,17 +444,25 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarFechaInicio && (
-        <div className="fixed z-[2000] ...">
-          <label>Selecciona fecha de inicio:</label>
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={fechaInicioStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Selecciona fecha de inicio:
+          </label>
           <input
             type="date"
             value={fechaInicio || ""}
-            min={new Date().toISOString().split("T")[0]} // mínimo: hoy
+            min={new Date().toISOString().split("T")[0]} // hoy mínimo
             onChange={(e) => {
               const hoy = new Date().toISOString().split("T")[0];
-              if (e.target.value < hoy) return; // no permitir fechas pasadas
-              setFechaInicio(e.target.value);
-              setFechaFin(null); // resetear fecha fin si cambia inicio
+              const seleccionada = e.target.value;
+
+              if (seleccionada < hoy) return; // evitar fecha pasada
+
+              setFechaInicio(seleccionada);
+              setFechaFin(null); // resetea fecha fin
             }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
@@ -462,12 +470,18 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarFechaFin && (
-        <div className="fixed z-[2000] ...">
-          <label>Selecciona fecha de fin:</label>
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={fechaFinStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Selecciona fecha de fin:
+          </label>
           <input
             type="date"
             value={fechaFin || ""}
-            min={fechaInicio || ""}
+            disabled={!fechaInicio} // solo habilitado si hay inicio
+            min={fechaInicio || ""} // no antes de inicio
             max={
               fechaInicio
                 ? new Date(
@@ -479,15 +493,16 @@ export default function MapaConFiltrosEstaticos() {
                     .split("T")[0]
                 : ""
             }
-            disabled={!fechaInicio}
             onChange={(e) => {
               if (!fechaInicio) return;
-              const inicio = new Date(fechaInicio);
+
               const seleccionada = new Date(e.target.value);
+              const inicio = new Date(fechaInicio);
               const limite = new Date(fechaInicio);
               limite.setMonth(limite.getMonth() + 18);
 
               if (seleccionada < inicio || seleccionada > limite) return;
+
               setFechaFin(e.target.value);
             }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
