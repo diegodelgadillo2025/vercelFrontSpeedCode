@@ -95,9 +95,9 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       setLoading(true);
 
       const response = await axios.post(
-        `https://localhost:3001/pagos/pagarConTarjeta/${idReserva}`,
-        datosPago
-      );
+       `http://vercelbackspeedcode.onrender.com/pagos/pagarConTarjeta/${idReserva}`,
+  datosPago
+);
 
       if (response.status === 200 && response.data?.comprobanteURL) {
         setMensajeModalTarjeta("Pago realizado con éxito.");
