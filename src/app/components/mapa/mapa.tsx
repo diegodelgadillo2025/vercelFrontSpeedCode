@@ -511,51 +511,71 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarPrecioMin && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={precioMinStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Precio mínimo (BOB):
-          </label>
-          <input
-            type="number"
-            value={precioMin !== null ? precioMin : ""}
-            onChange={(e) => {
-              const valor = Number(e.target.value);
-              if (valor <= 0) return; // ❌ No permitir 0 ni negativos
-              setPrecioMin(valor);
-              if (precioMax !== null && valor >= precioMax) {
-                setPrecioMax(null); // ❌ Resetea máximo si ya no es válido
-              }
-            }}
-            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-            min={1} // también visualmente
-          />
-        </div>
-      )}
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={precioMinStyle}
+  >
+    <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+      Precio mínimo (BOB):
+    </label>
+    <input
+      type="number"
+      value={precioMin !== null ? precioMin : ""}
+      onChange={(e) => {
+        const input = e.target.value;
 
-      {mostrarPrecioMax && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={precioMaxStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Precio máximo (BOB):
-          </label>
-          <input
-            type="number"
-            value={precioMax !== null ? precioMax : ""}
-            onChange={(e) => {
-              const valor = Number(e.target.value);
-              if (valor <= 0 || isNaN(valor)) return; // ❌ no permitir 0 o negativo
-              setPrecioMax(valor);
-            }}
-            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-            min={1} // ayuda visual (pero no bloquea funcionalidad)
-          />
-        </div>
-      )}
+        // 🟠 Permitir borrar el input
+        if (input.trim() === "") {
+          setPrecioMin(null);
+          return;
+        }
+
+        const valor = Number(input);
+        if (valor <= 0 || isNaN(valor)) return;
+
+        setPrecioMin(valor);
+
+        // Opcional: resetear max si ya no es válido
+        if (precioMax !== null && valor >= precioMax) {
+          setPrecioMax(null);
+        }
+      }}
+      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+      min={1}
+    />
+  </div>
+)}
+{mostrarPrecioMax && (
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={precioMaxStyle}
+  >
+    <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+      Precio máximo (BOB):
+    </label>
+    <input
+      type="number"
+      value={precioMax !== null ? precioMax : ""}
+      onChange={(e) => {
+        const input = e.target.value;
+
+        // 🟠 Permitir borrar el input
+        if (input.trim() === "") {
+          setPrecioMax(null);
+          return;
+        }
+
+        const valor = Number(input);
+        if (valor <= 0 || isNaN(valor)) return;
+
+        setPrecioMax(valor);
+      }}
+      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+      min={1}
+    />
+  </div>
+)}
+
 
       <div className="md:w-2/3 w-full h-1/2 md:h-full relative flex flex-col">
         <div className="z-[1000] bg-[var(--blanco)] py-4 relative">
