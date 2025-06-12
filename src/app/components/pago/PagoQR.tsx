@@ -25,11 +25,11 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
       if (!qrImage && idReserva && monto) {
         try {
           const response = await axios.get(
-            `https://vercelbackspeedcode.onrender.com/generarQR/crear/${monto}/${idReserva}`
+            `http://localhost:3001/generarQR/crear/${monto}/${idReserva}`
           );
           const data = response.data;
           if (data?.archivoQR) {
-            setQrURL(`https://vercelbackspeedcode.onrender.com/qr/${data.archivoQR}`);
+            setQrURL(`http://localhost:3001/qr/${data.archivoQR}`);
           } else {
             alert("Error al crear el QR.");
           }
@@ -48,14 +48,15 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
       alert("Faltan datos para regenerar el QR.");
       return;
     }
-
+    
+    
     try {
       const response = await axios.get(
-        `https://vercelbackspeedcode.onrender.com/generarQR/regenerar/${monto}/${idReserva}`
+        `http://localhost:3001/generarQR/regenerar/${monto}/${idReserva}`
       );
       const data = response.data;
       if (data?.archivoQR) {
-        setQrURL(`https://vercelbackspeedcode.onrender.com/qr/${data.archivoQR}`);
+        setQrURL(`http://localhost:3001/qr/${data.archivoQR}`);
       } else {
         alert("Error al regenerar el QR.");
       }
@@ -82,9 +83,11 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
       document.body.appendChild(link);
       link.click();
       setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        if (link.parentNode === document.body) {
+          document.body.removeChild(link);
+        }
       }, 0);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error al descargar el QR:", error);
       alert("Ocurrió un error al intentar descargar el código QR.");
@@ -92,84 +95,86 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
   };
 
   const handleConfirmacionQR = async () => {
-    const correoElectronico = "pruebaTEST@gmail.com";
+  const correoElectronico = "pruebaTEST@gmail.com";
 
-    const idNumerico = Number(idReserva);
-    const montoNumerico = Number(monto);
+  // Validaciones explícitas
+  if (!idReserva || isNaN(Number(idReserva))) {
+    setMensajeModalQR("ID de reserva inválido.");
+    return;
+  }
 
-    if (isNaN(idNumerico)) {
-      setMensajeModalQR("ID de reserva no válido.");
-      return;
-    }
+  if (!monto || isNaN(Number(monto))) {
+    setMensajeModalQR("El monto no es un número válido.");
+    return;
+  }
 
-    if (isNaN(montoNumerico) || montoNumerico <= 0) {
-      setMensajeModalQR("El monto no es válido.");
-      return;
-    }
+  if (!qrURL) {
+    setMensajeModalQR("No hay código QR disponible.");
+    return;
+  }
 
-    if (!qrURL) {
-      setMensajeModalQR("No hay código QR disponible.");
-      return;
-    }
+  if (!correoElectronico) {
+    setMensajeModalQR("Correo electrónico no válido.");
+    return;
+  }
 
-    const nombreArchivoQR = qrURL.split("/").pop();
+  const nombreArchivoQR = qrURL.split("/").pop();
 
-    if (!nombreArchivoQR || !nombreArchivoQR.startsWith("qr_")) {
-      setMensajeModalQR("Nombre de archivo QR inválido.");
-      return;
-    }
+  if (!nombreArchivoQR || !nombreArchivoQR.startsWith("qr_")) {
+    setMensajeModalQR("Nombre de archivo QR inválido.");
+    return;
+  }
 
-    const concepto = "Pago con QR";
+  const concepto = "Pago con QR";
 
-    const datosPagoQR = {
-      nombreArchivoQR,
-      monto: montoNumerico,
-      concepto,
-      correoElectronico,
-    };
+  const datosPagoQR = {
+    nombreArchivoQR: nombreArchivoQR,
+    monto: Number(monto).toFixed(2),  // ✅ número como string válido
+    concepto,
+    correoElectronico
+  };
+  
+  
+  try {
+    const response = await axios.post(
+      `http://localhost:3001/pagos/pagarConQR/${idReserva}`,
+      datosPagoQR
+    );
 
-    console.log("\u{1F4E6} Datos enviados:", datosPagoQR);
-    console.log("\u{1F522} Tipo de monto:", typeof datosPagoQR.monto);
+    if (response.status === 200 && response.data?.comprobanteURL) {
+      setMensajeModalQR("Pago realizado con éxito.");
+      const comprobanteURL = response.data.comprobanteURL;
 
-    try {
-      const response = await axios.post(
-        `https://vercelbackspeedcode.onrender.com/pagos/pagarConQR/${idNumerico}`,
-        datosPagoQR
-      );
+      setTimeout(async () => {
+        try {
+          const res = await fetch(comprobanteURL);
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
 
-      if (response.status === 200 && response.data?.comprobanteURL) {
-        setMensajeModalQR("Pago realizado con éxito.");
-        const comprobanteURL = response.data.comprobanteURL;
-
-        setTimeout(async () => {
-          try {
-            const res = await fetch(comprobanteURL);
-            const blob = await res.blob();
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "comprobante_pago.png";
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => {
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }, 0);
-          } catch (err) {
-            console.error("Error al descargar el comprobante:", err);
-          }
-        }, 2000);
-      } else {
-        const msg = response.data?.error || "Error desconocido al pagar.";
-        setMensajeModalQR(msg);
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "comprobante_pago.png";
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }, 0);
+        } catch (err) {
+          console.error("Error al descargar el comprobante:", err);
+        }
+      }, 2000);
+    } else {
+      const msg = response.data?.error || "Error desconocido al pagar.";
       setMensajeModalQR(msg);
     }
-  };
+  } catch (error: any) {
+    console.error("Error:", error);
+    const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
+    setMensajeModalQR(msg);
+  }
+};
+
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 bg-white rounded-xl shadow-lg">
