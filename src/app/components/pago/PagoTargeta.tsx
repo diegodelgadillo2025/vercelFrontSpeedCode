@@ -55,17 +55,15 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const idReserva = searchParams.get("id");
+    const id = searchParams.get("id");
     const montoParam = searchParams.get("monto");
-
-    if (idReserva) {
-      const valor = parseInt(idReserva);
-      if (!isNaN(valor)) setIdReserva(valor);
+    if (id) {
+      const parsed = parseInt(id);
+      if (!isNaN(parsed)) setIdReserva(parsed);
     }
-
     if (montoParam) {
-      const valor = parseFloat(montoParam);
-      if (!isNaN(valor)) setMonto(valor);
+      const parsedMonto = parseFloat(montoParam);
+      if (!isNaN(parsedMonto)) setMonto(parsedMonto);
     }
   }, [searchParams]);
 
@@ -73,19 +71,10 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
     const fechaExpiracion = `${mes}/${anio}`;
     const concepto = "Pago de reserva con tarjeta";
 
-    if (
-      !nombreTitular ||
-      !numeroTarjeta ||
-      !cvv ||
-      !direccion ||
-      !correoElectronico ||
-      !mes ||
-      !anio
-    ) {
+    if (!nombreTitular || !numeroTarjeta || !cvv || !direccion || !correoElectronico || !mes || !anio) {
       setMensajeErrorModal("Por favor completa todos los campos.");
       return;
     }
-
     if (!monto || !idReserva) {
       setMensajeErrorModal("Monto o idReserva no definido. Verifica la URL.");
       return;
@@ -95,7 +84,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       monto,
       concepto,
       nombreTitular,
-      numeroTarjeta,
+      numeroTarjeta: numeroTarjeta.replace(/\s/g, ""),
       fechaExpiracion,
       cvv,
       direccion,
@@ -110,11 +99,11 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
         datosPago
       );
 
-      if (response.status === 200) {
+      if (response.status === 200 && response.data?.comprobanteURL) {
         setMensajeModalTarjeta("Pago realizado con éxito.");
+        const comprobanteURL = response.data.comprobanteURL;
         setTimeout(async () => {
           try {
-            const comprobanteURL = response.data.comprobanteURL;
             const res = await fetch(comprobanteURL);
             const blob = await res.blob();
             const url = URL.createObjectURL(blob);
@@ -127,11 +116,12 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
           } catch (err) {
-            setMensajeErrorModal("Ocurrió un error al intentar descargar el comprobante.");
+            setMensajeErrorModal("Error al descargar comprobante.");
           }
         }, 2000);
       } else {
-        setMensajeErrorModal("Error en el pago: " + (response.data?.mensaje || "Error desconocido"));
+        const msg = response.data?.mensaje || "Error desconocido";
+        setMensajeErrorModal("Error en el pago: " + msg);
       }
     } catch (error: any) {
       const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
