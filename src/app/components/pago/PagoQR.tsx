@@ -4,40 +4,28 @@ import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Modal from "./Modal";
-//pago qr
+
 interface PagoQRProps {
   loading: boolean;
   qrImage: string;
-  idVehiculo: number | string;
+  idReserva: number | string;
   monto: any;
   handleConfirmacionQR: () => void;
 }
 
-const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
+const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
   const router = useRouter();
-  const [idVehiculo, setIdVehiculo] = useState<number | null>(null);
-  const [monto, setMonto] = useState<number | null>(null);
   const [qrURL, setQrURL] = useState<string>(qrImage);
   const [mensajeModalQR, setMensajeModalQR] = useState<string | null>(null);
-
   const [mostrarModalCancelacionQR, setMostrarModalCancelacionQR] = useState(false);
   const [mensajeErrorModalQR, setMensajeErrorModalQR] = useState<string | null>(null);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
-    const montoParam = urlParams.get("monto");
-
-    if (id) setIdVehiculo(parseInt(id));
-    if (montoParam) setMonto(parseFloat(montoParam));
-  }, []);
-
-  useEffect(() => {
     const crearQR = async () => {
-      if (!qrImage && idVehiculo && monto) {
+      if (!qrImage && idReserva && monto) {
         try {
           const response = await axios.get(
-            `https://vercelbackspeedcode.onrender.com/generarQR/crear/${monto}/${idVehiculo}`
+            `https://vercelbackspeedcode.onrender.com/generarQR/crear/${monto}/${idReserva}`
           );
           const data = response.data;
           if (data?.archivoQR) {
@@ -53,17 +41,18 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
     };
 
     crearQR();
-  }, [idVehiculo, monto, qrImage]);
+  }, [idReserva, monto, qrImage]);
 
   const handleRecargarQR = async () => {
-    if (!idVehiculo || !monto) {
+    if (!idReserva || !monto) {
       alert("Faltan datos para regenerar el QR.");
       return;
     }
-
+    
+    
     try {
       const response = await axios.get(
-        `https://vercelbackspeedcode.onrender.com/generarQR/regenerar/${monto}/${idVehiculo}`
+        `https://vercelbackspeedcode.onrender.com/generarQR/regenerar/${monto}/${idReserva}`
       );
       const data = response.data;
       if (data?.archivoQR) {
@@ -84,13 +73,13 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
     }
 
     try {
-      const response = await fetch(qrURL); // descarga binaria
-      const blob = await response.blob();  // lo convierte en objeto descargable
-      const url = URL.createObjectURL(blob); // crea URL temporal
+      const response = await fetch(qrURL);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = "codigo_qr.png"; // nombre del archivo
+      link.download = "codigo_qr.png";
       document.body.appendChild(link);
       link.click();
       setTimeout(() => {
@@ -98,77 +87,94 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
           document.body.removeChild(link);
         }
       }, 0);
-         
-      URL.revokeObjectURL(url); // limpia la URL temporal
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error al descargar el QR:", error);
       alert("Ocurrió un error al intentar descargar el código QR.");
     }
   };
 
-
   const handleConfirmacionQR = async () => {
-    const correoElectronico = "pruebaTEST@gmail.com";
-    if (!idVehiculo || !monto || !qrURL || !correoElectronico) {
-      setMensajeModalQR("Aún no se ha realizado el pago.");
-      return;
-    }
+  const correoElectronico = "pruebaTEST@gmail.com";
 
-    const nombreArchivoQR = qrURL.split("/").pop();
-    const concepto = "Pago con QR";
+  // Validaciones explícitas
+  if (!idReserva || isNaN(Number(idReserva))) {
+    setMensajeModalQR("ID de reserva inválido.");
+    return;
+  }
 
-    const datosPagoQR = {
-      nombreArchivoQR,
-      monto: monto.toString(),
-      concepto,
-      correoElectronico,
-    };
+  if (!monto || isNaN(Number(monto))) {
+    setMensajeModalQR("El monto no es un número válido.");
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        `https://vercelbackspeedcode.onrender.com/pagos/pagarConQR/${idVehiculo}`,
-        datosPagoQR
-      );
+  if (!qrURL) {
+    setMensajeModalQR("No hay código QR disponible.");
+    return;
+  }
 
-      if (response.status === 200 && response.data?.comprobanteURL) {
-        setMensajeModalQR("Pago realizado con éxito.");
-      
-        setTimeout(async () => {
-          try {
-            const comprobanteURL = response.data.comprobanteURL;
-        
-            const res = await fetch(comprobanteURL);
-            const blob = await res.blob();
-            const url = URL.createObjectURL(blob);
-        
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "comprobante_pago.png";
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => {
-              if (link.parentNode === document.body) {
-                document.body.removeChild(link);
-              }
-            }, 0);
-            
-            URL.revokeObjectURL(url);
-          } catch (err) {
-            console.error("Error al descargar el comprobante:", err);
-            alert("Ocurrió un error al intentar descargar el comprobante.");
-          }
-        }, 2000);
-        
-      }
-       else {
-        setMensajeModalQR("Error al realizar el pago: " + (response.data?.mensaje || "Error desconocido"));
-      }
-    } catch (error: any) {
-      console.error("Error:", error);
-      const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
-      setMensajeModalQR("Error al realizar el pago: " + msg);
-    }
+  if (!correoElectronico) {
+    setMensajeModalQR("Correo electrónico no válido.");
+    return;
+  }
+
+  const nombreArchivoQR = qrURL.split("/").pop();
+
+  if (!nombreArchivoQR || !nombreArchivoQR.startsWith("qr_")) {
+    setMensajeModalQR("Nombre de archivo QR inválido.");
+    return;
+  }
+
+  const concepto = "Pago con QR";
+
+  const datosPagoQR = {
+    nombreArchivoQR: nombreArchivoQR,
+    monto: Number(monto).toFixed(2),  // ✅ número como string válido
+    concepto,
+    correoElectronico
   };
+  
+  
+  try {
+    const response = await axios.post(
+      `https://vercelbackspeedcode.onrender.com/pagos/pagarConQR/${idReserva}`,
+      datosPagoQR
+    );
+
+    if (response.status === 200 && response.data?.comprobanteURL) {
+      setMensajeModalQR("Pago realizado con éxito.");
+      const comprobanteURL = response.data.comprobanteURL;
+
+      setTimeout(async () => {
+        try {
+          const res = await fetch(comprobanteURL);
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "comprobante_pago.png";
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }, 0);
+        } catch (err) {
+          console.error("Error al descargar el comprobante:", err);
+        }
+      }, 2000);
+    } else {
+      const msg = response.data?.error || "Error desconocido al pagar.";
+      setMensajeModalQR(msg);
+    }
+  } catch (error: any) {
+    console.error("Error:", error);
+    const msg = error.response?.data?.error || "Hubo un error al realizar el pago.";
+    setMensajeModalQR(msg);
+  }
+};
+
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 bg-white rounded-xl shadow-lg">
@@ -177,7 +183,6 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
       </h2>
 
       <div className="space-y-4">
-        {/* Imagen del QR */}
         <div className="relative flex justify-center">
           {loading ? (
             <p className="text-lg text-gray-600">Generando código QR...</p>
@@ -192,7 +197,6 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
           )}
         </div>
 
-        {/* Texto */}
         <p className="text-center text-gray-700 text-sm md:text-base">
           Escanee el código QR para realizar el pago.
         </p>
@@ -200,13 +204,11 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
           Aún no se ha confirmado ningún pago.
         </p>
 
-        {/* Botones */}
         <div className="flex justify-center gap-4">
           <button
             onClick={handleRecargarQR}
             className="p-3 bg-gray-200 hover:bg-gray-300 rounded-full transition"
             title="Recargar QR"
-            aria-label="Recargar código QR"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6c1.31 0 2.5.44 3.45 1.17L13 11h7V4l-2.35 2.35z" />
@@ -214,19 +216,16 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
           </button>
 
           <button
-          onClick={handleDescargarQR}
-          className="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-full transition"
-          title="Descargar QR"
-          aria-label="Descargar código QR"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-        </button>
-
+            onClick={handleDescargarQR}
+            className="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-full transition"
+            title="Descargar QR"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
         </div>
 
-        {/* Botones de acción */}
         <div className="flex flex-col gap-4 pt-2">
           <button
             onClick={handleConfirmacionQR}
@@ -244,7 +243,6 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage }) => {
         </div>
       </div>
 
-      {/* Modales */}
       {mensajeModalQR && (
         <Modal
           mensaje={mensajeModalQR}

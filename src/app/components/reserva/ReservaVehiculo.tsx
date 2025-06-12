@@ -20,15 +20,22 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
   useEffect(() => {
     if (id) {
       axios
-        .get(`https://vercel-back-speed-code.vercel.app/vehiculo/obtenerDetalleVehiculo/${id}`)
+        .get(`https://vercel-back-speed-code.vercel.app/api/reservas/${id}`)
         .then((response) => {
-          if (response.data.success) {
-            setVehiculo(response.data.data);
-            setIdReserva(response.data.data.reserva.idreserva);
-            const fechaFin = new Date(response.data.data.reserva.fecha_fin);
-            const tiempoRestante = Math.floor((fechaFin.getTime() - Date.now()) / 1000);
-            setEstadoTiempo(tiempoRestante > 0 ? tiempoRestante : 0);
-          }
+          const data = response.data;
+          setVehiculo({
+            ...data,
+            imagen:
+              data.imagen ||
+              "https://previews.123rf.com/images/nastudio/nastudio2007/nastudio200700383/152011677-silhouette-car-icon-for-logo-vehicle-view-from-side-vector-illustration.jpg",
+          });
+          setIdReserva(data.idReserva);
+
+          // ⏳ Cuenta regresiva: desde ahora hasta la fechaInicio
+          const ahora = new Date().getTime();
+          const inicio = new Date(data.fechaInicio).getTime();
+          const tiempoRestante = Math.floor((inicio - ahora) / 1000);
+          setEstadoTiempo(tiempoRestante > 0 ? tiempoRestante : 0);
         })
         .catch((error) => {
           console.error("Error al obtener detalles del vehículo:", error);
@@ -38,29 +45,23 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
 
   useEffect(() => {
     const intervalo = setInterval(() => {
-      if (idReserva) {
-        axios
-          .get(`https://vercel-back-speed-code.vercel.app/reservas/obtenerTiempoReserva/${idReserva}`)
-          .then((response) => {
-            if (response.data.success) {
-              setEstadoTiempo(response.data.tiempoRestante);
-            }
-          })
-          .catch((error) => {
-            console.error("Error al obtener el tiempo restante:", error);
-          });
-      }
+      setEstadoTiempo((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(intervalo);
-  }, [idReserva]);
+  }, []);
 
-  const formatoTiempo = (segundos: number) => {
-    const hrs = Math.floor(segundos / 3600);
-    const mins = Math.floor((segundos % 3600) / 60);
-    const secs = segundos % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
+const formatoTiempo = (segundos: number) => {
+  const dias = Math.floor(segundos / (60 * 60 * 24));
+  const hrs = Math.floor((segundos % (60 * 60 * 24)) / 3600);
+  const mins = Math.floor((segundos % 3600) / 60);
+  const secs = segundos % 60;
+
+  const diasTexto = dias > 0 ? `${dias} ${dias === 1 ? "día" : "días"} ` : "";
+  return `${diasTexto}${hrs.toString().padStart(2, "0")}:${mins
+    .toString()
+    .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+};
 
   const cancelarReserva = async () => {
     if (idReserva) {
@@ -79,13 +80,12 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
     return <p className="text-center mt-8">Cargando información del vehículo...</p>;
   }
 
-  const fechaInicio = new Date(vehiculo.reserva.fecha_inicio);
-  const fechaFin = new Date(vehiculo.reserva.fecha_fin);
-  const tiempoMs = fechaFin.getTime() - fechaInicio.getTime();
-  const dias = Math.ceil(tiempoMs / (1000 * 60 * 60 * 24));
-  const precioTotal = vehiculo.tarifa * dias;
-  const garantia = vehiculo.garantia || 0;
-  const total = precioTotal + garantia;
+  const fechaInicio = new Date(vehiculo.fechaInicio);
+  const fechaFin = new Date(vehiculo.fechaFin);
+  const dias = vehiculo.diasReserva;
+  const precioTotal = vehiculo.totalReserva;
+  const garantia = vehiculo.montoGarantia || 0;
+  const total = vehiculo.totalConGarantia;
 
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4 md:px-8 grid md:grid-cols-3 gap-6">
@@ -95,8 +95,12 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
         </h1>
 
         <div className="flex gap-2 mb-4">
-          <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">{vehiculo.tipo || "Tipo no definido"}</span>
-          <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">{vehiculo.anio || "Año no definido"}</span>
+          <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">
+            {vehiculo.modelo || "Modelo no definido"}
+          </span>
+          <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">
+            {vehiculo.placa || "Placa no definida"}
+          </span>
         </div>
 
         <div className="w-full h-64 bg-gray-200 rounded-lg mb-4 overflow-hidden">
@@ -110,21 +114,17 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
             className="w-12 h-12 rounded-full object-cover mr-4 border"
           />
           <div>
-            <p className="font-semibold text-black">
-              Auto ofrecido por Sergio Campos Noriega
-            </p>
+            <p className="font-semibold text-black">Auto ofrecido por {vehiculo.propietario}</p>
             <div className="flex items-center">
               <FaStar className="text-yellow-400" />
-              <span className="ml-1 text-sm font-semibold text-black">
-                3 (1 reseña)
-              </span>
+              <span className="ml-1 text-sm font-semibold text-black">3 (1 reseña)</span>
             </div>
           </div>
         </div>
 
         <h2 className="text-xl font-bold text-blue-900 mb-1">Acerca de este auto</h2>
         <p className="text-gray-600 mb-4">
-          Kia Rio 2014 en excelentes condiciones. A/C, radio, USB. Bajo consumo de combustible.
+          {vehiculo.descripcion || "Descripción no disponible."}
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-700 mt-4">
@@ -167,7 +167,9 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
         <div className="border-t border-gray-200 pt-4 mb-4">
           <h3 className="font-bold mb-2 text-black">Detalles del precio</h3>
           <div className="flex justify-between text-sm mb-1">
-            <span>{vehiculo.tarifa} Bs × {dias} días</span>
+            <span>
+              {vehiculo.tarifa} Bs × {dias} días
+            </span>
             <span>{precioTotal} Bs</span>
           </div>
           <div className="flex justify-between text-sm mb-1">
