@@ -147,8 +147,8 @@ export default function MapaGPS({
               </div>
               <button
                 className="mt-2 w-full bg-[#FCA311] hover:bg-[#e6950e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium"
-                onClick={() => {
-                  if (auto.estado) {
+                onClick={() => {  
+                  if (!auto.estado) {
                     setAutoReservado(auto);
                     setMostrarMensaje(true);
                   } else {
