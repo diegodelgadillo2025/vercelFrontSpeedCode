@@ -95,7 +95,7 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
       setLoading(true);
 
       const response = await axios.post(
-        `https://vercelbackspeedcode.onrender.com/pagos/pagarConTarjeta/${idReserva}`,
+        `https://localhost:3001/pagos/pagarConTarjeta/${idReserva}`,
         datosPago
       );
 
