@@ -444,34 +444,52 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarFechaInicio && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={fechaInicioStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Selecciona fecha de inicio:
-          </label>
+        <div className="fixed z-[2000] ...">
+          <label>Selecciona fecha de inicio:</label>
           <input
             type="date"
             value={fechaInicio || ""}
-            onChange={(e) => setFechaInicio(e.target.value)}
+            min={new Date().toISOString().split("T")[0]} // mínimo: hoy
+            onChange={(e) => {
+              const hoy = new Date().toISOString().split("T")[0];
+              if (e.target.value < hoy) return; // no permitir fechas pasadas
+              setFechaInicio(e.target.value);
+              setFechaFin(null); // resetear fecha fin si cambia inicio
+            }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
         </div>
       )}
 
       {mostrarFechaFin && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={fechaFinStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Selecciona fecha de fin:
-          </label>
+        <div className="fixed z-[2000] ...">
+          <label>Selecciona fecha de fin:</label>
           <input
             type="date"
             value={fechaFin || ""}
-            onChange={(e) => setFechaFin(e.target.value)}
+            min={fechaInicio || ""}
+            max={
+              fechaInicio
+                ? new Date(
+                    new Date(fechaInicio).setMonth(
+                      new Date(fechaInicio).getMonth() + 18
+                    )
+                  )
+                    .toISOString()
+                    .split("T")[0]
+                : ""
+            }
+            disabled={!fechaInicio}
+            onChange={(e) => {
+              if (!fechaInicio) return;
+              const inicio = new Date(fechaInicio);
+              const seleccionada = new Date(e.target.value);
+              const limite = new Date(fechaInicio);
+              limite.setMonth(limite.getMonth() + 18);
+
+              if (seleccionada < inicio || seleccionada > limite) return;
+              setFechaFin(e.target.value);
+            }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
         </div>
@@ -487,10 +505,23 @@ export default function MapaConFiltrosEstaticos() {
           </label>
           <input
             type="number"
-            value={precioMin !== null ? precioMin : ""}
-            onChange={(e) => setPrecioMin(Number(e.target.value))}
+            value={precioMax !== null ? precioMax : ""}
+            min={precioMin !== null ? precioMin + 1 : 1}
+            onChange={(e) => {
+              const valor = Number(e.target.value);
+              if (isNaN(valor)) return;
+
+              if (precioMin !== null) {
+                // Si hay precio mínimo, el máximo debe ser mayor
+                if (valor <= precioMin) return;
+              } else {
+                // Si no hay mínimo, el máximo debe ser mayor a 0
+                if (valor <= 0) return;
+              }
+
+              setPrecioMax(valor);
+            }}
             className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-            min={0}
           />
         </div>
       )}
