@@ -43,7 +43,25 @@ export default function ReservaVehiculo({ id }: ReservaVehiculoProps) {
     }
   }, [id]);
 
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setEstadoTiempo((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
 
+    return () => clearInterval(intervalo);
+  }, []);
+
+const formatoTiempo = (segundos: number) => {
+  const dias = Math.floor(segundos / (60 * 60 * 24));
+  const hrs = Math.floor((segundos % (60 * 60 * 24)) / 3600);
+  const mins = Math.floor((segundos % 3600) / 60);
+  const secs = segundos % 60;
+
+  const diasTexto = dias > 0 ? `${dias} ${dias === 1 ? "día" : "días"} ` : "";
+  return `${diasTexto}${hrs.toString().padStart(2, "0")}:${mins
+    .toString()
+    .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+};
 
   const cancelarReserva = async () => {
     if (idReserva) {
