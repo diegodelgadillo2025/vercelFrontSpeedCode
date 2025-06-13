@@ -25,11 +25,11 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
       if (!qrImage && idReserva && monto) {
         try {
           const response = await axios.get(
-            `https://vercelbackspeedcode.onrender.com/generarQR/crear/${monto}/${idReserva}`
+            `http://localhost:3001/generarQR/crear/${monto}/${idReserva}`
           );
           const data = response.data;
           if (data?.archivoQR) {
-            setQrURL(`https://vercelbackspeedcode.onrender.com/qr/${data.archivoQR}`);
+            setQrURL(`http://localhost:3001/qr/${data.archivoQR}`);
           } else {
             alert("Error al crear el QR.");
           }
@@ -52,11 +52,11 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
     
     try {
       const response = await axios.get(
-        `https://vercelbackspeedcode.onrender.com/generarQR/regenerar/${monto}/${idReserva}`
+        `http://localhost:3001/generarQR/regenerar/${monto}/${idReserva}`
       );
       const data = response.data;
       if (data?.archivoQR) {
-        setQrURL(`https://vercelbackspeedcode.onrender.com/qr/${data.archivoQR}`);
+        setQrURL(`http://localhost:3001/qr/${data.archivoQR}`);
       } else {
         alert("Error al regenerar el QR.");
       }
@@ -137,7 +137,7 @@ const PagoQR: FC<PagoQRProps> = ({ loading, qrImage, idReserva, monto }) => {
   
   try {
     const response = await axios.post(
-      `https://vercelbackspeedcode.onrender.com/pagos/pagarConQR/${idReserva}`,
+      `http://localhost:3001/pagos/pagarConQR/${idReserva}`,
       datosPagoQR
     );
 
