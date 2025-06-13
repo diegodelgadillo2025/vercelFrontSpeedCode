@@ -5,6 +5,7 @@ import MapaGPS from "@/app/components/mapa/mapaGPS";
 import { useRef, useEffect, useState } from "react";
 import MensajeRedireccion from "../mapa/MensajeRedireccion";
 import "leaflet/dist/leaflet.css";
+import { FiTrash2 } from "react-icons/fi";
 
 export default function MapaConFiltrosEstaticos() {
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
@@ -64,6 +65,22 @@ export default function MapaConFiltrosEstaticos() {
     lng,
     selectedDistance,
   ]);
+const resetearFiltros = () => {
+  setTextoBusqueda("");
+  setFechaInicio(null);
+  setFechaFin(null);
+  setPrecioMin(null);
+  setPrecioMax(null);
+  setSelectedDistance(5);
+  setLat(-17.7833);
+  setLng(-63.1833);
+  setEstadoUbicacion("nulo");
+  setNombreAeropuerto("Aeropuerto");
+  setBusquedaAeropuerto("");
+  setResultadosAeropuerto([]);
+  setAeropuertoSeleccionado(null);
+  cerrarTodosLosPaneles();
+};
 
   const obtenerVehiculos = async () => {
     try {
@@ -511,71 +528,70 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarPrecioMin && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={precioMinStyle}
-  >
-    <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-      Precio mínimo (BOB):
-    </label>
-    <input
-      type="number"
-      value={precioMin !== null ? precioMin : ""}
-      onChange={(e) => {
-        const input = e.target.value;
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={precioMinStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Precio mínimo (BOB):
+          </label>
+          <input
+            type="number"
+            value={precioMin !== null ? precioMin : ""}
+            onChange={(e) => {
+              const input = e.target.value;
 
-        // 🟠 Permitir borrar el input
-        if (input.trim() === "") {
-          setPrecioMin(null);
-          return;
-        }
+              // 🟠 Permitir borrar el input
+              if (input.trim() === "") {
+                setPrecioMin(null);
+                return;
+              }
 
-        const valor = Number(input);
-        if (valor <= 0 || isNaN(valor)) return;
+              const valor = Number(input);
+              if (valor <= 0 || isNaN(valor)) return;
 
-        setPrecioMin(valor);
+              setPrecioMin(valor);
 
-        // Opcional: resetear max si ya no es válido
-        if (precioMax !== null && valor >= precioMax) {
-          setPrecioMax(null);
-        }
-      }}
-      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-      min={1}
-    />
-  </div>
-)}
-{mostrarPrecioMax && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={precioMaxStyle}
-  >
-    <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-      Precio máximo (BOB):
-    </label>
-    <input
-      type="number"
-      value={precioMax !== null ? precioMax : ""}
-      onChange={(e) => {
-        const input = e.target.value;
+              // Opcional: resetear max si ya no es válido
+              if (precioMax !== null && valor >= precioMax) {
+                setPrecioMax(null);
+              }
+            }}
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+            min={1}
+          />
+        </div>
+      )}
+      {mostrarPrecioMax && (
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={precioMaxStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Precio máximo (BOB):
+          </label>
+          <input
+            type="number"
+            value={precioMax !== null ? precioMax : ""}
+            onChange={(e) => {
+              const input = e.target.value;
 
-        // 🟠 Permitir borrar el input
-        if (input.trim() === "") {
-          setPrecioMax(null);
-          return;
-        }
+              // 🟠 Permitir borrar el input
+              if (input.trim() === "") {
+                setPrecioMax(null);
+                return;
+              }
 
-        const valor = Number(input);
-        if (valor <= 0 || isNaN(valor)) return;
+              const valor = Number(input);
+              if (valor <= 0 || isNaN(valor)) return;
 
-        setPrecioMax(valor);
-      }}
-      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-      min={1}
-    />
-  </div>
-)}
-
+              setPrecioMax(valor);
+            }}
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+            min={1}
+          />
+        </div>
+      )}
 
       <div className="md:w-2/3 w-full h-1/2 md:h-full relative flex flex-col">
         <div className="z-[1000] bg-[var(--blanco)] py-4 relative">
@@ -672,6 +688,14 @@ export default function MapaConFiltrosEstaticos() {
               >
                 {precioMax !== null ? `Máx: BOB ${precioMax}` : "PRECIO MAXIMO"}{" "}
                 ▼
+              </button>
+              <button
+                onClick={resetearFiltros}
+                className="transition flex items-center gap-2 rounded-full px-4 py-2 border border-red-500 shadow font-medium text-sm text-red-600 hover:bg-red-500 hover:text-white bg-white"
+                title="Restablecer filtros"
+              >
+                <FiTrash2 className="text-base" />
+                Limpiar filtros
               </button>
             </div>
           </div>
