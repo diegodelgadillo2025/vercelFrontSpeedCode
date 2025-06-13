@@ -57,3 +57,6 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+.leaflet-tooltip.tooltip-auto-precio {
+  z-index: 400; /* ⬅️ más bajo que el marcador principal */
+}

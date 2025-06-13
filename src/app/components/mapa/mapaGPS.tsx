@@ -83,6 +83,7 @@ export default function MapaGPS({
       {/* 📍 Marcador principal */}
       <Marker
         position={[lat, lng]}
+        zIndexOffset={1000000}
         draggable={true}
         eventHandlers={{
           dragend: (e) => {
@@ -108,13 +109,14 @@ export default function MapaGPS({
         <Marker
           key={auto.id}
           position={[auto.latitud, auto.longitud]}
+           zIndexOffset={0}
           icon={L.icon({
             iconUrl: "https://cdn3.iconfinder.com/data/icons/red-car-types-colored-pack/256/red-liftback-car-16701-512.png",
             iconSize: [30, 30],
             iconAnchor: [15, 30],
           })}
         >
-          <Tooltip direction="top" offset={[0, -25]} permanent>
+          <Tooltip direction="top" offset={[0, -25]} permanent className="tooltip-auto-precio">
             <span className="text-xs font-semibold">Bs. {auto.precio}</span>
           </Tooltip>
           <Popup>
