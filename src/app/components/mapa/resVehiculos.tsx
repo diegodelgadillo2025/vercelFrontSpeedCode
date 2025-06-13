@@ -105,6 +105,17 @@ export default function PanelResultados({
           ))}
         </div>
       </div>
+
+      {mostrarMensaje && autoReservado && (
+        <MensajeRedireccion
+          onCerrar={() => setMostrarMensaje(false)}
+          onAceptar={() => {
+            setMostrarMensaje(false);
+            window.location.href = "/mapa";
+          }}
+        />
+      )}
     </div>
   );
 }
+
