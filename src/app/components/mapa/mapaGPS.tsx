@@ -64,7 +64,7 @@ export default function MapaGPS({
     <MapContainer
       center={[lat, lng]}
       zoom={13}
-      scrollWheelZoom={false}
+      scrollWheelZoom={true}
       className="w-full h-full"
     >
       <ClickOutsideMapHandler

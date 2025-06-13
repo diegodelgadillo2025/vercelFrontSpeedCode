@@ -558,7 +558,7 @@ export default function MapaConFiltrosEstaticos() {
                 setPrecioMin(null);
                 return;
               }
-
+              if (input.length > 5) return;
               const valor = Number(input);
               if (valor <= 0 || isNaN(valor)) return;
 
@@ -586,7 +586,9 @@ export default function MapaConFiltrosEstaticos() {
             type="number"
             value={precioMaxTemp}
             onChange={(e) => {
-              setPrecioMaxTemp(e.target.value); // Permite escribir libremente
+              const valor = e.target.value;
+              if (valor.length > 5) return;
+              setPrecioMaxTemp(valor);
             }}
             onBlur={() => {
               const valor = Number(precioMaxTemp);
@@ -596,6 +598,7 @@ export default function MapaConFiltrosEstaticos() {
                 setPrecioMaxTemp("");
                 return;
               }
+              if (precioMaxTemp.length > 5) return;
 
               if (precioMin !== null && valor < precioMin) {
                 setPrecioMax(null);
