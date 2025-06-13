@@ -94,10 +94,16 @@ const PagoTarjeta: FC<PagoTarjetaProps> = ({
     try {
       setLoading(true);
 
+      const BASE_URL =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3001"
+          : "https://vercel-back-speed-code.vercel.app";
+
       const response = await axios.post(
-       `http://vercelbackspeedcode.onrender.com/pagos/pagarConTarjeta/${idReserva}`,
-  datosPago
-);
+        `${BASE_URL}/pagos/pagarConTarjeta/${idReserva}`,
+        datosPago
+      );
+
 
       if (response.status === 200 && response.data?.comprobanteURL) {
         setMensajeModalTarjeta("Pago realizado con éxito.");
