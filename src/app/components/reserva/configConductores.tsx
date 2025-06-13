@@ -20,13 +20,19 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
       esPrincipal: true
     }
   ]);
-
+//agregado
+  const [errores, setErrores] = useState<{ [key: number]: { nombre?: boolean; apellido?: boolean; email?: boolean; telefono?: boolean } }>({});
+  
   const [quienRecoge, setQuienRecoge] = useState<string>("yo");
   const [conductorRecogeId, setConductorRecogeId] = useState<number | null>(null);
   const [metodoEntrega, setMetodoEntrega] = useState<string>("ubicacion");
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false);
 
   const agregarConductor = () => {
+    if (conductores.length > 1) {
+    alert("Solo puedes agregar un conductor adicional.");
+    return;
+  }
     setConductores([
       ...conductores,
       {
@@ -54,16 +60,42 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
       [campo]: valor
     };
     setConductores(nuevosConductores);
+     // Limpiar error visual al escribir
+    setErrores((prev) => ({
+      ...prev,
+      [index]: {
+        ...prev[index],
+        [campo]: false
+      }
+    }));//agregado
   };
 
-  const validarFormulario = () => {
-    // Validar conductor principal
-    if (!conductores[0].nombre || !conductores[0].apellido || !conductores[0].email || !conductores[0].telefono) {
-      alert("Por favor complete todos los datos del conductor principal");
+  // para validar el formulario componente ConfigConductores
+   const validarFormulario = () => {
+    const soloLetrasRegex = /^[a-zA-ZáéíóúÑñ\s]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const telefonoRegex = /^\d{7,15}$/;
+
+    let erroresTemp: typeof errores = {};
+
+    conductores.forEach((c, index) => {
+      const err: typeof errores[0] = {};
+
+      if (!soloLetrasRegex.test(c.nombre)) err.nombre = true;
+      if (!soloLetrasRegex.test(c.apellido)) err.apellido = true;
+      if (!emailRegex.test(c.email)) err.email = true;
+      if (!telefonoRegex.test(c.telefono)) err.telefono = true;
+
+      if (Object.keys(err).length > 0) erroresTemp[index] = err;
+    });
+
+    setErrores(erroresTemp);
+
+    if (Object.keys(erroresTemp).length > 0) {
+      alert("Por favor corrija los campos incorrectos antes de continuar.");
       return false;
     }
 
-    // Validar si seleccionó "otro recoge" pero no seleccionó conductor
     if (quienRecoge === "otro" && conductorRecogeId === null) {
       alert("Por favor seleccione el conductor que recogerá el auto");
       return false;
@@ -78,17 +110,31 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
     }
   };
 
-  const guardarConfiguracion = async () => {
-    //logica del back
+ const guardarConfiguracion = async () => {
   if (!idReserva) {
     alert("ID de reserva inválido");
     return;
   }
 
-  // Por ahora simula con IDs de usuario que ya existan en tu base de datos
-  const idUsuarios = [4,6,25]; //  Reemplaza con IDs reales desde tu tabla `usuario`
-
   try {
+    // ✅ Verificar si ya hay conductores asignados antes de hacer el POST
+    const responseExistentes = await fetch(`https://vercel-back-speed-code.vercel.app/api/conductores/${idReserva}`);
+    const existentes = await responseExistentes.json();
+
+    if (Array.isArray(existentes) && existentes.length > 0) {
+      alert("Ya existen conductores asignados a esta reserva.");
+      return;
+    }
+
+    // ✅ Preparar payload desde el formulario
+    const conductoresPayload = conductores.map(c => ({
+      nombre: c.nombre,
+      apellido: c.apellido,
+      email: c.email,
+      telefono: c.telefono
+    }));
+
+    // ✅ Enviar la solicitud POST para asignar
     const response = await fetch("https://vercel-back-speed-code.vercel.app/api/conductores/asignar", {
       method: "POST",
       headers: {
@@ -96,7 +142,7 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
       },
       body: JSON.stringify({
         idReserva,
-        idUsuarios,
+        conductores: conductoresPayload
       }),
     });
 
@@ -117,6 +163,7 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
 };
 
 
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Configuración de Conductores</h2>
@@ -128,11 +175,14 @@ export default function ConfigConductores({ idReserva }: { idReserva: number | n
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
             <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md"
-              value={conductores[0].nombre}
-              onChange={(e) => handleChange(0, "nombre", e.target.value)}
+             type="text"
+             className={`w-full p-2 border rounded-md ${
+              errores[0]?.nombre ? "border-red-500" : "border-gray-300"
+            }`}
+            value={conductores[0].nombre}
+            onChange={(e) => handleChange(0, "nombre", e.target.value)}
             />
+
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
