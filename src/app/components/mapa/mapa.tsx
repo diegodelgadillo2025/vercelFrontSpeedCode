@@ -219,7 +219,7 @@ export default function MapaConFiltrosEstaticos() {
     };
   }, []);
 
-  // ✅ Solo se debe mostrar un panel a la vez
+  //  Solo se debe mostrar un panel a la vez
   const cerrarTodosLosPaneles = () => {
     setMostrarSelector(false);
     setMostrarAeropuerto(false);
@@ -360,7 +360,7 @@ export default function MapaConFiltrosEstaticos() {
             </button>
           </form>
 
-          {/* 📍 Ubicación actual */}
+          {/* Ubicación actual */}
           <button
             onClick={usarUbicacionActual}
             disabled={cargandoUbicacion}
@@ -397,7 +397,7 @@ export default function MapaConFiltrosEstaticos() {
             className="w-full border border-gray-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
 
-          {/* 📋 Lista de resultados */}
+          {/*  Lista de resultados */}
           {resultadosAeropuerto.length > 0 && (
             <ul className="mt-2 border border-gray-300 rounded-md max-h-40 overflow-y-auto scrollbar-hide">
               {resultadosAeropuerto.map((a) => (
@@ -420,7 +420,7 @@ export default function MapaConFiltrosEstaticos() {
             </ul>
           )}
 
-          {/* ✅ Botón aplicar */}
+          {/*  Botón aplicar */}
           <button
             onClick={() => {
               if (!aeropuertoSeleccionado)
@@ -446,98 +446,133 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarDistanciaSlider && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={distanciaStyle}
-        >
-          {/* 🎯 Etiqueta del slider */}
-          <label className="block text-sm text-[var(--foreground)] mb-2 font-medium">
-            Seleccionar distancia (km):
-          </label>
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={distanciaStyle}
+  >
+    <label className="block text-sm text-[var(--foreground)] mb-2 font-medium">
+      Seleccionar distancia (km):
+    </label>
 
-          {/* 📏 Slider */}
-          <input
-            type="range"
-            min="1"
-            max="50"
-            value={selectedDistance}
-            onChange={(e) => setSelectedDistance(Number(e.target.value))}
-            className="w-full accent-[var(--naranja)] cursor-pointer"
-          />
+    <input
+      type="range"
+      min="1"
+      max="50"
+      value={selectedDistance}
+      onChange={(e) => setSelectedDistance(Number(e.target.value))}
+      className="w-full accent-[var(--naranja)] cursor-pointer"
+    />
 
-          {/* 📍 Distancia seleccionada */}
-          <div className="text-center text-sm mt-3 font-semibold text-[var(--foreground)]">
-            {selectedDistance} km
-          </div>
-        </div>
-      )}
+    <div className="text-center text-sm mt-3 font-semibold text-[var(--foreground)]">
+      {selectedDistance} km
+    </div>
+
+    {selectedDistance !== 5 && (
+      <button
+        onClick={() => {
+          setSelectedDistance(5);             //  Vuelve a estado inicial
+          setMostrarDistanciaSlider(false);   //  Cierra el panel
+        }}
+        className="mt-3 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm py-1.5 rounded-md transition-colors"
+      >
+        Restablecer distancia
+      </button>
+    )}
+  </div>
+)}
+
 
       {mostrarFechaInicio && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={fechaInicioStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Selecciona fecha de inicio:
-          </label>
-          <input
-            type="date"
-            value={fechaInicio || ""}
-            min={new Date().toISOString().split("T")[0]} // hoy mínimo
-            onChange={(e) => {
-              const hoy = new Date().toISOString().split("T")[0];
-              const seleccionada = e.target.value;
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={fechaInicioStyle}
+  >
+    <div className="flex justify-between items-center mb-2">
+      <label className="text-sm text-[var(--foreground)] font-medium">
+        Selecciona fecha de inicio:
+      </label>
+      <button
+        onClick={() => setMostrarFechaInicio(false)}
+        className="text-red-600 text-lg font-bold hover:text-red-800"
+        title="Cerrar filtro"
+      >
+        ×
+      </button>
+    </div>
 
-              if (seleccionada < hoy) return; // evitar fecha pasada
+    <input
+      type="date"
+      value={fechaInicio || ""}
+      min={new Date().toISOString().split("T")[0]}
+      onChange={(e) => {
+        const hoy = new Date().toISOString().split("T")[0];
+        const seleccionada = e.target.value;
 
-              setFechaInicio(seleccionada);
-              setFechaFin(null); // resetea fecha fin
-            }}
-            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-          />
-        </div>
-      )}
+        if (seleccionada < hoy) return;
+
+        setFechaInicio(seleccionada);
+        setFechaFin(null);
+      }}
+      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+    />
+  </div>
+)}
+
 
       {mostrarFechaFin && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={fechaFinStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Selecciona fecha de fin:
-          </label>
-          <input
-            type="date"
-            value={fechaFin || ""}
-            disabled={!fechaInicio} // solo habilitado si hay inicio
-            min={fechaInicio || ""} // no antes de inicio
-            max={
-              fechaInicio
-                ? new Date(
-                    new Date(fechaInicio).setMonth(
-                      new Date(fechaInicio).getMonth() + 18
-                    )
-                  )
-                    .toISOString()
-                    .split("T")[0]
-                : ""
-            }
-            onChange={(e) => {
-              if (!fechaInicio) return;
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={fechaFinStyle}
+  >
+    <div className="flex justify-between items-center mb-2">
+      <label className="text-sm text-[var(--foreground)] font-medium">
+        Selecciona fecha de fin:
+      </label>
+      <button
+        onClick={() => {
+          setFechaFin(null); // Limpia solo la fecha fin
+          setMostrarFechaFin(false); // Cierra solo ese panel
+        }}
+        className="text-red-600 text-lg font-bold hover:text-red-800"
+        title="Cerrar filtro"
+      >
+        ×
+      </button>
+    </div>
 
-              const seleccionada = new Date(e.target.value);
-              const inicio = new Date(fechaInicio);
-              const limite = new Date(fechaInicio);
-              limite.setMonth(limite.getMonth() + 18);
+    <input
+      type="date"
+      value={fechaFin || ""}
+      disabled={!fechaInicio} // solo habilitado si hay inicio
+      min={fechaInicio || ""} // no antes de inicio
+      max={
+        fechaInicio
+          ? new Date(
+              new Date(fechaInicio).setMonth(
+                new Date(fechaInicio).getMonth() + 18
+              )
+            )
+              .toISOString()
+              .split("T")[0]
+          : ""
+      }
+      onChange={(e) => {
+        if (!fechaInicio) return;
 
-              if (seleccionada < inicio || seleccionada > limite) return;
+        const seleccionada = new Date(e.target.value);
+        const inicio = new Date(fechaInicio);
+        const limite = new Date(fechaInicio);
+        limite.setMonth(limite.getMonth() + 18);
 
-              setFechaFin(e.target.value);
-            }}
-            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-          />
-        </div>
-      )}
+        if (seleccionada < inicio || seleccionada > limite) return;
+
+        setFechaFin(e.target.value);
+      }}
+      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+    />
+  </div>
+)}
+
 
       {mostrarPrecioMin && (
         <div
@@ -553,7 +588,7 @@ export default function MapaConFiltrosEstaticos() {
             onChange={(e) => {
               const input = e.target.value;
 
-              // 🟠 Permitir borrar el input
+              //  Permitir borrar el input
               if (input.trim() === "") {
                 setPrecioMin(null);
                 return;
