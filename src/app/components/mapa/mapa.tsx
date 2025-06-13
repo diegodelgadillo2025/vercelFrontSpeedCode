@@ -573,81 +573,110 @@ export default function MapaConFiltrosEstaticos() {
   </div>
 )}
 
-
       {mostrarPrecioMin && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={precioMinStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Precio mínimo (BOB):
-          </label>
-          <input
-            type="number"
-            value={precioMin !== null ? precioMin : ""}
-            onChange={(e) => {
-              const input = e.target.value;
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={precioMinStyle}
+  >
+    <div className="flex justify-between items-center mb-2">
+      <label className="text-sm text-[var(--foreground)] font-medium">
+        Precio mínimo (BOB):
+      </label>
+      <button
+        onClick={() => {
+          setPrecioMin(null);           // ✅ Limpia el filtro
+          setMostrarPrecioMin(false);   // ✅ Cierra solo este panel
+        }}
+        className="text-red-600 text-lg font-bold hover:text-red-800"
+        title="Cerrar filtro"
+      >
+        ×
+      </button>
+    </div>
 
-              //  Permitir borrar el input
-              if (input.trim() === "") {
-                setPrecioMin(null);
-                return;
-              }
-              if (input.length > 5) return;
-              const valor = Number(input);
-              if (valor <= 0 || isNaN(valor)) return;
+    <input
+      type="number"
+      value={precioMin !== null ? precioMin : ""}
+      onChange={(e) => {
+        const input = e.target.value;
 
-              setPrecioMin(valor);
+        if (input.trim() === "") {
+          setPrecioMin(null);
+          return;
+        }
+        if (input.length > 5) return;
 
-              // Opcional: resetear max si ya no es válido
-              if (precioMax !== null && valor >= precioMax) {
-                setPrecioMax(null);
-              }
-            }}
-            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-            min={1}
-          />
-        </div>
-      )}
+        const valor = Number(input);
+        if (valor <= 0 || isNaN(valor)) return;
+
+        setPrecioMin(valor);
+
+        // Opcional: resetear max si ya no es válido
+        if (precioMax !== null && valor >= precioMax) {
+          setPrecioMax(null);
+        }
+      }}
+      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+      min={1}
+    />
+  </div>
+)}
+
+      
       {mostrarPrecioMax && (
-        <div
-          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-          style={precioMaxStyle}
-        >
-          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
-            Precio máximo (BOB):
-          </label>
-          <input
-            type="number"
-            value={precioMaxTemp}
-            onChange={(e) => {
-              const valor = e.target.value;
-              if (valor.length > 5) return;
-              setPrecioMaxTemp(valor);
-            }}
-            onBlur={() => {
-              const valor = Number(precioMaxTemp);
+  <div
+    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+    style={precioMaxStyle}
+  >
+    <div className="flex justify-between items-center mb-2">
+      <label className="text-sm text-[var(--foreground)] font-medium">
+        Precio máximo (BOB):
+      </label>
+      <button
+        onClick={() => {
+          setPrecioMax(null);         // ✅ Limpia el filtro
+          setPrecioMaxTemp("");       // ✅ Limpia input temporal
+          setMostrarPrecioMax(false); // ✅ Cierra solo este panel
+        }}
+        className="text-red-600 text-lg font-bold hover:text-red-800"
+        title="Cerrar filtro"
+      >
+        ×
+      </button>
+    </div>
 
-              if (precioMaxTemp.trim() === "" || isNaN(valor) || valor <= 0) {
-                setPrecioMax(null);
-                setPrecioMaxTemp("");
-                return;
-              }
-              if (precioMaxTemp.length > 5) return;
+    <input
+      type="number"
+      value={precioMaxTemp}
+      onChange={(e) => {
+        const valor = e.target.value;
+        if (valor.length > 5) return;
+        setPrecioMaxTemp(valor);
+      }}
+      onBlur={() => {
+        const valor = Number(precioMaxTemp);
 
-              if (precioMin !== null && valor < precioMin) {
-                setPrecioMax(null);
-                setPrecioMaxTemp("");
-                return;
-              }
+        if (precioMaxTemp.trim() === "" || isNaN(valor) || valor <= 0) {
+          setPrecioMax(null);
+          setPrecioMaxTemp("");
+          return;
+        }
+        if (precioMaxTemp.length > 5) return;
 
-              setPrecioMax(valor);
-            }}
-            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-            min={1}
-          />
-        </div>
-      )}
+        if (precioMin !== null && valor < precioMin) {
+          setPrecioMax(null);
+          setPrecioMaxTemp("");
+          return;
+        }
+
+        setPrecioMax(valor);
+      }}
+      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+      min={1}
+    />
+  </div>
+)}
+
 
       <div className="md:w-2/3 w-full h-1/2 md:h-full relative flex flex-col">
         <div className="z-[1000] bg-[var(--blanco)] py-4 relative">
