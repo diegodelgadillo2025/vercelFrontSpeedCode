@@ -9,6 +9,7 @@ import {
   Circle,
   useMap,
   useMapEvents,
+  LayersControl,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -73,10 +74,50 @@ export default function MapaGPS({
         }}
       />
 
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <LayersControl position="topright">
+  <LayersControl.BaseLayer checked name="OpenStreetMap">
+    <TileLayer
+      attribution='&copy; OpenStreetMap'
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+  </LayersControl.BaseLayer>
+
+  <LayersControl.BaseLayer name="OpenTopoMap">
+    <TileLayer
+      attribution='&copy; OpenTopoMap contributors'
+      url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+    />
+  </LayersControl.BaseLayer>
+
+  <LayersControl.BaseLayer name="Esri Satélite">
+    <TileLayer
+      attribution='Tiles © Esri'
+      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    />
+  </LayersControl.BaseLayer>
+
+  <LayersControl.BaseLayer name="Esri World Terrain">
+    <TileLayer
+      attribution='Tiles © Esri Terrain'
+      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}"
+    />
+  </LayersControl.BaseLayer>
+
+  <LayersControl.BaseLayer name="CartoDB Positron">
+    <TileLayer
+      attribution='&copy; CartoDB Positron'
+      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+    />
+  </LayersControl.BaseLayer>
+
+  <LayersControl.BaseLayer name="CartoDB DarkMatter">
+    <TileLayer
+      attribution='&copy; CartoDB DarkMatter'
+      url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    />
+  </LayersControl.BaseLayer>
+</LayersControl>
+
 
       <ChangeMapCenter lat={lat} lng={lng} />
 
