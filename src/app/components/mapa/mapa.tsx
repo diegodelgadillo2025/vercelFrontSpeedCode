@@ -47,6 +47,7 @@ export default function MapaConFiltrosEstaticos() {
   const [mostrarPrecioMax, setMostrarPrecioMax] = useState(false);
   const [precioMin, setPrecioMin] = useState<number | null>(null);
   const [precioMax, setPrecioMax] = useState<number | null>(null);
+  const [precioMaxTemp, setPrecioMaxTemp] = useState<string>("");
   const [precioMinStyle, setPrecioMinStyle] = useState({ top: 0, left: 0 });
   const [precioMaxStyle, setPrecioMaxStyle] = useState({ top: 0, left: 0 });
 
@@ -65,22 +66,32 @@ export default function MapaConFiltrosEstaticos() {
     lng,
     selectedDistance,
   ]);
-const resetearFiltros = () => {
-  setTextoBusqueda("");
-  setFechaInicio(null);
-  setFechaFin(null);
-  setPrecioMin(null);
-  setPrecioMax(null);
-  setSelectedDistance(5);
-  setLat(-17.7833);
-  setLng(-63.1833);
-  setEstadoUbicacion("nulo");
-  setNombreAeropuerto("Aeropuerto");
-  setBusquedaAeropuerto("");
-  setResultadosAeropuerto([]);
-  setAeropuertoSeleccionado(null);
-  cerrarTodosLosPaneles();
-};
+  useEffect(() => {
+    if (estadoUbicacion === "actual" || estadoUbicacion === "personalizada") {
+      // Resetea aeropuerto automáticamente
+      setNombreAeropuerto("Aeropuerto");
+      setAeropuertoSeleccionado(null);
+      setBusquedaAeropuerto("");
+      setResultadosAeropuerto([]);
+    }
+  }, [estadoUbicacion]);
+
+  const resetearFiltros = () => {
+    setTextoBusqueda("");
+    setFechaInicio(null);
+    setFechaFin(null);
+    setPrecioMin(null);
+    setPrecioMax(null);
+    setSelectedDistance(5);
+    setLat(-17.7833);
+    setLng(-63.1833);
+    setEstadoUbicacion("nulo");
+    setNombreAeropuerto("Aeropuerto");
+    setBusquedaAeropuerto("");
+    setResultadosAeropuerto([]);
+    setAeropuertoSeleccionado(null);
+    cerrarTodosLosPaneles();
+  };
 
   const obtenerVehiculos = async () => {
     try {
@@ -281,6 +292,7 @@ const resetearFiltros = () => {
     });
     cerrarTodosLosPaneles();
     setMostrarPrecioMax(true);
+    setPrecioMaxTemp(precioMax !== null ? precioMax.toString() : "");
   };
   const usarUbicacionActual = () => {
     setCargandoUbicacion(true);
@@ -572,18 +584,24 @@ const resetearFiltros = () => {
           </label>
           <input
             type="number"
-            value={precioMax !== null ? precioMax : ""}
+            value={precioMaxTemp}
             onChange={(e) => {
-              const input = e.target.value;
+              setPrecioMaxTemp(e.target.value); // Permite escribir libremente
+            }}
+            onBlur={() => {
+              const valor = Number(precioMaxTemp);
 
-              // 🟠 Permitir borrar el input
-              if (input.trim() === "") {
+              if (precioMaxTemp.trim() === "" || isNaN(valor) || valor <= 0) {
                 setPrecioMax(null);
+                setPrecioMaxTemp("");
                 return;
               }
 
-              const valor = Number(input);
-              if (valor <= 0 || isNaN(valor)) return;
+              if (precioMin !== null && valor < precioMin) {
+                setPrecioMax(null);
+                setPrecioMaxTemp("");
+                return;
+              }
 
               setPrecioMax(valor);
             }}
