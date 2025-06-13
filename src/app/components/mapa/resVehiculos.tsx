@@ -1,7 +1,11 @@
+// ✅ VERSIÓN ACTUALIZADA DE resVehiculos.tsx CON BOTÓN RESERVAR FUNCIONAL Y MODAL
+
 "use client";
 
-import  BuscadorVehiculo from "@/app/components/mapa/buscadorVehiculo";
+import { useState } from "react";
+import BuscadorVehiculo from "@/app/components/mapa/buscadorVehiculo";
 import { getEstrellas } from "@/app/components/mapa/getEstrellas";
+import MensajeRedireccion from "@/app/components/mapa/MensajeRedireccion";
 
 type Vehiculo = {
   id: number;
@@ -27,6 +31,9 @@ export default function PanelResultados({
   setTextoBusqueda,
   vehiculos,
 }: PanelResultadosProps) {
+  const [autoReservado, setAutoReservado] = useState<Vehiculo | null>(null);
+  const [mostrarMensaje, setMostrarMensaje] = useState(false);
+
   return (
     <div className="md:w-1/3 w-full h-1/2 md:h-full bg-white md:border-l p-4 flex flex-col">
       <div className="flex items-center gap-2 mb-4">
@@ -66,20 +73,32 @@ export default function PanelResultados({
                   {auto.descripcion}
                 </p>
                 <p className="text-xs text-[var(--naranja)] font-bold flex items-center gap-1">
-                  {auto.calificacion?.toFixed(1)}{" "}
-                  {getEstrellas(auto.calificacion || 0)}
+                  {auto.calificacion?.toFixed(1)} {getEstrellas(auto.calificacion || 0)}
                 </p>
+
                 {auto.distancia !== null && (
-                  <p className="text-xs text-gray-600">
-                    {auto.distancia.toFixed(1)} km -{" "}
-                    <span className="text-[var(--verde)] font-semibold">
-                      DISPONIBLE
+                  <div className="flex justify-between items-center flex-wrap gap-2 text-xs text-gray-600">
+                    <span className="whitespace-nowrap">
+                      {auto.distancia.toFixed(1)} km - <span className="text-[var(--verde)] font-semibold">DISPONIBLE</span>
                     </span>
-                  </p>
+                    <button
+                      className="bg-[#FCA311] hover:bg-[#e6950e] text-white px-3 py-1 rounded-md text-xs font-semibold"
+                      onClick={() => {
+                        if (auto.id !== 60) {
+                          setAutoReservado(auto);
+                          setMostrarMensaje(true);
+                        } else {
+                          window.location.href = "/pago";
+                        }
+                      }}
+                    >
+                      RESERVAR
+                    </button>
+                  </div>
                 )}
+
                 <p className="text-xs text-gray-600">
-                  Año: {auto.anio}, Transmisión: {auto.transmision}, Consumo:{" "}
-                  {auto.consumo}
+                  Año: {auto.anio}, Transmisión: {auto.transmision}, Consumo: {auto.consumo}
                 </p>
               </div>
             </div>
