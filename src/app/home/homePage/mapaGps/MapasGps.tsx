@@ -1,15 +1,16 @@
 "use client";
 //filtros version 2
 import PanelResultados from "@/app/components/mapa/resVehiculos";
-import MapaGPS from "@/app/components/mapa/mapaGPS";
+import MapaGPS from "@/app/components/mapa/mapaGps";
 import { useRef, useEffect, useState } from "react";
-import MensajeRedireccion from "../mapa/MensajeRedireccion";
+import MensajeRedireccion from "@/app/components/mapa/MensajeRedireccion";
 import "leaflet/dist/leaflet.css";
-import { FiTrash2 } from "react-icons/fi";
+import { Vehiculo } from "@/app/types/Vehiculo";
+import { useCallback } from "react";
 
 export default function MapaConFiltrosEstaticos() {
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
-  const [autoReservado, setAutoReservado] = useState<any | null>(null);
+  const [autoReservado, setAutoReservado] = useState<Vehiculo | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [mostrarSelector, setMostrarSelector] = useState(false);
@@ -47,79 +48,42 @@ export default function MapaConFiltrosEstaticos() {
   const [mostrarPrecioMax, setMostrarPrecioMax] = useState(false);
   const [precioMin, setPrecioMin] = useState<number | null>(null);
   const [precioMax, setPrecioMax] = useState<number | null>(null);
-  const [precioMaxTemp, setPrecioMaxTemp] = useState<string>("");
   const [precioMinStyle, setPrecioMinStyle] = useState({ top: 0, left: 0 });
   const [precioMaxStyle, setPrecioMaxStyle] = useState({ top: 0, left: 0 });
 
   const [textoBusqueda, setTextoBusqueda] = useState("");
-  const [vehiculos, setVehiculos] = useState<any[]>([]);
+  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   /*para recuperar los vehiculos*/
+
+  const obtenerVehiculos = useCallback(async () => {
+  try {
+    const params = new URLSearchParams();
+    if (textoBusqueda.trim()) params.append("texto", textoBusqueda.trim());
+    if (fechaInicio) params.append("fechaInicio", fechaInicio);
+    if (fechaFin) params.append("fechaFin", fechaFin);
+    if (precioMin !== null) params.append("precioMin", precioMin.toString());
+    if (precioMax !== null) params.append("precioMax", precioMax.toString());
+    if (lat && lng && selectedDistance) {
+      params.append("lat", lat.toString());
+      params.append("lng", lng.toString());
+      params.append("dkm", selectedDistance.toString());
+    }
+
+    const response = await fetch(
+      `https://vercel-back-speed-code.vercel.app/api/filtroMapaPrecio?${params.toString()}`
+    );
+    const data = await response.json();
+    setVehiculos(
+      Array.isArray(data.vehiculos?.vehiculos) ? data.vehiculos.vehiculos : []
+    );
+  } catch (err) {
+    console.error("Error al obtener vehículos:", err);
+  }
+}, [textoBusqueda, fechaInicio, fechaFin, precioMin, precioMax, lat, lng, selectedDistance]);
+
   useEffect(() => {
     obtenerVehiculos();
-  }, [
-    textoBusqueda,
-    fechaInicio,
-    fechaFin,
-    precioMin,
-    precioMax,
-    lat,
-    lng,
-    selectedDistance,
-  ]);
-  useEffect(() => {
-    if (estadoUbicacion === "actual" || estadoUbicacion === "personalizada") {
-      // Resetea aeropuerto automáticamente
-      setNombreAeropuerto("Aeropuerto");
-      setAeropuertoSeleccionado(null);
-      setBusquedaAeropuerto("");
-      setResultadosAeropuerto([]);
-    }
-  }, [estadoUbicacion]);
-
-  const resetearFiltros = () => {
-    setTextoBusqueda("");
-    setFechaInicio(null);
-    setFechaFin(null);
-    setPrecioMin(null);
-    setPrecioMax(null);
-    setSelectedDistance(5);
-    setLat(-17.7833);
-    setLng(-63.1833);
-    setEstadoUbicacion("nulo");
-    setNombreAeropuerto("Aeropuerto");
-    setBusquedaAeropuerto("");
-    setResultadosAeropuerto([]);
-    setAeropuertoSeleccionado(null);
-    cerrarTodosLosPaneles();
-  };
-
-  const obtenerVehiculos = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (textoBusqueda.trim()) params.append("texto", textoBusqueda.trim());
-      if (fechaInicio) params.append("fechaInicio", fechaInicio);
-      if (fechaFin) params.append("fechaFin", fechaFin);
-      if (precioMin !== null) params.append("precioMin", precioMin.toString());
-      if (precioMax !== null) params.append("precioMax", precioMax.toString());
-      if (lat && lng && selectedDistance) {
-        params.append("lat", lat.toString());
-        params.append("lng", lng.toString());
-        params.append("dkm", selectedDistance.toString());
-      }
-
-      const response = await fetch(
-        `https://vercel-back-speed-code.vercel.app/api/filtroMapaPrecio?${params.toString()}`
-      );
-      const data = await response.json();
-      setVehiculos(
-        Array.isArray(data.vehiculos?.vehiculos) ? data.vehiculos.vehiculos : []
-      );
-
-      console.log("Datos recibidos del backend:", data);
-    } catch (err) {
-      console.error("Error al obtener vehículos:", err);
-    }
-  };
+  }, [obtenerVehiculos]);
 
   /*para recuperar el filtrar aeropuerto*/
   useEffect(() => {
@@ -219,7 +183,7 @@ export default function MapaConFiltrosEstaticos() {
     };
   }, []);
 
-  //  Solo se debe mostrar un panel a la vez
+  // ✅ Solo se debe mostrar un panel a la vez
   const cerrarTodosLosPaneles = () => {
     setMostrarSelector(false);
     setMostrarAeropuerto(false);
@@ -292,7 +256,6 @@ export default function MapaConFiltrosEstaticos() {
     });
     cerrarTodosLosPaneles();
     setMostrarPrecioMax(true);
-    setPrecioMaxTemp(precioMax !== null ? precioMax.toString() : "");
   };
   const usarUbicacionActual = () => {
     setCargandoUbicacion(true);
@@ -339,6 +302,7 @@ export default function MapaConFiltrosEstaticos() {
       : "Ubicación: Dirección personalizada";
   return (
     <div className="w-full h-screen flex flex-col md:flex-row overflow-hidden px-2 md:px-4 relative">
+        
       {mostrarSelector && (
         <div
           className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
@@ -360,7 +324,7 @@ export default function MapaConFiltrosEstaticos() {
             </button>
           </form>
 
-          {/* Ubicación actual */}
+          {/* 📍 Ubicación actual */}
           <button
             onClick={usarUbicacionActual}
             disabled={cargandoUbicacion}
@@ -397,7 +361,7 @@ export default function MapaConFiltrosEstaticos() {
             className="w-full border border-gray-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
           />
 
-          {/*  Lista de resultados */}
+          {/* 📋 Lista de resultados */}
           {resultadosAeropuerto.length > 0 && (
             <ul className="mt-2 border border-gray-300 rounded-md max-h-40 overflow-y-auto scrollbar-hide">
               {resultadosAeropuerto.map((a) => (
@@ -420,7 +384,7 @@ export default function MapaConFiltrosEstaticos() {
             </ul>
           )}
 
-          {/*  Botón aplicar */}
+          {/* ✅ Botón aplicar */}
           <button
             onClick={() => {
               if (!aeropuertoSeleccionado)
@@ -446,237 +410,101 @@ export default function MapaConFiltrosEstaticos() {
       )}
 
       {mostrarDistanciaSlider && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={distanciaStyle}
-  >
-    <label className="block text-sm text-[var(--foreground)] mb-2 font-medium">
-      Seleccionar distancia (km):
-    </label>
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={distanciaStyle}
+        >
+          {/* 🎯 Etiqueta del slider */}
+          <label className="block text-sm text-[var(--foreground)] mb-2 font-medium">
+            Seleccionar distancia (km):
+          </label>
 
-    <input
-      type="range"
-      min="1"
-      max="50"
-      value={selectedDistance}
-      onChange={(e) => setSelectedDistance(Number(e.target.value))}
-      className="w-full accent-[var(--naranja)] cursor-pointer"
-    />
+          {/* 📏 Slider */}
+          <input
+            type="range"
+            min="1"
+            max="50"
+            value={selectedDistance}
+            onChange={(e) => setSelectedDistance(Number(e.target.value))}
+            className="w-full accent-[var(--naranja)] cursor-pointer"
+          />
 
-    <div className="text-center text-sm mt-3 font-semibold text-[var(--foreground)]">
-      {selectedDistance} km
-    </div>
-
-    {selectedDistance !== 5 && (
-      <button
-        onClick={() => {
-          setSelectedDistance(5);             //  Vuelve a estado inicial
-          setMostrarDistanciaSlider(false);   //  Cierra el panel
-        }}
-        className="mt-3 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm py-1.5 rounded-md transition-colors"
-      >
-        Restablecer distancia
-      </button>
-    )}
-  </div>
-)}
-
+          {/* 📍 Distancia seleccionada */}
+          <div className="text-center text-sm mt-3 font-semibold text-[var(--foreground)]">
+            {selectedDistance} km
+          </div>
+        </div>
+      )}
 
       {mostrarFechaInicio && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={fechaInicioStyle}
-  >
-    <div className="flex justify-between items-center mb-2">
-      <label className="text-sm text-[var(--foreground)] font-medium">
-        Selecciona fecha de inicio:
-      </label>
-      <button
-        onClick={() => setMostrarFechaInicio(false)}
-        className="text-red-600 text-lg font-bold hover:text-red-800"
-        title="Cerrar filtro"
-      >
-        ×
-      </button>
-    </div>
-
-    <input
-      type="date"
-      value={fechaInicio || ""}
-      min={new Date().toISOString().split("T")[0]}
-      onChange={(e) => {
-        const hoy = new Date().toISOString().split("T")[0];
-        const seleccionada = e.target.value;
-
-        if (seleccionada < hoy) return;
-
-        setFechaInicio(seleccionada);
-        setFechaFin(null);
-      }}
-      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-    />
-  </div>
-)}
-
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={fechaInicioStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Selecciona fecha de inicio:
+          </label>
+          <input
+            type="date"
+            value={fechaInicio || ""}
+            onChange={(e) => setFechaInicio(e.target.value)}
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+          />
+        </div>
+      )}
 
       {mostrarFechaFin && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={fechaFinStyle}
-  >
-    <div className="flex justify-between items-center mb-2">
-      <label className="text-sm text-[var(--foreground)] font-medium">
-        Selecciona fecha de fin:
-      </label>
-      <button
-        onClick={() => {
-          setFechaFin(null); // Limpia solo la fecha fin
-          setMostrarFechaFin(false); // Cierra solo ese panel
-        }}
-        className="text-red-600 text-lg font-bold hover:text-red-800"
-        title="Cerrar filtro"
-      >
-        ×
-      </button>
-    </div>
-
-    <input
-      type="date"
-      value={fechaFin || ""}
-      disabled={!fechaInicio} // solo habilitado si hay inicio
-      min={fechaInicio || ""} // no antes de inicio
-      max={
-        fechaInicio
-          ? new Date(
-              new Date(fechaInicio).setMonth(
-                new Date(fechaInicio).getMonth() + 18
-              )
-            )
-              .toISOString()
-              .split("T")[0]
-          : ""
-      }
-      onChange={(e) => {
-        if (!fechaInicio) return;
-
-        const seleccionada = new Date(e.target.value);
-        const inicio = new Date(fechaInicio);
-        const limite = new Date(fechaInicio);
-        limite.setMonth(limite.getMonth() + 18);
-
-        if (seleccionada < inicio || seleccionada > limite) return;
-
-        setFechaFin(e.target.value);
-      }}
-      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-    />
-  </div>
-)}
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={fechaFinStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Selecciona fecha de fin:
+          </label>
+          <input
+            type="date"
+            value={fechaFin || ""}
+            onChange={(e) => setFechaFin(e.target.value)}
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+          />
+        </div>
+      )}
 
       {mostrarPrecioMin && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={precioMinStyle}
-  >
-    <div className="flex justify-between items-center mb-2">
-      <label className="text-sm text-[var(--foreground)] font-medium">
-        Precio mínimo (BOB):
-      </label>
-      <button
-        onClick={() => {
-          setPrecioMin(null);           // ✅ Limpia el filtro
-          setMostrarPrecioMin(false);   // ✅ Cierra solo este panel
-        }}
-        className="text-red-600 text-lg font-bold hover:text-red-800"
-        title="Cerrar filtro"
-      >
-        ×
-      </button>
-    </div>
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={precioMinStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Precio mínimo (BOB):
+          </label>
+          <input
+            type="number"
+            value={precioMin !== null ? precioMin : ""}
+            onChange={(e) => setPrecioMin(Number(e.target.value))}
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+            min={0}
+          />
+        </div>
+      )}
 
-    <input
-      type="number"
-      value={precioMin !== null ? precioMin : ""}
-      onChange={(e) => {
-        const input = e.target.value;
-
-        if (input.trim() === "") {
-          setPrecioMin(null);
-          return;
-        }
-        if (input.length > 5) return;
-
-        const valor = Number(input);
-        if (valor <= 0 || isNaN(valor)) return;
-
-        setPrecioMin(valor);
-
-        // Opcional: resetear max si ya no es válido
-        if (precioMax !== null && valor >= precioMax) {
-          setPrecioMax(null);
-        }
-      }}
-      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-      min={1}
-    />
-  </div>
-)}
-
-      
       {mostrarPrecioMax && (
-  <div
-    className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
-    style={precioMaxStyle}
-  >
-    <div className="flex justify-between items-center mb-2">
-      <label className="text-sm text-[var(--foreground)] font-medium">
-        Precio máximo (BOB):
-      </label>
-      <button
-        onClick={() => {
-          setPrecioMax(null);         // ✅ Limpia el filtro
-          setPrecioMaxTemp("");       // ✅ Limpia input temporal
-          setMostrarPrecioMax(false); // ✅ Cierra solo este panel
-        }}
-        className="text-red-600 text-lg font-bold hover:text-red-800"
-        title="Cerrar filtro"
-      >
-        ×
-      </button>
-    </div>
-
-    <input
-      type="number"
-      value={precioMaxTemp}
-      onChange={(e) => {
-        const valor = e.target.value;
-        if (valor.length > 5) return;
-        setPrecioMaxTemp(valor);
-      }}
-      onBlur={() => {
-        const valor = Number(precioMaxTemp);
-
-        if (precioMaxTemp.trim() === "" || isNaN(valor) || valor <= 0) {
-          setPrecioMax(null);
-          setPrecioMaxTemp("");
-          return;
-        }
-        if (precioMaxTemp.length > 5) return;
-
-        if (precioMin !== null && valor < precioMin) {
-          setPrecioMax(null);
-          setPrecioMaxTemp("");
-          return;
-        }
-
-        setPrecioMax(valor);
-      }}
-      className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
-      min={1}
-    />
-  </div>
-)}
-
+        <div
+          className="fixed z-[2000] bg-[var(--blanco)] border border-[var(--negro)] rounded-lg p-4 shadow-xl w-64"
+          style={precioMaxStyle}
+        >
+          <label className="block text-sm mb-2 text-[var(--foreground)] font-medium">
+            Precio máximo (BOB):
+          </label>
+          <input
+            type="number"
+            value={precioMax !== null ? precioMax : ""}
+            onChange={(e) => setPrecioMax(Number(e.target.value))}
+            className="w-full border border-gray-300 px-2 py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--naranja)]"
+            min={0}
+          />
+        </div>
+      )}
 
       <div className="md:w-2/3 w-full h-1/2 md:h-full relative flex flex-col">
         <div className="z-[1000] bg-[var(--blanco)] py-4 relative">
@@ -774,14 +602,6 @@ export default function MapaConFiltrosEstaticos() {
                 {precioMax !== null ? `Máx: BOB ${precioMax}` : "PRECIO MAXIMO"}{" "}
                 ▼
               </button>
-              <button
-                onClick={resetearFiltros}
-                className="transition flex items-center gap-2 rounded-full px-4 py-2 border border-red-500 shadow font-medium text-sm text-red-600 hover:bg-red-500 hover:text-white bg-white"
-                title="Restablecer filtros"
-              >
-                <FiTrash2 className="text-base" />
-                Limpiar filtros
-              </button>
             </div>
           </div>
         </div>
@@ -794,9 +614,9 @@ export default function MapaConFiltrosEstaticos() {
             vehiculos={vehiculos}
             setLat={setLat}
             setLng={setLng}
+            setResultadosAeropuerto={setResultadosAeropuerto}
             setEstadoUbicacion={setEstadoUbicacion}
             cerrarTodosLosPaneles={cerrarTodosLosPaneles}
-            setResultadosAeropuerto={setResultadosAeropuerto}
             setAutoReservado={setAutoReservado}
             setMostrarMensaje={setMostrarMensaje}
           />

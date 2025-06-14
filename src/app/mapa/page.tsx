@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-const Mapa = dynamic(() => import("@/app/components/mapa/mapa"), {
+const Mapa = dynamic(() => import("@/app/components/mapa/mapas"), {
   ssr: false,
   loading: () => <p>Cargando mapa...</p>,
 });
