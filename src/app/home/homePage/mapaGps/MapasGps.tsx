@@ -1,12 +1,13 @@
 "use client";
 //filtros version 2
 import PanelResultados from "@/app/components/mapa/resVehiculos";
-import MapaGPS from "@/app/components/mapa/mapaGps";
+import MapaGPS from "@/app/components/mapa/mapaGPS";
 import { useRef, useEffect, useState } from "react";
 import MensajeRedireccion from "@/app/components/mapa/MensajeRedireccion";
 import "leaflet/dist/leaflet.css";
 import { Vehiculo } from "@/app/types/Vehiculo";
 import { useCallback } from "react";
+import BotonRedireccion from "@/app/components/BotonRedireccion";
 
 export default function MapaConFiltrosEstaticos() {
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
@@ -526,7 +527,12 @@ export default function MapaConFiltrosEstaticos() {
               >
                 {textoUbicacion} ▼
               </button>
-
+<button
+                onClick={() => window.location.href = '/configConductores'}
+                className="transition rounded-full px-4 py-2 border border-[var(--azul-oscuro)] shadow font-medium text-sm text-[var(--azul-oscuro)] hover:bg-[var(--naranja)] hover:text-white bg-[var(--blanco)]"
+              >
+                Configurar Conductores
+              </button>
               {/* Aeropuerto */}
               <button
                 type="button"
@@ -624,9 +630,11 @@ export default function MapaConFiltrosEstaticos() {
       </div>
 
       <PanelResultados
-        textoBusqueda={textoBusqueda}
+textoBusqueda={textoBusqueda}
         setTextoBusqueda={setTextoBusqueda}
         vehiculos={vehiculos}
+        setAutoReservado={setAutoReservado}
+        setMostrarMensaje={setMostrarMensaje}
       />
 
       <style jsx global>{`
