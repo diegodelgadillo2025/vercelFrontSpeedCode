@@ -41,16 +41,6 @@ const iconoUsuario = new L.Icon({
   iconAnchor: [15, 15],
 });
 
-const GuardarInstanciaMapa = ({ mapRef }: { mapRef: React.MutableRefObject<any> }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    mapRef.current = map;
-  }, [map]);
-
-  return null;
-};//añadido
-
 interface Vehiculo {
   id: number;
   imagen: string;
@@ -90,9 +80,7 @@ interface FiltroMapaPrecioProps {
   distancia: string;
   fechaInicio: string;
   fechaFin: string;
-  lat?: number;
-  lng?: number;
-  onLocationChange?: ([lat, lng]: [number, number]) => void;
+  ubicacionAeropuerto: [number, number] | null; // ⬅️ NUEVO
 }
 
 export default function FiltroMapaPrecio({
@@ -100,9 +88,7 @@ export default function FiltroMapaPrecio({
   distancia,
   fechaInicio,
   fechaFin,
-  lat,
-  lng,
-  onLocationChange // Añade esta prop desestructurada
+  ubicacionAeropuerto, // ⬅️ NUEVO
 }: FiltroMapaPrecioProps) {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [ubicacionUsuario, setUbicacionUsuario] = useState<
@@ -110,14 +96,7 @@ export default function FiltroMapaPrecio({
   >(null);
   const [precioMin, setPrecioMin] = useState<string>("");
   const [precioMax, setPrecioMax] = useState<string>("");
-  const mapRef = useRef<any>(null); //añadido
-  useEffect(() => {
-    if (lat !== undefined && lng !== undefined) {
-      console.log("Ubicación del aeropuerto recibida :", lat, lng);
-      setUbicacionUsuario([lat, lng]);
-    }
-  }, [lat, lng]);
-  
+
   //const [texto, setTexto] = useState<string>(""); // Para el texto de búsqueda
   //const [distancia, setDistancia] = useState<string>(""); // Para la distancia
   //const [fechaInicio, setFechaInicio] = useState<string>(""); // Fecha de inicio
@@ -187,8 +166,12 @@ export default function FiltroMapaPrecio({
   };
 
   useEffect(() => {
-    fetchVehiculos();
-    const interval = setInterval(fetchVehiculos, 10000);
+    fetchVehiculos(); // Llamada inicial
+
+    const interval = setInterval(() => {
+      fetchVehiculos(); // cada 10s
+    }, 10000);
+
     return () => clearInterval(interval);
   }, [
     ubicacionUsuario,
@@ -199,12 +182,7 @@ export default function FiltroMapaPrecio({
     fechaInicio,
     fechaFin,
   ]);
-  useEffect(() => {
-    if (ubicacionUsuario && mapRef.current) {
-      mapRef.current.setView(ubicacionUsuario, 13);
-    }
-  }, [ubicacionUsuario]);//añadido
-  
+
   const renderEstrellas = (cal: number | null) => {
     const baseClass =
       "absolute top-2 left-2 bg-white bg-opacity-80 px-2 py-1 rounded text-xs font-semibold text-yellow-500 flex items-center gap-[2px]";
@@ -269,7 +247,6 @@ export default function FiltroMapaPrecio({
           zoom={6}
           style={{ height: "100%", width: "100%" }}
         >
-          <GuardarInstanciaMapa mapRef={mapRef} /> //agregado
           <IrAUbicacion setUbicacionUsuario={setUbicacionUsuario} />
 
           <LayersControl position="topright">
@@ -340,27 +317,16 @@ export default function FiltroMapaPrecio({
 
           {ubicacionUsuario && (
             <>
-              <Marker 
-                position={ubicacionUsuario} 
-                icon={iconoUsuario}
-                draggable={true}
-                eventHandlers={{
-                  dragend: (e) => {
-                    const newPos = e.target.getLatLng();
-                    setUbicacionUsuario([newPos.lat, newPos.lng]);
-                    onLocationChange?.([newPos.lat, newPos.lng]); // Usa la prop desestructurada
-                  }
-                }}
-              >
+              <Marker position={ubicacionUsuario} icon={iconoUsuario}>
                 <Tooltip permanent direction="top" offset={[0, -10]}>
-                  Arrástrame para buscar vehículos cercanos
+                  Tú estás aquí
                 </Tooltip>
               </Marker>
 
               {distancia.trim() !== "" && (
                 <Circle
                   center={ubicacionUsuario}
-                  radius={Number(distancia.trim()) * 1000}
+                  radius={Number(distancia.trim()) * 1000} // convertir km a metros
                   pathOptions={{
                     color: "blue",
                     fillColor: "blue",
@@ -370,6 +336,32 @@ export default function FiltroMapaPrecio({
               )}
             </>
           )}
+
+
+          {ubicacionAeropuerto && (
+  <>
+    <Marker position={ubicacionAeropuerto} icon={iconoUsuario}>
+      <Tooltip permanent direction="top" offset={[0, -10]}>
+        Aeropuerto seleccionado
+      </Tooltip>
+    </Marker>
+
+    {distancia.trim() !== "" && (
+      <Circle
+        center={ubicacionAeropuerto}
+        radius={Number(distancia.trim()) * 1000}
+        pathOptions={{
+          color: "blue",
+          fillColor: "blue",
+          fillOpacity: 0.1,
+        }}
+      />
+    )}
+  </>
+)}
+
+
+
         </MapContainer>
       </div>
     </div>

@@ -8,7 +8,8 @@ export default function RootRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/mapa');
+    //router.replace('/mapa');
+    router.replace('/home');
   }, [router]);
   return null;
 }

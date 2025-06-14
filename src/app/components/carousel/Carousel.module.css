@@ -1,10 +1,18 @@
+.topRentedTitle {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 2rem 0 2rem 0;
+}
+
 .carouselContainer {
   position: relative;
   width: 90%;
   max-width: 1200px;
   height: 70vh;
   min-height: 500px;
-  /*margin: 2rem auto;*/
+  margin: 0 auto;
   overflow: hidden;
 }
 
@@ -160,6 +168,7 @@
   .carouselContainer {
     height: 60vh;
     min-height: 400px;
+    margin: 4rem auto;
   }
   
   .info h3 {
@@ -187,8 +196,8 @@
 @media (max-width: 768px) {
   .carouselContainer {
     width: 95%;
-    /*height: 55vh;*/
     min-height: 350px;
+    margin: 3rem auto;
   }
   
   .slide {
@@ -204,6 +213,11 @@
     width: 40px;
     height: 40px;
     font-size: 1.2rem;
+  }
+
+  .topRentedTitle {
+    font-size: 1.75rem;
+    margin: 3rem 0 1.5rem 0;
   }
 }
 
@@ -245,5 +259,10 @@
     width: 35px;
     height: 35px;
     font-size: 1rem;
+  }
+
+  .topRentedTitle {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
   }
 }
