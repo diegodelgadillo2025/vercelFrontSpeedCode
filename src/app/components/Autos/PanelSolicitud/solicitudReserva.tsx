@@ -269,6 +269,17 @@ export default function SolicitudReserva({ mostrar, onClose, auto, onSolicitudCo
               >
                 Enviar solicitud de reserva
               </button>
+
+                <button
+                      className="bg-[#fca311] text-white px-5 py-2.5 rounded-full text-base font-semibold transition max-w-[250px] w-full"
+                      onClick={() => {
+                        //window.location.href = "/reserva";
+                        window.location.href = `/reserva?id=${auto.idAuto}`;
+                      }}
+                    >
+                      Guardar Reserva
+                    </button>
+
             </div>
           </div>
         </div>
