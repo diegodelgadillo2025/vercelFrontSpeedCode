@@ -209,7 +209,7 @@ export default function MapaGPS({
                     setAutoReservado(auto);
                     setMostrarMensaje(true);
                   } else {
-                    window.location.href = `/detalleCoche`;
+                     window.location.href = `/detalleCoche/${auto.id}`;
                   }
                 }}
               >
