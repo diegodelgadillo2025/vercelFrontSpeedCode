@@ -92,6 +92,18 @@ export default function PanelResultados({
                     >
                       RESERVAR
                     </button>
+
+                    <button
+                      className="bg-[#FCA311] hover:bg-[#e6950e] text-white px-3 py-1 rounded-md text-xs font-semibold"
+                      onClick={() => {
+                      //window.location.href = `/detalleCoche/${auto.id}`;
+                      window.location.href = `/detalleCoche/${auto.id}`;
+                      }}
+                        >
+                      VER DETALLES
+                    </button>
+
+
                   </div>
                 )}
                 <p className="text-xs text-gray-600">

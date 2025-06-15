@@ -201,6 +201,20 @@ export default function MapaGPS({
               >
                 RESERVAR
               </button>
+
+              <button
+                className="mt-2 w-full bg-[#FCA311] hover:bg-[#e6950e] text-white py-[3px] px-2 rounded-md text-[9px] sm:text-sm font-medium"
+                onClick={() => {  
+                  if (!auto.estado) {
+                    setAutoReservado(auto);
+                    setMostrarMensaje(true);
+                  } else {
+                    window.location.href = `/detalleCoche`;
+                  }
+                }}
+              >
+                VER DETALLES
+              </button>
             </div>
           </Popup>
         </Marker>
